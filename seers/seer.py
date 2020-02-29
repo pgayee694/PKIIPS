@@ -1,72 +1,70 @@
-class data_collector_plugin(object):
-	def __init__(self):
-		pass
+"""
+The SEER component.
 
-	def init(self):
-		pass
-
-	def shutdown(self):
-		pass
-
-	def collect(self):
-		return {}
+This is the entry point into the seer component.
+It starts by gathering all the plugins under the plugins folder and runs
+each one in a different thread. As they run, the delivery system will occasionally
+iterate through each plugin to gather whatever data they currently have in queue.
+This data is then packged up into a JSON format and then sent to an API endpoint
+of the Delphi component.
+"""
 
 import plugins
+import seer_plugin
+import seer_config
+
 import threading
-import time
 import queue
-import ctypes
+import sys
+import logging
+import requests
 
-def plugin_collection(plug_class, message_queue, time_step, stop_token):
-	plug = plug_class()
-	plug.init()
+logging.basicConfig(level=seer_config.logging_level, format='[%(levelname)s] %(asctime)s (%(module)s): %(message)s')
+logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+
+http_session	= requests.Session()
+timeout			= None if seer_config.data_collection_timeout is None else seer_config.data_collection_timeout / 1000
+url				= '{}:{}{}'.format(seer_config.delphi_address, seer_config.delphi_port, seer_config.delphi_endpoint)
+
+plugs = plugins.gather_plugins()
+if len(plugs) == 0:
+	logging.error('No plugins loaded!')
+	sys.exit(1)
+
+queues 		= [queue.Queue(seer_config.data_collection_queue_size) for _ in range(len(plugs))]
+threads		= []
+stop_token	= threading.Event()
+
+for plug, q in zip(plugs, queues):
+	thread = threading.Thread(target=seer_plugin.plugin_collection, args=(plug, q, stop_token), daemon=True)
+	thread.start()
+	threads.append(thread)
+
+try:
 	while True:
-		if stop_token.value:
-			break
-	
-		data = plug.collect()
-		while True:
-			if stop_token.value:
-				break
+		delivery_data = {}
+		for q in queues:
 			try:
-				message_queue.put(data, True, .2)
+				collection_data = q.get(True, timeout)
+			except queue.Empty:
+				continue
+
+			delivery_data.update(collection_data)
+
+		try:
+			r = http_session.post(url, data=delivery_data)
+			if r.status_code != 200:
+				logging.error(f'Error sending delivery. Status code: {r.status_code}')
+				stop_token.set()
 				break
-			except queue.Full:
-				pass
-		time.sleep(time_step / 1000)
+		except requests.exceptions.ConnectionError as e:
+			logging.error(f'Error connecting to delphi: {e}')
+			stop_token.set()
+			break
+except KeyboardInterrupt:
+	stop_token.set()
 
-	plug.shutdown()
-
-if __name__ == '__main__':
-	# This information can be inside some sort of configuration file
-	TIME_STEP_MS				= 100
-	DATA_COLLECTION_TIMEOUT_MS	= 100
-	QUEUE_SIZE 					= 1
-	
-	plugs 		= plugins.gather_plugins()
-	queues 		= [queue.Queue(QUEUE_SIZE) for _ in range(len(plugs))]
-	threads		= []
-	stop_token	= ctypes.c_bool()
-
-	for plug, q in zip(plugs, queues):
-		thread = threading.Thread(target=plugin_collection, args=(plug, q, TIME_STEP_MS, stop_token))
-		thread.start()
-		threads.append(thread)
-
-	try:
-		while True:
-			delivery_data = {}
-			for q in queues:
-				try:
-					collection_data = q.get(True, None if DATA_COLLECTION_TIMEOUT_MS is None else (TIME_STEP_MS + DATA_COLLECTION_TIMEOUT_MS) / 1000)
-				except queue.Empty:
-					continue
-
-				delivery_data.update(collection_data)
-
-			print(delivery_data)
-	except KeyboardInterrupt:
-		stop_token.value = True
-
-	for thread in threads:
-		thread.join()
+logging.info('Shutting down data components...')
+for thread in threads:
+	thread.join(3)
