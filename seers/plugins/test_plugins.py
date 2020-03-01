@@ -1,12 +1,13 @@
+"""
+These plugins are both used as example plugins
+to learn from as well as used in unit tests.
+"""
+
 import seer_plugin
-import random
 import cv2
 import logging
 
-class test_collector(object):
-	pass
-
-class actual_test_collector(seer_plugin.data_collector_plugin):
+class ActualTestCollector(seer_plugin.DataCollectorPlugin):
 	def init(self):
 		logging.info('Initialized!')
 
@@ -16,7 +17,7 @@ class actual_test_collector(seer_plugin.data_collector_plugin):
 	def shutdown(self):
 		logging.info('Shutdown!')
 
-class actual_test_collector2(seer_plugin.data_collector_plugin):
+class ActualTestCollector2(seer_plugin.DataCollectorPlugin):
 	def init(self):
 		logging.info('Initialized 2!')
 
@@ -26,7 +27,7 @@ class actual_test_collector2(seer_plugin.data_collector_plugin):
 	def shutdown(self):
 		logging.info('No more howdy :(')
 
-class camera_collector(seer_plugin.data_collector_plugin):
+class CameraCollector(seer_plugin.DataCollectorPlugin):
 	def init(self):
 		self.video 	= cv2.VideoCapture()
 		self.opened = self.video.open(0)
