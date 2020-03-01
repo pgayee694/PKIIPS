@@ -5,7 +5,11 @@ import imutils
 import time
 import cv2
 # Code taken from https://www.pyimagesearch.com/
+"""
+detect.py is intended to run on a raspi and interacts with the raspi camera module. Video from the camera module is ran 
+with openCV and a person model in order to count the number of people visible to the raspi camera module
 
+"""
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--prototxt", required=True,
