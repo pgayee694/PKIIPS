@@ -6,11 +6,11 @@ from flask import request
 def updateSensorData():
     data = request.get_json(silent=True)
 
-    if data:
+    if isinstance(data, dict):
         sensorId = data.get('id')
         count = data.get('count')
 
-        if sensorId and isinstance(sensorId, int) and count and isinstance(count, int):
+        if isinstance(sensorId, int) and isinstance(count, int):
             # todo: store sensor data
             return '', 204
 
