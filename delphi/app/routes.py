@@ -4,14 +4,15 @@ from flask import request
 
 @app.route('/update-sensor-data', methods=['POST'])
 def updateSensorData():
-    data = request.get_json(silent=True)
+    try:
+        data = request.get_json()
+        sensorId = int(data.get('id'))
+        count = int(data.get('count'))
 
-    if isinstance(data, dict):
-        sensorId = data.get('id')
-        count = data.get('count')
-
-        if isinstance(sensorId, int) and isinstance(count, int):
+        if sensorId is not None and count is not None:
             # todo: store sensor data
             return '', 204
+    except:
+        pass
 
     return 'Invalid Request Syntax', 400
