@@ -36,6 +36,16 @@ class TestUploadSensorData(unittest.TestCase):
         self.assertEqual(response.get_data(as_text=True),
                          'Invalid Request Syntax')
 
+    def test_zero_id_and_count(self):
+        self.assertSuccess(self.postJson({"id": 0, "count": 0}))
+        self.assertSuccess(self.postJson({"id": 0, "count": 1}))
+        self.assertSuccess(self.postJson({"id": 1, "count": 0}))
+
+    def test_negative_id_and_count(self):
+        self.assertSuccess(self.postJson({"id": -1, "count": -1}))
+        self.assertSuccess(self.postJson({"id": -1, "count": 1}))
+        self.assertSuccess(self.postJson({"id": 1, "count": -1}))
+
     def test_int_id_and_count(self):
         self.assertSuccess(self.postJson({"id": 1, "count": 1}))
 
