@@ -71,7 +71,6 @@ class TestDelivery(unittest.TestCase):
 		def testing_exception(deliv, data):
 			self.assertFalse(test_key in data)
 			deliv.stop()
-			
 
 		delivery = seer_plugin.PluginDelivery([InitExceptionPlugin],
 			testing_exception)
