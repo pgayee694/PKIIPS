@@ -1,5 +1,5 @@
 import time
-import RPi.GPIO as GPIO
+from RPi import GPIO
 
 SPEED_OF_SOUND = 34300 # in cm/s
 
@@ -25,7 +25,7 @@ def find_next_node():
     time.sleep(0.00001) # recommended wait for ultrasonic to go out
     GPIO.output(TRIGGER, False)
 
-    start, end = time.time()
+    start = end = time.time()
 
     while GPIO.input(ECHO) == 0:
         start = time.time()
