@@ -10,7 +10,7 @@ Material:
   m_Name: Room
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
   m_ShaderKeywords: _ALPHAPREMULTIPLY_ON _EMISSION
-  m_LightmapFlags: 2
+  m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
@@ -74,5 +74,5 @@ Material:
     - _UVSec: 0
     - _ZWrite: 0
     m_Colors:
-    - _Color: {r: 0.26666662, g: 0.6662261, b: 0.8980392, a: 0.74509805}
-    - _EmissionColor: {r: 0.0020024881, g: 0.03539358, b: 0.14901961, a: 1}
+    - _Color: {r: 0.13656996, g: 0.6058896, b: 0.8773585, a: 0.74509805}
+    - _EmissionColor: {r: 0, g: 0.021328952, b: 0.122641504, a: 1}
