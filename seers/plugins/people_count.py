@@ -5,6 +5,9 @@ import imutils
 import imutils.video
 import numpy
 import os.path
+import matplotlib.pyplot as plt
+import numpy as np
+import utils
 
 class PeopleCount(seer_plugin.DataCollectorPlugin):
 	"""
@@ -64,6 +67,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 	CONFIDENCE_INI	= 'confidence'
 	MODEL_INI		= 'model-path'
 	PROTOTXT_INI	= 'prototxt-path'
+	RPI_MODEL_INI   = 'rpi-model-path'
+	LABELMAP_INI    = 'labelmap-path'
 
 	DEFAULT_CONFIDENCE	= 0.2
 	COUNT_KEY			= 'count'
@@ -76,6 +81,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 		self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
 		self.model		= seer_config.configuration[PeopleCount.INI].get(PeopleCount.MODEL_INI)
 		self.prototxt	= seer_config.configuration[PeopleCount.INI].get(PeopleCount.PROTOTXT_INI)
+		self.rpi_model  = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RPI_MODEL_INI)
+		self.labelmap   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.LABELMAP_INI)
 
 		if not os.path.isfile(self.model):
 			raise IOError(self.model)
@@ -123,3 +130,49 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 				detection_count += 1
 
 		return {PeopleCount.COUNT_KEY: detection_count}
+	
+	def find_marker(query, image):
+		"""
+		Searches for the marker object in the image
+
+		Parameters:
+			query: picture of the object to search for, also called the query image
+			image: image to search within, also called the train image
+		
+		return:
+		rtype:
+		"""
+
+		orb = cv2.ORB_create()
+
+		kp_q, des_q = orb.detectAndCompute(query, None)
+		kp_i, des_i = orb.detectAndCompute(image, None)
+
+		bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+		
+		matches = bf.match(des_q, des_i)
+		matches = sorted(matches, key=lambda x: x.distance)
+		top_half = matches[:(int(len(matches)/2))]
+		
+		points = {}
+
+		for match in top_half:
+			idx = match.trainIdx
+			points[idx] = kp_i[idx].pt
+
+		x = 0
+		y = 0
+		cnt = 0
+
+		# accumulation for center
+		for pair in points.values():
+			x += pair[0]
+			y += pair[1]
+			cnt += 1
+
+		center = (x/cnt, y/cnt)
+		top_half = sorted(top_half,
+			key=lambda x: utils.euclidean_distance(center[0], center[1], points[x.trainIdx][0], points[x.trainIdx][1]))
+
+		res = cv2.drawMatches(query, kp_q, image, kp_i, top_half[:(int(len(top_half)/2))], None, flags=None)
+		plt.imshow(res), plt.show()

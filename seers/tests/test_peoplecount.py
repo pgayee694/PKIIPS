@@ -2,6 +2,7 @@ import unittest
 import seer_config
 import seer_plugin
 import plugins.people_count
+import cv2
 
 class TestPeopleCountPlugin(unittest.TestCase):
 	MODEL_PATH = 'MobileNetSSD_deploy.caffemodel'
@@ -44,3 +45,9 @@ class TestPeopleCountPlugin(unittest.TestCase):
 			testing_init, timeout=5000)
 
 		delivery.start()
+	
+	def test_find_marker(self):
+		query = cv2.imread('./assets/queries/pi3.jpg', cv2.IMREAD_GRAYSCALE)
+		image = cv2.imread('./assets/test/find_marker/case_side.jpg', cv2.IMREAD_GRAYSCALE)
+		
+		plugins.people_count.PeopleCount.find_marker(query, image)

@@ -1,37 +1,39 @@
-import time
-from RPi import GPIO
+import math
 
-SPEED_OF_SOUND = 34300 # in cm/s
+"""
+Houses utility functions.
+"""
 
-def find_next_node():
+IN_TO_CM = 2.54
+PI_WIDTH = 2.22 * IN_TO_CM # 5.6388cm
+PI_LENGTH = 3.37 * IN_TO_CM # 8.5598cm
+
+def in_to_cm(inches):
     """
-    Uses an ultrasonic sensor to get the distance to the next sensor node.
-    Assumes the PKIIPS standard ultrasonic schematic is being used and 
-    the sensor is pointed directly at the next node.
+    Converts the input from inches to centimeters
 
-    return: distance to the next sensor node, in cm
+    Parameters:
+        inches(int): value to convert
+    
+    return: converted value, in cm
     rtype: int
     """
 
-    # Pins
-    TRIGGER = 18
-    ECHO = 24
+    return inches * IN_TO_CM
 
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(TRIGGER, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN)
-
-    GPIO.output(TRIGGER, True)
-    time.sleep(0.00001) # recommended wait for ultrasonic to go out
-    GPIO.output(TRIGGER, False)
-
-    start = end = time.time()
-
-    while GPIO.input(ECHO) == 0:
-        start = time.time()
+def calc_focal_length(distance, width, pixels):
+    """
+    Calculates the focal length based off the input
     
-    while GPIO.input(ECHO) == 1:
-        end = time.time()
-    
-    elapsed = end - start
-    return (elapsed * 34300) / 2
+    Parameters:
+        distance(int): distance from camera to the object
+        width(int): actual width of the object
+        pixels(int): width in pixels of the object
+
+    return: focal length of the camera based off the target object
+    rtype: int
+    """
+    return (distance * pixels) / width
+
+def euclidean_distance(x1, y1, x2, y2):
+    return math.sqrt((x1-x2)**2 + (y1-y2)**2)
