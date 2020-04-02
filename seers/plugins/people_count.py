@@ -8,6 +8,7 @@ import os.path
 import matplotlib.pyplot as plt
 import numpy as np
 import utils
+import sys
 
 class PeopleCount(seer_plugin.DataCollectorPlugin):
 	"""
@@ -139,8 +140,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 			query: picture of the object to search for, also called the query image
 			image: image to search within, also called the train image
 		
-		return:
-		rtype:
+		return: list containing top left and top right coordinate of rectangle around object
+		rtype: list
 		"""
 
 		orb = cv2.ORB_create()
@@ -173,6 +174,22 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 		center = (x/cnt, y/cnt)
 		top_half = sorted(top_half,
 			key=lambda x: utils.euclidean_distance(center[0], center[1], points[x.trainIdx][0], points[x.trainIdx][1]))
+		good_matches = top_half[:(int(len(top_half)/2))]
+		
+		# find bounding rectangle coords
+		left = bottom = sys.maxsize
+		right = top = -sys.maxsize - 1
+		for match in good_matches:
+			idx = match.trainIdx
+			pt = kp_i[idx].pt
+			top = int(max(top, pt[1]))
+			left = int(min(left, pt[0]))
+			bottom = int(min(bottom, pt[1]))
+			right = int(max(right, pt[0]))
+		
+		return [(top, left), (bottom, right)]
 
-		res = cv2.drawMatches(query, kp_q, image, kp_i, top_half[:(int(len(top_half)/2))], None, flags=None)
-		plt.imshow(res), plt.show()
+		# these lines left in for debugging, will be removed once distance stuff is done
+		#res = cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 3)
+		#res = cv2.drawMatches(query, kp_q, image, kp_i, top_half, None, flags=None)
+		#plt.imshow(res), plt.show()
