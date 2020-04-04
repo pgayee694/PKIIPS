@@ -1,4 +1,6 @@
 import unittest
+from unittest.mock import patch
+import imutils.video
 import seer_config
 import seer_plugin
 import plugins.people_count
@@ -6,9 +8,18 @@ import cv2
 import utils
 import numpy as np
 
+
 class TestPeopleCountPlugin(unittest.TestCase):
 	MODEL_PATH = 'MobileNetSSD_deploy.caffemodel'
 	PROTO_PATH = 'MobileNetSSD_deploy.prototxt.txt'
+	FILE_STREAM_PATH = 'tests/test_vid.mp4'
+
+	def setUp(self):
+		self.videoStreamMock = patch('plugins.people_count.imutils.video.VideoStream',return_value=imutils.video.FileVideoStream(TestPeopleCountPlugin.FILE_STREAM_PATH))
+		self.videoStreamMock.start()
+
+	def tearDown(self):
+		self.videoStreamMock.stop()
 
 	def test_collect(self):
 		seer_config.configuration[plugins.people_count.PeopleCount.INI][plugins.people_count.PeopleCount.MODEL_INI]		= TestPeopleCountPlugin.MODEL_PATH
