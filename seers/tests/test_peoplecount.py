@@ -4,6 +4,9 @@ import imutils.video
 import seer_config
 import seer_plugin
 import plugins.people_count
+import cv2
+import utils
+import numpy as np
 
 
 class TestPeopleCountPlugin(unittest.TestCase):
@@ -55,3 +58,12 @@ class TestPeopleCountPlugin(unittest.TestCase):
 			testing_init, timeout=5000)
 
 		delivery.start()
+	
+	def test_find_marker(self):
+		query = cv2.imread('./assets/queries/pi3.jpg', cv2.IMREAD_GRAYSCALE)
+		image = cv2.imread('./assets/test/find_marker/case_side.jpg', cv2.IMREAD_GRAYSCALE)
+		expected = [(1800, 1950), (1500, 2830)] # estimations based off where the raspi is in case_side.jpg
+		
+		actual = plugins.people_count.PeopleCount.find_marker(query, image)
+		self.assertTrue(0 <= utils.euclidean_distance(expected[0][0], expected[0][1], actual[0][0], actual[0][1]) <= 250) # upper left coord
+		self.assertTrue(0 <= utils.euclidean_distance(expected[1][0], expected[1][1], actual[1][0], actual[1][1]) <= 250) # lower right coord
