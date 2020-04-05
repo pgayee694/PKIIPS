@@ -48,4 +48,9 @@ public class StatisticsBox : MonoBehaviour
             Destroy(textObject);
         }
     }
+
+    public void Destroy()
+    {
+        Destroy(gameObject);
+    }
 }

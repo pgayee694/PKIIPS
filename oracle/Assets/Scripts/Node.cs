@@ -55,7 +55,7 @@ public class Node : MonoBehaviour
         updateStatisticsPosition();
     }
 
-    void OnMouseDown()
+    void OnMouseUp()
     {
         if(statistics == null)
         {
