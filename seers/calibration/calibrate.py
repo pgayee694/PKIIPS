@@ -10,7 +10,8 @@ parser = argparse.ArgumentParser(description='Calibrates cameras using chessboar
 parser.add_argument('--path', help='Path to preexisting training files', required=False)
 parser.add_argument('--num', help='Number of images to calibrate using, default is 10', required=False)
 
-images = None
+imagesl = None
+imagesr = None
 args = parser.parse_args()
 
 if args.path:
@@ -18,7 +19,8 @@ if args.path:
         print('Invalid or empty directory')
         sys.exit()
     else:
-        images = glob.glob('{}/*.jpg'.format(args.path))
+        imagesl = glob.glob('{}l/*.jpg'.format(args.path))
+        imagesr = glob.glob('{}r/*.jpg'.format(args.path))
 
 
 # termination criteria
@@ -30,7 +32,8 @@ objp[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
 
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space
-imgpoints = [] # 2d points in image plane.
+imgpointsl = [] # 2d points in image plane on left camera
+imgpointsr = [] # 2d points in image plane on right camera
 
 
 # Gathering data
@@ -44,54 +47,107 @@ else:
 num_pics = 0
 
 video = None
-if not images:
-    video = cv2.VideoCapture(0)
+if not imagesl or not imagesr:
+    videol = cv2.VideoCapture(0)
+    videor = cv2.VideoCapture(1)
 
-if video is not None:
+    videol.set(cv2.CAP_PROP_FRAME_HEIGHT, )
+
     while num_pics < num:
-        ret, frame = video.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        ret, framel = videol.read()
+        ret, framer = videor.read()
+        grayl = cv2.cvtColor(framel, cv2.COLOR_BGR2GRAY)
+        grayr = cv2.cvtColor(framer, cv2.COLOR_BGR2GRAY)
 
-        found, corners = cv2.findChessboardCorners(gray, (9,6), None)
-        if found == True:
-            cv2.imwrite('./images/chessboard-{}.jpg'.format(num_pics), gray)
+        foundl, cornersl = cv2.findChessboardCorners(grayl, (9,6), None)
+        foundr, cornersr = cv2.findChessboardCorners(grayr, (9,6), None)
+        if foundl == foundr == True:
+            cv2.imwrite('./images/chessboard-{}l.jpg'.format(num_pics), grayl)
+            cv2.imwrite('./images/chessboard-{}r.jpg'.format(num_pics), grayr)
             num_pics += 1
 
             objpoints.append(objp)
-            imgpoints.append(corners)
+            imgpointsl.append(cornersl)
+            imgpointsr.append(cornersr)
 
-            print('Found a picture, waiting 5 seconds')
-            time.sleep(5)
+            print('Found chessboard, waiting 5 seconds')
+            start = time.time()
+            now = start
 
-    video.release()
+            while now - start_time < 5:
+                # avoid the video advancing when we don't want it to
+
+                framel = videol.read()
+                framer = videor.read()
+                cv2.imshow('left', framel)
+                cv2.imshow('right', framer)
+
+                cv2.waitKey(1)
+                now = time.time()
+
+    videol.release()
+    videor.release()
     cv2.destroyAllWindows()
 else:
     # We already have an image directory
-    for image in images:
-        img = cv2.imread(image)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        found, corners = cv2.findChessboardCorners(gray, (9,6), None)
+    for imagel in imagesl:
+        img = cv2.imread(imagel)
+        grayl = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        found, corners = cv2.findChessboardCorners(grayl, (9,6), None)
 
         if found == True:
             objpoints.append(objp)
-            imgpoints.append(corners)
+            imgpointsl.append(corners)
+    
+    for imager in imagesr:
+        img = cv2.imread(imager)
+        grayr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        found, corners = cv2.findChessboardCorners(grayr, (9,6), None)
+
+        if found == True:
+            objpoints.append(objp)
+            imgpointsr.append(corners)
 
 # Actual calibration
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+retl, mtxl, distl, rvecsl, tvecsl = cv2.calibrateCamera(objpoints, imgpointsl, grayl.shape[::-1], None, None)
+retr, mtxr, distr, rvecsr, tvecsr = cv2.calibrateCamera(objpoints, imgpointsr, grayr.shape[::-1], None, None)
 
-img = cv2.imread('./images/chessboard-0.jpg')
-h, w = img.shape[:2]
-newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
+imgl = cv2.imread('./images/chessboard-5l.jpg')
+h, w = imgl.shape[:2]
+newcameramtxl, roil = cv2.getOptimalNewCameraMatrix(mtxl, distl, (w,h), 1, (w,h))
 
-undistorted = cv2.undistort(img, mtx, dist, None, newcameramtx)
-x, y, w, h = roi
+undistorted = cv2.undistort(imgl, mtxl, distl, None, newcameramtx)
+x, y, w, h = roil
 undistorted = undistorted[y:y+h, x:x+w]
-cv2.imwrite('./generated/result.jpg', undistorted)
+cv2.imwrite('./generated/resultl.jpg', undistorted)
+
+imgr = cv2.imread('./images/chessboard-5r.jpg')
+h, w = imgr.shape[:2]
+newcameramtxr, roir = cv2.getOptimalNewCameraMatrix(mtxr, distr, (w,h), 1, (w,h))
+
+undistorted = cv2.undistort(imgr, mtxr, distr, None, newcameramtx)
+x, y, w, h = roir
+undistorted = undistorted[y:y+h, x:x+w]
+cv2.imwrite('./generated/resultr.jpg', undistorted)
 
 mean_error = 0
 for i in range(len(objpoints)):
-    imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecs[i], tvecs[i], mtx, dist)
-    error = cv2.norm(imgpoints[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+    imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecsl[i], tvecsl[i], mtxl, distl)
+    error = cv2.norm(imgpointsl[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
     mean_error += error
-print( "total error: {}".format(mean_error/len(objpoints)) )
+print( "total error(left): {}".format(mean_error/len(objpoints)) )
+
+mean_error = 0
+for i in range(len(objpoints)):
+    imgpoints2, _ = cv2.projectPoints(objpoints[i], rvecsr[i], tvecsr[i], mtxr, distr)
+    error = cv2.norm(imgpointsr[i], imgpoints2, cv2.NORM_L2)/len(imgpoints2)
+    mean_error += error
+print( "total error(right): {}".format(mean_error/len(objpoints)) )
+
+# Stereo stuff
+ret, mtxl, distl, mtxr, distr, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsl, imgpointsr, mtxl, distl, mtxr, distr, grayl.shape[:2], None, None, None, None, flags=cv2.CALIB_FIX_INTRINSIC)
+
+print('stereo calibraiton error: {}'.format(ret))
