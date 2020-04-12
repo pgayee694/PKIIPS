@@ -16,7 +16,7 @@ public class Floor : MonoBehaviour
     /// </summary>
     void OnDestroy()
     {
-        foreach(var node in GetComponentsInChildren<Node>())
+        foreach(var node in GetComponentsInChildren<GraphComponent>())
         {
             Destroy(node);
         }

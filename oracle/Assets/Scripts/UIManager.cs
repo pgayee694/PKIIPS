@@ -157,6 +157,7 @@ public class UIManager : MonoBehaviour
         eventSystem = GetComponent<EventSystem>();
         Assert.IsNotNull(eventSystem);
         Floor = 1;
+        UpdateCameraZoom();
     }
 
     /// <summary>
