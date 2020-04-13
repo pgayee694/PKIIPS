@@ -42,6 +42,7 @@ class GraphNode():
 
         self.count = count
 
+
 class GraphEdge():
     """
     Contains information about each directed edge within the graph representation
@@ -69,3 +70,6 @@ class GraphEdge():
         """
 
         self.capacity = capacity
+
+# TODO: Have this actually populated and easier to access/manipulate
+PKI = []
