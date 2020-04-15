@@ -16,7 +16,7 @@ def updateSensorData():
 
     return 'Invalid Request Syntax', 400
 
-@app.route('/enable/<room_id>', methods=['PUT'])
+@app.route('/enable/<int:room_id>', methods=['PUT'])
 def enable(room_id):
     """
     Enables and disables a node
@@ -37,7 +37,7 @@ def enable(room_id):
         return jsonify(error='Enable flag not found'), 400
 
     for room in PKI:
-        if room.id_ == int(room_id):
+        if room.id_ == room_id:
             room.enable(enable)
             return '', 204
     
@@ -49,7 +49,7 @@ def get_counts():
     Gets the count of people in the specified rooms
     """
 
-    rooms = [int(r) for r in request.args.getlist('room_id')]
+    rooms = {int(r) for r in request.args.getlist('room_id')}
     counts = {}
     for r in PKI:
         if r.id_ in rooms:
@@ -63,7 +63,7 @@ def get_statuses():
     Gets the status (enabled/disabled) of the specified rooms
     """
 
-    rooms = [int(r) for r in request.args.getlist('room_id')]
+    rooms = {int(r) for r in request.args.getlist('room_id')}
     status = {}
     for r in PKI:
         if r.id_ in rooms:
