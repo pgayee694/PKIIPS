@@ -6,13 +6,8 @@ using SimpleJSON;
 
 public class DelphiClient : MonoBehaviour
 {
-  //   todo: remove
-  //   private readonly string EX_GET_REQUEST_URL = "https://dog.ceo/api/breed/akita/images/random";
-  //   private readonly string EX_POST_REQUEST_URL = "https://reqres.in/api/users";
-
-  // todo: update w/ actual url
-  private readonly string GET_NODES_URL = "";
-  private readonly string DISABLE_NODE_URL = "";
+  // todo: move to config
+  private readonly string BASE_URL = "localhost:5000";
 
   void Start()
   {
@@ -25,19 +20,42 @@ public class DelphiClient : MonoBehaviour
     // note: http://answers.unity.com/answers/237847/view.html
   }
 
-  public void TestGetNodes()
+  //test methods
+  public void TestGetStatuses()
   {
-    StartCoroutine(GetNodes());
+    StartCoroutine(CallGetStatuses(new int[] { 123, 123 }));
   }
 
-  public void TestDisableNode(string id)
+  public void TestGetCounts()
   {
-    StartCoroutine(DisableNode(id));
+    StartCoroutine(CallGetCounts(new int[] { 123, 123 }));
   }
 
-  IEnumerator GetNodes()
+  public void TestUpdateStatus()
   {
-    UnityWebRequest www = UnityWebRequest.Get(GET_NODES_URL);
+    StartCoroutine(CallUpdateStatus(123, true));
+  }
+
+  //expected client methods
+  public void GetStatuses(int[] roomIds)
+  {
+    StartCoroutine(CallGetStatuses(roomIds));
+  }
+
+  public void GetCounts(int[] roomIds)
+  {
+    StartCoroutine(CallGetCounts(roomIds));
+  }
+
+  public void UpdateStatus(int id, bool status)
+  {
+    StartCoroutine(CallUpdateStatus(id, status));
+  }
+
+  //client logic
+  IEnumerator CallGetStatuses(int[] roomIds)
+  {
+    UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-statuses?room_ids=" + string.Join(",", roomIds));
     yield return www.SendWebRequest();
 
     if (www.isNetworkError || www.isHttpError)
@@ -47,16 +65,15 @@ public class DelphiClient : MonoBehaviour
     }
 
     JSONNode response = JSON.Parse(www.downloadHandler.text);
+    print(response);
 
-    // todo: update local node info
+    // todo: push status into local object
+    // ex: local256.status = response[256]
   }
 
-  IEnumerator DisableNode(string id)
+  IEnumerator CallGetCounts(int[] roomIds)
   {
-    Dictionary<string, string> requestBody = new Dictionary<string, string>();
-    requestBody.Add("id", id);
-
-    UnityWebRequest www = UnityWebRequest.Post(DISABLE_NODE_URL, requestBody);
+    UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-counts?room_ids=" + string.Join(",", roomIds));
     yield return www.SendWebRequest();
 
     if (www.isNetworkError || www.isHttpError)
@@ -66,7 +83,26 @@ public class DelphiClient : MonoBehaviour
     }
 
     JSONNode response = JSON.Parse(www.downloadHandler.text);
+    print(response);
 
-    // todo: disable local node
+    // todo: push status into local object
+    // ex: local256.count = response[256]
+  }
+
+  IEnumerator CallUpdateStatus(int id, bool status)
+  {
+    JSONObject requestData = new JSONObject();
+    requestData.Add("enable", status);
+
+    UnityWebRequest www = UnityWebRequest.Put(BASE_URL + "/enable/" + id, requestData.ToString());
+    www.SetRequestHeader("Content-Type", "application/json");
+    yield return www.SendWebRequest();
+
+    if (www.isNetworkError || www.isHttpError)
+    {
+      Debug.LogError(www.error);
+      yield break;
+    }
   }
 }
+
