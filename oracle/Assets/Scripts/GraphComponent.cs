@@ -4,61 +4,11 @@ using UnityEngine;
 using UnityEngine.Assertions;
 
 /// <summary>
-/// Script used to model a "node" in our graph model.
-/// Every node has a set of attributes.
+/// Script used to model a graph component that contain various
+/// displayable attributes.
 /// </summary>
-public class Node : MonoBehaviour
+public class GraphComponent : MonoBehaviour
 {
-    /// <summary>
-    /// The name of the people count attribute.
-    /// </summary>
-    public const string PeopleCountAttribute = "People Count";
-
-    /// <summary>
-    /// The name of the id attribute.
-    /// </summary>
-    public const string IdAttribute = "Room";
-
-    /// <summary>
-    /// The number of people in this node.
-    /// </summary>
-    private int peopleCount;
-
-    /// <summary>
-    /// An ID for this node.
-    /// </summary>
-    private int id;
-
-    /// <summary>
-    /// Public attribute for the <code>peopleCount</code> member.
-    /// Updates the UI entry when this value gets sets.
-    /// <see cref="peopleCount"/>
-    /// </summary>
-    public int PeopleCount
-    {
-        get { return peopleCount; }
-        set
-        {
-            peopleCount = value;
-            updateEntry(PeopleCountAttribute, peopleCount);
-        }
-    }
-
-    /// <summary>
-    /// Public attribute for the <code>id</code> member.
-    /// Updates the UI entry when this value gets sets.
-    /// <see cref="id"/>
-    /// </summary>
-    public int Id
-    {
-        get { return id; }
-        set
-        {
-            id = value;
-            updateEntry(IdAttribute, id);
-        }
-    }
-
     /// <summary>
     /// A <code>StatisticsBox</code> game object that can be used as
     /// a template to instantiate.
@@ -93,39 +43,60 @@ public class Node : MonoBehaviour
     /// The currently instantiaed <code>StatisticsBox</code>.
     /// </summary>
     private StatisticsBox statistics = null;
+
+    /// <summary>
+    /// Updates an entry in the statistics box, if one exists.
+    /// </summary>
+    /// <param name="attributeName">The name of the attribute to show</param>
+    /// <param name="attribute">The value of the attribute to show</param>
+    public void UpdateEntry<T>(string attributeName, T attribute)
+    {
+        if(statistics != null)
+        {
+            statistics.addEntry(attributeName, attribute);
+        }
+    }
+
+    /// <summary>
+    /// Remove an entry in the statistics box, if that one exists.
+    /// </summary>
+    /// <param name="attributeName">The name of the attribute to remove</param>
+    public void RemoveEntry(string attributeName)
+    {
+        if(statistics != null)
+        {
+            statistics.removeEntry(attributeName);
+        }
+    }
     
     /// <summary>
     /// Called on the first frame. Sets up certain variables.
     /// </summary>
-    void Start()
+    virtual protected void Start()
     {
         ui = GameObject.Find("EventSystem").GetComponent<UIManager>();
         Assert.IsNotNull(statisticsTemplate);
         Assert.IsNotNull(ui);
-        PeopleCount = 0;
-        Id = 0;
     }
 
     /// <summary>
     /// Called every frame.
     /// </summary>
-    void Update()
+    virtual protected void Update()
     {
-        updateStatisticsPosition();
+        UpdateStatisticsPosition();
     }
 
     /// <summary>
     /// The currently instantiated <code>StatisticsBox</code>.
     /// </summary>
-    void OnMouseUp()
+    virtual protected void OnMouseUp()
     {
         if(statistics == null)
         {
-            statistics = Instantiate<StatisticsBox>(statisticsTemplate);
-            statistics.transform.SetParent(ui.getCanvas().gameObject.transform);
-            updateEntry(PeopleCountAttribute, PeopleCount);
-            updateEntry(IdAttribute, Id);
-            updateStatisticsPosition();
+            statistics = CreateStatisticsBox();
+            UpdateStatisticsValues();
+            UpdateStatisticsPosition();
         }
         else
         {
@@ -134,10 +105,30 @@ public class Node : MonoBehaviour
     }
 
     /// <summary>
+    /// Updates the statistics box with all the up-to-date values.
+    /// This method is meant to be overridden and is called after the statistics box
+    /// has been created.
+    /// </summary>
+    virtual protected void UpdateStatisticsValues()
+    {
+    }
+
+    /// <summary>
+    /// Creates a statistics box game object from the given prefab.
+    /// </summary>
+    /// <returns>An empty statistics object set in the canvas.</returns>
+    virtual protected StatisticsBox CreateStatisticsBox()
+    {
+        var statisticsBox = Instantiate<StatisticsBox>(statisticsTemplate);
+        statisticsBox.transform.SetParent(ui.getCanvas().gameObject.transform);
+        return statisticsBox;
+    }
+
+    /// <summary>
     /// Called when this game object is destroyed.
     /// Will also destroy its corresponding statistics box.
     /// </summary>
-    void OnDestroy()
+    private void OnDestroy()
     {
         if(statistics != null)
         {
@@ -148,21 +139,10 @@ public class Node : MonoBehaviour
     }
 
     /// <summary>
-    /// Updates an entry in the statistics box, if one exists.
-    /// </summary>
-    public void updateEntry<T>(string attributeName, T attribute)
-    {
-        if(statistics != null)
-        {
-            statistics.addEntry(attributeName, attribute);
-        }
-    }
-
-    /// <summary>
     /// Moves the statistics box's position to the node, rather than just being stuck in
     /// the UI screen space.
     /// </summary>
-    private void updateStatisticsPosition()
+    private void UpdateStatisticsPosition()
     {
         if(statistics != null)
         {

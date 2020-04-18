@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 333631175968179013}
   - component: {fileID: 333631175968179012}
   - component: {fileID: 333631175968179015}
-  - component: {fileID: 7095723755093468612}
   - component: {fileID: 2703045413556144264}
+  - component: {fileID: 5521073157439541065}
   m_Layer: 0
-  m_Name: Node
+  m_Name: Hallway
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4711,7 +4711,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b6b5a30874f17b04a92c76169aae0e20, type: 2}
+  - {fileID: 2100000, guid: 27d9162c0a21d254fa4ca0847f77b8e1, type: 2}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -4756,22 +4756,6 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
---- !u!114 &7095723755093468612
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 333631175968179014}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c1110fe5729b134384d4793f2e2f7e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  statisticsTemplate: {fileID: 5058060725312959975, guid: 1bd3989b9e8f1a242a01657e119aae5d,
-    type: 3}
-  statisticsPositionOffsetX: -100
-  statisticsPositionOffsetY: 100
 --- !u!58 &2703045413556144264
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -4788,3 +4772,19 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 1.071
+--- !u!114 &5521073157439541065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 333631175968179014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1330d76a345f03a4ab150edfcc32e22f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statisticsTemplate: {fileID: 5058060725312959975, guid: 1bd3989b9e8f1a242a01657e119aae5d,
+    type: 3}
+  statisticsPositionOffsetX: -100
+  statisticsPositionOffsetY: 100
