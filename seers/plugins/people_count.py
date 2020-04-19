@@ -169,9 +169,6 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                 x = int((startX + endX)/2)
                 y = int((startY + endY)/2)
                 print(distance_mtx[y][x])
-                plt.imshow(depth, 'gray')
-                plt.show()
-
 
         return {PeopleCount.COUNT_KEY: detection_count}
 
