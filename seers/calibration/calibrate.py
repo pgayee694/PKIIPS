@@ -51,7 +51,12 @@ shaper = None
 
 if imagesl == None or imagesr == None:
     videol = cv2.VideoCapture(0)
+    videol.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    videol.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
     videor = cv2.VideoCapture(1)
+    videor.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    videor.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
     #videol.set(cv2.CAP_PROP_AUTOFOCUS, 0)
     videor.set(cv2.CAP_PROP_AUTOFOCUS, 0)
@@ -162,17 +167,24 @@ mapXl, mapYl = cv2.initUndistortRectifyMap(mtxl, distl, rectifl, projl, grayl.sh
 
 mapXr, mapYr = cv2.initUndistortRectifyMap(mtxr, distr, rectifr, projr, grayr.shape[:2], cv2.CV_32FC1)
 
-framel = cv2.imread('./images/chessboard-10l.jpg')
-framer = cv2.imread('./images/chessboard-10r.jpg')
+framel = cv2.imread('./images/chessboard-5l.jpg')
+framer = cv2.imread('./images/chessboard-5r.jpg')
 
 undistorted_rectifiedl = cv2.remap(framel, mapXl, mapYl, cv2.INTER_LINEAR)
 undistorted_rectifiedr = cv2.remap(framer, mapXr, mapYr, cv2.INTER_LINEAR)
 
-cv2.imshow('rectifiedl', undistorted_rectifiedl)
-cv2.imshow('rectifiedr', undistorted_rectifiedr)
+#cv2.imshow('rectifiedl', undistorted_rectifiedl)
+#cv2.imshow('rectifiedr', undistorted_rectifiedr)
+cv2.imwrite('./generated/undistorted_rectifiedl', undistorted_rectifiedl)
+cv2.imwrite('./generated/undistorted_rectifiedr', undistorted_rectifiedr)
 
-cv2.waitKey(0)
+#cv2.waitKey(0)
 
 np.savez_compressed('./generated/calibration', imageSize=grayl.shape[:2], leftMapX=mapXl, leftMapY=mapYl, leftROI=roil, rightMapX=mapXr, rightMapY=mapYr, rightROI=roir)
 
-print('stereo calibraiton error: {}'.format(error))
+print('stereo calibration error: {}'.format(error))
+
+stereo = cv2.StereoSGBM_create()
+disparity = stereo.compute(undistorted_rectifiedl, undistorted_rectifiedr)
+plt.imshow(disparity, 'gray')
+plt.show()
