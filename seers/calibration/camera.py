@@ -1,7 +1,9 @@
 import cv2
 import numpy as np
 
-video = cv2.VideoCapture(0)
+video = cv2.VideoCapture(1)
+video.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+video.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 while(True):
     ret, frame = video.read()

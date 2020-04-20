@@ -5,6 +5,7 @@ import time
 import argparse
 import os
 import sys
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description='Calibrates cameras using chessboard calibration')
 parser.add_argument('--path', help='Path to preexisting training files', required=False)
@@ -159,7 +160,7 @@ for i in range(len(objpoints)):
 print( "total error(right): {}".format(mean_error/len(objpoints)) ) 
 
 # Stereo stuff
-error, mtxl, distl, mtxr, distr, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsl, imgpointsr, mtxl, distl, mtxr, distr, grayl.shape[:2], None, None, None, None, flags=cv2.CALIB_FIX_INTRINSIC + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_PRINCIPAL_POINT)
+error, _,  _, _, _, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsl, imgpointsr, mtxl, distl, mtxr, distr, grayl.shape[:2], None, None, None, None, flags=cv2.CALIB_FIX_INTRINSIC + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_PRINCIPAL_POINT)
 
 rectifl, rectifr, projl, projr, disparityToDepthMap, roil, roir = cv2.stereoRectify(mtxl, distl, mtxr, distr, grayl.shape[:2], R, T, None, None, None, None, None, cv2.CALIB_ZERO_DISPARITY)
 
@@ -175,8 +176,8 @@ undistorted_rectifiedr = cv2.remap(framer, mapXr, mapYr, cv2.INTER_LINEAR)
 
 #cv2.imshow('rectifiedl', undistorted_rectifiedl)
 #cv2.imshow('rectifiedr', undistorted_rectifiedr)
-cv2.imwrite('./generated/undistorted_rectifiedl', undistorted_rectifiedl)
-cv2.imwrite('./generated/undistorted_rectifiedr', undistorted_rectifiedr)
+cv2.imwrite('./generated/undistorted_rectifiedl.jpg', undistorted_rectifiedl)
+cv2.imwrite('./generated/undistorted_rectifiedr.jpg', undistorted_rectifiedr)
 
 #cv2.waitKey(0)
 
