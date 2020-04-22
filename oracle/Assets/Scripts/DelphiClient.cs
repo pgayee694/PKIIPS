@@ -23,17 +23,17 @@ public class DelphiClient : MonoBehaviour
   //test methods
   public void TestGetStatuses()
   {
-    StartCoroutine(CallGetStatuses(new int[] { 123, 123 }));
+    StartCoroutine(CallGetStatuses(new int[] { 123, 321 }));
   }
 
   public void TestGetCounts()
   {
-    StartCoroutine(CallGetCounts(new int[] { 123, 123 }));
+    StartCoroutine(CallGetCounts(new int[] { 123, 321 }));
   }
 
   public void TestUpdateStatus()
   {
-    StartCoroutine(CallUpdateStatus(123, true));
+    StartCoroutine(CallUpdateStatus(123, "True"));
   }
 
   //expected client methods
@@ -47,15 +47,26 @@ public class DelphiClient : MonoBehaviour
     StartCoroutine(CallGetCounts(roomIds));
   }
 
-  public void UpdateStatus(int id, bool status)
+  public void UpdateStatus(int id, string status)
   {
     StartCoroutine(CallUpdateStatus(id, status));
+  }
+
+  string GenerateParams(string key, int[] values)
+  {
+    string output = "?";
+    for (int i = 0; i < values.Length; i++)
+    {
+      if (i != 0) output += "&";
+      output += key + "=" + values[i];
+    }
+    return output;
   }
 
   //client logic
   IEnumerator CallGetStatuses(int[] roomIds)
   {
-    UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-statuses?room_ids=" + string.Join(",", roomIds));
+    UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-statuses" + GenerateParams("room_id", roomIds));
     yield return www.SendWebRequest();
 
     if (www.isNetworkError || www.isHttpError)
@@ -73,7 +84,7 @@ public class DelphiClient : MonoBehaviour
 
   IEnumerator CallGetCounts(int[] roomIds)
   {
-    UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-counts?room_ids=" + string.Join(",", roomIds));
+    UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-counts" + GenerateParams("room_id", roomIds));
     yield return www.SendWebRequest();
 
     if (www.isNetworkError || www.isHttpError)
@@ -89,7 +100,7 @@ public class DelphiClient : MonoBehaviour
     // ex: local256.count = response[256]
   }
 
-  IEnumerator CallUpdateStatus(int id, bool status)
+  IEnumerator CallUpdateStatus(int id, string status)
   {
     JSONObject requestData = new JSONObject();
     requestData.Add("enable", status);
