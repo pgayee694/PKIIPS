@@ -1,63 +1,29 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using SimpleJSON;
 
+/// <summary>
+/// Client used to make calls to and from Delphi.
+/// </summary>
 public class DelphiClient : MonoBehaviour
 {
   // todo: move to config
   private readonly string BASE_URL = "localhost:5000";
 
-  void Start()
-  {
-    //   todo: get all node info?
-  }
-
-  void Update()
-  {
-    // todo: update all node info?
-    // note: http://answers.unity.com/answers/237847/view.html
-  }
-
-  //test methods
-  // public void TestGetStatuses()
-  // {
-  //   StartCoroutine(CallGetStatuses(new int[] { 123, 321 }));
-  // }
-
-  // public void TestGetCounts()
-  // {
-  //   StartCoroutine(CallGetCounts(new int[] { 123, 321 }));
-  // }
-
-  public void TestUpdateStatus()
-  {
-    StartCoroutine(CallUpdateStatus(123, "True"));
-  }
-
-  //expected client methods
-  // public void GetStatuses(int[] roomIds)
-  // {
-  //   StartCoroutine(CallGetStatuses(roomIds));
-  // }
-
-  // public void GetCounts(int[] roomIds)
-  // {
-  //   StartCoroutine(CallGetCounts(roomIds));
-  // }
-
-  // public void UpdateStatus(int id, string status)
-  // {
-  //   StartCoroutine(CallUpdateStatus(id, status));
-  // }
-
+  /// <summary>
+  /// Updates all of the fields associated with a room.
+  /// </summary>
   public void UpdateRoom(Room room)
   {
     StartCoroutine(CallGetCounts(new int[] { room.Id }, (response) => room.PeopleCount = response[room.Id]));
+    // todo: update room status
     // StartCoroutine(CallGetStatuses(new int[] { room.Id }, (response) => room.Status = response[room.Id]));
   }
 
+  /// <summary>
+  /// Helper method used to generate a list of parameters.
+  /// </summary>
   string GenerateParams(string key, int[] values)
   {
     string output = "?";
@@ -69,7 +35,9 @@ public class DelphiClient : MonoBehaviour
     return output;
   }
 
-  //client logic
+  /// <summary>
+  /// Gets the status of all of the rooms given in the list of ids.
+  /// </summary>
   IEnumerator CallGetStatuses(int[] roomIds, System.Action<JSONNode> callback)
   {
     UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-statuses" + GenerateParams("room_id", roomIds));
@@ -86,6 +54,9 @@ public class DelphiClient : MonoBehaviour
     callback(response);
   }
 
+  /// <summary>
+  /// Gets the people count of all of the rooms given in the list of ids.
+  /// </summary>
   IEnumerator CallGetCounts(int[] roomIds, System.Action<JSONNode> callback)
   {
     UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-counts" + GenerateParams("room_id", roomIds));
@@ -102,6 +73,9 @@ public class DelphiClient : MonoBehaviour
     callback(response);
   }
 
+  /// <summary>
+  /// Updates the status of the room associated with the given id.
+  /// </summary>
   IEnumerator CallUpdateStatus(int id, string status)
   {
     JSONObject requestData = new JSONObject();
@@ -118,4 +92,3 @@ public class DelphiClient : MonoBehaviour
     }
   }
 }
-

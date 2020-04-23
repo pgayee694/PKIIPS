@@ -9,16 +9,38 @@ using UnityEngine;
 /// </summary>
 public class Floor : MonoBehaviour
 {
+  /// <summary>
+  /// Sets the delay at which the UpdateRooms is called in seconds.
+  /// </summary>
+  private static float DELAY_UPDATE_TIME = 0.0f;
 
+  /// <summary>
+  /// Sets the interval at which the UpdateRooms is called in seconds.
+  /// </summary>
+  private static float UPDATE_INTERVAL_TIME = 0.5f;
+
+  /// <summary>
+  /// Client used to update the rooms of the floor.
+  /// </summary>
   public DelphiClient client;
 
+  /// <summary>
+  /// Called when this game object is created.
+  /// </summary>
   void Start()
   {
-    InvokeRepeating("UpdateRooms", 0.0f, 5.0f);
+    client = gameObject.AddComponent<DelphiClient>();
+    InvokeRepeating("UpdateRooms", DELAY_UPDATE_TIME, UPDATE_INTERVAL_TIME);
   }
 
+  /// <summary>
+  /// Continiously called to update the rooms of the floor.
+  /// Updates according to the value of the <code>UPDATE_INTERVAL_TIME</code> property.
+  /// <see cref="UPDATE_INTERVAL_TIME"/>
+  /// </summary>
   void UpdateRooms()
   {
+    // todo: generate list of room ids to update in a single call
     foreach (var room in GetComponentsInChildren<Room>())
     {
       client.UpdateRoom(room);
