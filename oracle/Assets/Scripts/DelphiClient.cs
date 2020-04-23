@@ -21,15 +21,15 @@ public class DelphiClient : MonoBehaviour
   }
 
   //test methods
-  public void TestGetStatuses()
-  {
-    StartCoroutine(CallGetStatuses(new int[] { 123, 321 }));
-  }
+  // public void TestGetStatuses()
+  // {
+  //   StartCoroutine(CallGetStatuses(new int[] { 123, 321 }));
+  // }
 
-  public void TestGetCounts()
-  {
-    StartCoroutine(CallGetCounts(new int[] { 123, 321 }));
-  }
+  // public void TestGetCounts()
+  // {
+  //   StartCoroutine(CallGetCounts(new int[] { 123, 321 }));
+  // }
 
   public void TestUpdateStatus()
   {
@@ -37,19 +37,25 @@ public class DelphiClient : MonoBehaviour
   }
 
   //expected client methods
-  public void GetStatuses(int[] roomIds)
-  {
-    StartCoroutine(CallGetStatuses(roomIds));
-  }
+  // public void GetStatuses(int[] roomIds)
+  // {
+  //   StartCoroutine(CallGetStatuses(roomIds));
+  // }
 
-  public void GetCounts(int[] roomIds)
-  {
-    StartCoroutine(CallGetCounts(roomIds));
-  }
+  // public void GetCounts(int[] roomIds)
+  // {
+  //   StartCoroutine(CallGetCounts(roomIds));
+  // }
 
-  public void UpdateStatus(int id, string status)
+  // public void UpdateStatus(int id, string status)
+  // {
+  //   StartCoroutine(CallUpdateStatus(id, status));
+  // }
+
+  public void UpdateRoom(Room room)
   {
-    StartCoroutine(CallUpdateStatus(id, status));
+    StartCoroutine(CallGetCounts(new int[] { room.Id }, (response) => room.PeopleCount = response[room.Id]));
+    // StartCoroutine(CallGetStatuses(new int[] { room.Id }, (response) => room.Status = response[room.Id]));
   }
 
   string GenerateParams(string key, int[] values)
@@ -64,7 +70,7 @@ public class DelphiClient : MonoBehaviour
   }
 
   //client logic
-  IEnumerator CallGetStatuses(int[] roomIds)
+  IEnumerator CallGetStatuses(int[] roomIds, System.Action<JSONNode> callback)
   {
     UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-statuses" + GenerateParams("room_id", roomIds));
     yield return www.SendWebRequest();
@@ -76,13 +82,11 @@ public class DelphiClient : MonoBehaviour
     }
 
     JSONNode response = JSON.Parse(www.downloadHandler.text);
-    print(response);
 
-    // todo: push status into local object
-    // ex: local256.status = response[256]
+    callback(response);
   }
 
-  IEnumerator CallGetCounts(int[] roomIds)
+  IEnumerator CallGetCounts(int[] roomIds, System.Action<JSONNode> callback)
   {
     UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-counts" + GenerateParams("room_id", roomIds));
     yield return www.SendWebRequest();
@@ -94,10 +98,8 @@ public class DelphiClient : MonoBehaviour
     }
 
     JSONNode response = JSON.Parse(www.downloadHandler.text);
-    print(response);
 
-    // todo: push status into local object
-    // ex: local256.count = response[256]
+    callback(response);
   }
 
   IEnumerator CallUpdateStatus(int id, string status)
