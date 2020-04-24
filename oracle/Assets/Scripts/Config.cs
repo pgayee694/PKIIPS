@@ -7,7 +7,7 @@ public class Config : MonoBehaviour
     /// <summary>
     /// Configuration file's location.
     /// </summary>
-    private static readonly string CONFIG_FILE = "config.ini";
+    private static readonly string CONFIG_FILE = "oracle_config.ini";
 
     /// <summary>
     /// Used to access all configuration settings.
@@ -27,9 +27,11 @@ public class Config : MonoBehaviour
         }
         else
         {
+            Debug.Log("Config file found!");
             cfg = Configuration.LoadFromFile(CONFIG_FILE);
         }
     }
+
 
     /// <summary>
     /// Applies the default configuration settings when no configuration file is found.
