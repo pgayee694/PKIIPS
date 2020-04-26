@@ -1,5 +1,5 @@
 import unittest
-from app.plugins.test_plugins import TestDataAnalyzerPlugin
+from app.plugins.example_plugins import TestDataAnalyzerPlugin
 from app import data_analyzer
 
 class TestDataAnalyzer(unittest.TestCase):
@@ -24,91 +24,36 @@ class TestDataAnalyzer(unittest.TestCase):
         analyzer = TestDataAnalyzerPlugin()
         analyzer.init()
 
+        data_payload = {'increment': 1}
+        data_object = analyzer.get_data_class()(**data_payload)
+
         self.assertEqual(analyzer.collect()['num'], 0)
-        analyzer.analyze(data_analyzer.DataContainer({'increment': 1}))
+        analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect()['num'], 1)
 
     def test_analyze_constraint(self):
         analyzer = TestDataAnalyzerPlugin()
         analyzer.init()
 
-        analyzer.analyze(data_analyzer.DataContainer({'increment': 10}))
+        data_payload        = {'increment': 10}
+        constraint_payload  = {'max': 5}
+        data_object         = analyzer.get_data_class()(**data_payload)
+        constraint_object   = analyzer.get_constraint_class()(**constraint_payload)
+
+        analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect()['num'], 10)
 
-        analyzer.analyze(data_analyzer.DataContainer({'not_increment': 1}))
-        self.assertEqual(analyzer.collect()['num'], 10)
-
-        analyzer.constraint(data_analyzer.ConstraintsContainer({'max': 5}))
-        self.assertEqual(analyzer.collect()['num'], 5)
-
-        analyzer.constraint(data_analyzer.ConstraintsContainer({'not_max': 1}))
+        analyzer.constraint(constraint_object)
         self.assertEqual(analyzer.collect()['num'], 5)
 
     def test_shutdown(self):
         analyzer = TestDataAnalyzerPlugin()
         analyzer.init()
 
-        analyzer.analyze(data_analyzer.DataContainer({'increment': 10}))
+        data_payload = {'increment': 10}
+        data_object  = analyzer.get_data_class()(**data_payload)
+
+        analyzer.analyze(data_object)
         analyzer.shutdown()
 
         self.assertEqual(analyzer.num, -1)
-
-class TestDataContainer(unittest.TestCase):
-    """
-    Tests a DataContainer
-    """
-
-    def test_constructor(self):
-        data = {'test': 12, 'test2': 'hello'}
-        container = data_analyzer.DataContainer(data)
-
-        self.assertEqual(container.data, data)
-
-    def test_get(self):
-        data = {'test': 12, 'test2': 'hello'}
-        container = data_analyzer.DataContainer(data)
-
-        self.assertEqual(container.get('test'), data['test'])
-        self.assertEqual(container.get('test2'), data['test2'])
-        self.assertEqual(container['test'], data['test'])
-        self.assertEqual(container['test2'], data['test2'])
-        self.assertIsNone(container.get('hello'))
-        self.assertIsNone(container['hello'])
-
-    def test_contains_keyword(self):
-        data = {'test': 12, 'test2': 'hello'}
-        container = data_analyzer.DataContainer(data)
-
-        self.assertTrue(container.contains_keyword('test'))
-        self.assertTrue(container.contains_keyword('test2'))
-        self.assertFalse(container.contains_keyword('test3'))
-
-class TestConstraintsContainer(unittest.TestCase):
-    """
-    Tests a ConstraintsContainer
-    """
-
-    def test_constructor(self):
-        data = {'test': 12, 'test2': 'hello'}
-        container = data_analyzer.ConstraintsContainer(data)
-
-        self.assertEqual(container.data, data)
-
-    def test_get(self):
-        data = {'test': 12, 'test2': 'hello'}
-        container = data_analyzer.ConstraintsContainer(data)
-
-        self.assertEqual(container.get('test'), data['test'])
-        self.assertEqual(container.get('test2'), data['test2'])
-        self.assertEqual(container['test'], data['test'])
-        self.assertEqual(container['test2'], data['test2'])
-        self.assertIsNone(container.get('hello'))
-        self.assertIsNone(container['hello'])
-
-    def test_contains_keyword(self):
-        data = {'test': 12, 'test2': 'hello'}
-        container = data_analyzer.ConstraintsContainer(data)
-
-        self.assertTrue(container.contains_keyword('test'))
-        self.assertTrue(container.contains_keyword('test2'))
-        self.assertFalse(container.contains_keyword('test3'))

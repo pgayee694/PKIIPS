@@ -13,6 +13,28 @@ class DataAnalyzerPlugin(object):
         self.data_keywords          = set() if data_keywords is None else set(data_keywords)
         self.constraint_keywords    = set() if constraint_keywords is None else set(constraint_keywords)
 
+    def get_data_class(self):
+        """
+        Returns a class type that will be constructed and passed to the analyze function
+        upon a data payload. This class must take in keyword arguments in its constructor
+        to initialize its fields.
+
+        Returns:
+            (type): a class type
+        """
+        pass
+
+    def get_constraint_class(self):
+        """
+        Returns a class type that will be constructed and passed to the constraint function
+        upon a constraint payload. This class must take in keyword arguments in its constructor
+        to initialize its fields.
+
+        Returns:
+            (type): a class type
+        """
+        pass
+
     def init(self):
         """
         Called once before the plugin has recieved any data. Meant to
@@ -32,7 +54,7 @@ class DataAnalyzerPlugin(object):
         Called whenever the current state of this data analyzer is needed.
         
         Returns:
-            (DataContainer): A map of keywords to values.
+            (dictionary): A map of keywords to values.
         """
         pass
 
@@ -44,7 +66,8 @@ class DataAnalyzerPlugin(object):
         that this analyzer is listening for.
 
         Parameters:
-            data (DataContainer): A map of keywords to values.
+            data (object): A custom object that is defined by the type returned
+                           by get_data_class
         """
         pass
 
@@ -55,7 +78,8 @@ class DataAnalyzerPlugin(object):
         listening for.
 
         Parameters:
-            constraints (ConstraintsContainer): A map of keywords to values.
+            constraints (object): A custom object that is defined by the type returned
+                                  by get_constraint_class
         """
         pass
 
@@ -104,141 +128,3 @@ class DataAnalyzerPlugin(object):
                     payloads, false otherwise
         """
         return keyword in self.constraint_keywords
-
-class DataContainer(object):
-    """
-    A wrapper class around a dictionary to indicate a data payload.
-    """
-    def __init__(self, data_dict):
-        """
-        Initializes this object with the given dictionary.
-
-        Parameters:
-            data_dict (dict): Data payload
-        """
-        self.data = data_dict
-    
-    def get(self, keyword):
-        """
-        Retrieves the data associated with the given keyword, or None
-        if it does not exist.
-
-        Parameters:
-            keyword (string): A keyword
-
-        Returns:
-            (object or None): Returns an object is one has an associated
-                              keyword, otherwise returns None
-        """
-        return self.data.get(keyword, None)
-    
-    def __getitem__(self, key):
-        """
-        Retrieves the data associated with the given keyword, or None
-        if it does not exist.
-
-        Parameters:
-            key (string): A keyword
-
-        Returns:
-            (object or None): Returns an object is one has an associated
-                              keyword, otherwise returns None
-        """
-        return self.get(key)
-
-    def keywords(self):
-        """
-        Gets all the keywords of this data payload.
-
-        Returns:
-            (set [string]): A set of keywords
-        """
-        return self.data.keys()
-
-    def contains_keyword(self, keyword):
-        """
-        Checks if this data payload contains the given keyword.
-
-        Parameters:
-            keyword (string): keyword to check
-
-        Returns:
-            (bool): True if the given keyword is in this data container,
-                    False otherwise
-        """
-        return keyword in self.data
-    
-    def __iter__(self):
-        """
-        Returns an iterator over the internal dictionary.
-        """
-        return iter(self.data)
-
-class ConstraintsContainer(object):
-    """
-    A wrapper class around a dictionary to indicate a constraints payload.
-    """
-    def __init__(self, data_dict):
-        """
-        Initializes this object with the given dictionary.
-
-        Parameters:
-            data_dict (dict): Constraints payload
-        """
-        self.data = data_dict
-    
-    def get(self, keyword):
-        """
-        Retrieves the constraint associated with the given keyword, or None
-        if it does not exist.
-
-        Parameters:
-            keyword (string): A keyword
-
-        Returns:
-            (object or None): Returns an object is one has an associated
-                              keyword, otherwise returns None
-        """
-        return self.data.get(keyword, None)
-    
-    def __getitem__(self, key):
-        """
-        Retrieves the constraint associated with the given keyword, or None
-        if it does not exist.
-
-        Parameters:
-            key (string): A keyword
-
-        Returns:
-            (object or None): Returns an object is one has an associated
-                              keyword, otherwise returns None
-        """
-        return self.get(key)
-
-    def keywords(self):
-        """
-        Gets all the keywords of this constraints payload.
-
-        Returns:
-            (set [string]): A set of keywords
-        """
-        return self.data.keys()
-
-    def contains_keyword(self, keyword):
-        """
-        Checks if this constraints payload contains the given keyword.
-
-        Parameters:
-            keyword (string): keyword to check
-
-        Returns:
-            (bool): True if the given keyword is in this constraints container,
-                    False otherwise
-        """
-        return keyword in self.data
-    
-    def __iter__(self):
-        """
-        Returns an iterator over the internal dictionary.
-        """
-        return iter(self.data)
