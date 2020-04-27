@@ -41,7 +41,7 @@ imgpointsr = [] # 2d points in image plane on right camera
 num = -1
 
 if args.num:
-    num = args.num
+    num = int(args.num)
 else:
     num = 10
 
@@ -51,6 +51,11 @@ shapel = None
 shaper = None
 
 if imagesl == None or imagesr == None:
+    print('preparing cameras, you have 5')
+    for i in range(5):
+        print(5-i)
+        time.sleep(1)
+
     videol = cv2.VideoCapture(0)
     videol.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     videol.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -63,15 +68,19 @@ if imagesl == None or imagesr == None:
     videor.set(cv2.CAP_PROP_AUTOFOCUS, 0)
 
     while num_pics < num:
-        ret, framel = videol.read()
-        ret, framer = videor.read()
+        if not (videol.grab() and videor.grab()):
+            print('unable to get frames')
+            break
+
+        ret, framel = videol.retrieve()
+        ret, framer = videor.retrieve()
         grayl = cv2.cvtColor(framel, cv2.COLOR_BGR2GRAY)
         grayr = cv2.cvtColor(framer, cv2.COLOR_BGR2GRAY)
 
         #cv2.imshow('framel', framel)
         #cv2.imshow('framer', framer)
 
-        #cv2.waitKey(1000)
+        #cv2.waitKey(1)
 
         print('looking for corners')
         foundl, cornersl = cv2.findChessboardCorners(grayl, (9,6), None)
@@ -110,13 +119,13 @@ else:
 
     for imagel, imager in zip(imagesl, imagesr):
         imgl = cv2.imread(imagel)
-        grayl = cv2.cvtColor(imgl, cv2.COLOR_BGR2GRAY)
+        #grayl = cv2.cvtColor(imgl, cv2.COLOR_BGR2GRAY)
 
         imgr = cv2.imread(imager)
-        grayr = cv2.cvtColor(imgr, cv2.COLOR_BGR2GRAY)
+        #grayr = cv2.cvtColor(imgr, cv2.COLOR_BGR2GRAY)
 
-        foundl, cornersl = cv2.findChessboardCorners(grayl, (9,6), None)
-        foundr, cornersr = cv2.findChessboardCorners(grayr, (9,6), None)
+        foundl, cornersl = cv2.findChessboardCorners(imgl, (9,6), None)
+        foundr, cornersr = cv2.findChessboardCorners(imgr, (9,6), None)
 
         if foundl == foundr == True:
             objpoints.append(objp)
@@ -124,8 +133,8 @@ else:
             imgpointsr.append(cornersr)
 
 # Actual calibration
-retl, mtxl, distl, rvecsl, tvecsl = cv2.calibrateCamera(objpoints, imgpointsl, grayl.shape[::-1], None, None)
-retr, mtxr, distr, rvecsr, tvecsr = cv2.calibrateCamera(objpoints, imgpointsr, grayr.shape[::-1], None, None)
+retl, mtxl, distl, rvecsl, tvecsl = cv2.calibrateCamera(objpoints, imgpointsl, (1280, 720), None, None)
+retr, mtxr, distr, rvecsr, tvecsr = cv2.calibrateCamera(objpoints, imgpointsr, (1280, 720), None, None)
 
 imgl = cv2.imread('./images/chessboard-5l.jpg')
 h, w = imgl.shape[:2]
@@ -160,13 +169,13 @@ for i in range(len(objpoints)):
 print( "total error(right): {}".format(mean_error/len(objpoints)) ) 
 
 # Stereo stuff
-error, _,  _, _, _, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsl, imgpointsr, mtxl, distl, mtxr, distr, grayl.shape[:2], None, None, None, None, flags=cv2.CALIB_FIX_INTRINSIC + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_PRINCIPAL_POINT)
+error, mtxl, distl, mtxr, distr, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpointsl, imgpointsr, mtxl, distl, mtxr, distr, (1280, 720), None, None, None, None, flags=cv2.CALIB_FIX_INTRINSIC + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_PRINCIPAL_POINT)
 
-rectifl, rectifr, projl, projr, disparityToDepthMap, roil, roir = cv2.stereoRectify(mtxl, distl, mtxr, distr, grayl.shape[:2], R, T, None, None, None, None, None, cv2.CALIB_ZERO_DISPARITY)
+rectifl, rectifr, projl, projr, disparityToDepthMap, roil, roir = cv2.stereoRectify(mtxl, distl, mtxr, distr, (1280, 720), R, T, None, None, None, None, None, cv2.CALIB_ZERO_DISPARITY)
 
-mapXl, mapYl = cv2.initUndistortRectifyMap(mtxl, distl, rectifl, projl, grayl.shape[:2], cv2.CV_32FC1)
+mapXl, mapYl = cv2.initUndistortRectifyMap(mtxl, distl, rectifl, projl, (1280, 720), cv2.CV_32FC1)
 
-mapXr, mapYr = cv2.initUndistortRectifyMap(mtxr, distr, rectifr, projr, grayr.shape[:2], cv2.CV_32FC1)
+mapXr, mapYr = cv2.initUndistortRectifyMap(mtxr, distr, rectifr, projr, (1280, 720), cv2.CV_32FC1)
 
 framel = cv2.imread('./images/chessboard-5l.jpg')
 framer = cv2.imread('./images/chessboard-5r.jpg')
@@ -181,11 +190,13 @@ cv2.imwrite('./generated/undistorted_rectifiedr.jpg', undistorted_rectifiedr)
 
 #cv2.waitKey(0)
 
-np.savez_compressed('./generated/calibration', imageSize=grayl.shape[:2], leftMapX=mapXl, leftMapY=mapYl, leftROI=roil, rightMapX=mapXr, rightMapY=mapYr, rightROI=roir)
+np.savez_compressed('./generated/calibration', imageSize=(1280, 720), leftMapX=mapXl, leftMapY=mapYl, leftROI=roil, rightMapX=mapXr, rightMapY=mapYr, rightROI=roir)
 
 print('stereo calibration error: {}'.format(error))
+
 
 stereo = cv2.StereoSGBM_create()
 disparity = stereo.compute(undistorted_rectifiedl, undistorted_rectifiedr)
 plt.imshow(disparity, 'gray')
 plt.show()
+
