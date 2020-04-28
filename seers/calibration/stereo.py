@@ -36,8 +36,8 @@ fixedR = cv2.cvtColor(fixedR, cv2.COLOR_BGR2GRAY)
 cn = fixedL.shape[2] if len(fixedL.shape) > 2 else 3
 
 #BM params
-stereo.setBlockSize(7)
-stereo.setNumDisparities(96)
+stereo.setBlockSize(9)
+#stereo.setNumDisparities(48)
 stereo.setTextureThreshold(507)
 
 #SGBM params

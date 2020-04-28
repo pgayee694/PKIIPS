@@ -190,7 +190,7 @@ cv2.imwrite('./generated/undistorted_rectifiedr.jpg', undistorted_rectifiedr)
 
 #cv2.waitKey(0)
 
-np.savez_compressed('./generated/calibration', imageSize=(1280, 720), leftMapX=mapXl, leftMapY=mapYl, leftROI=roil, rightMapX=mapXr, rightMapY=mapYr, rightROI=roir)
+np.savez_compressed('./generated/calibration', imageSize=(1280, 720), leftMapX=mapXl, leftMapY=mapYl, leftROI=roil, rightMapX=mapXr, rightMapY=mapYr, rightROI=roir, leftCamMtx=mtxl, rightCamMtx=mtxr, leftDist=distl, rightDist=distr)
 
 print('stereo calibration error: {}'.format(error))
 
