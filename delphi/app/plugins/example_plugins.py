@@ -37,3 +37,39 @@ class TestDataAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
     def constraint(self, constraints):
         self.max = constraints.max
         self.num = min(self.num, self.max)
+
+class TestDataAnalyzerPlugin2(data_analyzer.DataAnalyzerPlugin):
+    NodeData            = namedtuple('NodeData', ('node_id', 'extra',), defaults=(None, None))
+    MaxSizeConstraint   = namedtuple('MaxSizeConstraint', ('maxsize',))
+
+    def __init__(self):
+        super().__init__(TestDataAnalyzerPlugin2.NodeData._fields, TestDataAnalyzerPlugin2.MaxSizeConstraint._fields)
+
+    def get_data_class(self):
+        return TestDataAnalyzerPlugin2.NodeData
+    
+    def get_constraint_class(self):
+        return TestDataAnalyzerPlugin2.MaxSizeConstraint
+        
+    def init(self):
+        self.num      = 0
+        self.nodes    = set()
+        self.maxsize  = None
+
+    def shutdown(self):
+        self.nodes.clear()
+
+    def collect(self):
+        return {'nodes': self.nodes}
+
+    def analyze(self, data):
+        if self.maxsize is not None and len(self.nodes) >= self.maxsize:
+            return
+
+        if data.node_id is not None:
+            self.nodes.add(data.node_id)
+            if data.extra is not None:
+                self.num += data.extra
+
+    def constraint(self, constraints):
+        self.maxsize = constraints.maxsize
