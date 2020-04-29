@@ -19,6 +19,11 @@ public class Room : GraphComponent
     public const string IdAttribute = "Room";
 
     /// <summary>
+    /// The name of the status attribute.
+    /// </summary>
+    public const string StatusAttribute = "Status";
+
+    /// <summary>
     /// The number of people in this node.
     /// </summary>
     private int peopleCount = 0;
@@ -27,6 +32,11 @@ public class Room : GraphComponent
     /// An ID for this node.
     /// </summary>
     private int id = 0;
+
+    /// <summary>
+    /// The status for this node.
+    /// </summary>
+    private bool status = false;
 
     /// <summary>
     /// Public attribute for the <code>peopleCount</code> member.
@@ -59,6 +69,33 @@ public class Room : GraphComponent
     }
 
     /// <summary>
+    /// Public attribute for the <code>status</code> member.
+    /// Updates the UI entry when this value gets sets.
+    /// <see cref="status"/>
+    /// </summary>
+    public bool Status
+    {
+        get { return status; }
+        set
+        {
+            status = value;
+            UpdateEntry(StatusAttribute, Status);
+            //UpdateToggle(StatusAttribute, Status);
+        }
+    }
+
+    /// <summary>
+    /// Toggles the room status on right click.
+    /// </summary>
+    void OnMouseOver()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            DelphiClient.Instance.ToggleRoomStatus(this);
+        }
+    }
+
+    /// <summary>
     /// Updates the statistics box with all the up-to-date values.
     /// This method is meant to be overridden and is called after the statistics box
     /// has been created.
@@ -67,5 +104,7 @@ public class Room : GraphComponent
     {
         UpdateEntry(PeopleCountAttribute, PeopleCount);
         UpdateEntry(IdAttribute, Id);
+        UpdateEntry(StatusAttribute, Status);
+        //UpdateToggle(StatusAttribute, Status);
     }
 }

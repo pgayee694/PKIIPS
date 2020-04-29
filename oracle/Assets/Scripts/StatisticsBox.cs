@@ -39,7 +39,7 @@ public class StatisticsBox : MonoBehaviour
     {
         var textTransform = gameObject.transform.Find(name);
         Text text;
-        if(textTransform != null)
+        if (textTransform != null)
         {
             text = textTransform.gameObject.GetComponent<Text>();
         }
@@ -63,6 +63,44 @@ public class StatisticsBox : MonoBehaviour
     {
         var textObject = gameObject.transform.Find(name).gameObject;
         if(textObject != null)
+        {
+            Destroy(textObject);
+        }
+    }
+
+    /// <summary>
+    /// Adds a toggle into the UI. If one already exists,
+    /// then the value will be updated.
+    /// </summary>
+    public void addToggle(string name, bool value)
+    {
+        var toggleTransform = gameObject.transform.Find(name);
+        Toggle toggle;
+        if (toggleTransform != null)
+        {
+            toggle = toggleTransform.gameObject.GetComponent<Toggle>();
+        }
+        else
+        {
+            var toggleObject = new GameObject(name);
+            toggleObject.transform.parent = gameObject.transform;
+
+            toggle = toggleObject.AddComponent<Toggle>();
+            //var toggleText = toggle.GetComponentInChildren<Text>();
+            //toggleText.font = font;
+            //toggleText.fontSize = fontSize;
+        }
+
+        toggle.isOn = value;
+    }
+
+    /// <summary>
+    /// If the given toggle exists, it will be removed from the UI.
+    /// </summary>
+    public void removeToggle(string name)
+    {
+        var textObject = gameObject.transform.Find(name).gameObject;
+        if (textObject != null)
         {
             Destroy(textObject);
         }

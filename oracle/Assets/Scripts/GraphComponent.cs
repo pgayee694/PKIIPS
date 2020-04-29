@@ -68,7 +68,32 @@ public class GraphComponent : MonoBehaviour
             statistics.removeEntry(attributeName);
         }
     }
-    
+
+    /// <summary>
+    /// Updates a toggle in the statistics box, if one exists.
+    /// </summary>
+    /// <param name="attributeName">The name of the attribute to show</param>
+    /// <param name="attribute">The value of the attribute to show</param>
+    public void UpdateToggle(string attributeName, bool attribute)
+    {
+        if (statistics != null)
+        {
+            statistics.addToggle(attributeName, attribute);
+        }
+    }
+
+    /// <summary>
+    /// Remove a toggle in the statistics box, if that one exists.
+    /// </summary>
+    /// <param name="attributeName">The name of the attribute to remove</param>
+    public void RemoveToggle(string attributeName)
+    {
+        if (statistics != null)
+        {
+            statistics.removeToggle(attributeName);
+        }
+    }
+
     /// <summary>
     /// Called on the first frame. Sets up certain variables.
     /// </summary>

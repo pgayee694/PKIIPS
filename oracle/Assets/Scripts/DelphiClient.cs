@@ -46,11 +46,19 @@ public class DelphiClient : MonoBehaviour
     /// <summary>
     /// Updates all of the fields for each of the rooms supplied.
     /// </summary>
+    public void ToggleRoomStatus(Room room)
+    {
+        StartCoroutine(CallToggleStatus(room));
+    }
+
+    /// <summary>
+    /// Updates all of the fields for each of the rooms supplied.
+    /// </summary>
     public void UpdateRooms(Room[] rooms)
     {
         int[] roomIds = rooms.Select(room => room.Id).ToArray();
         StartCoroutine(CallGetCounts(roomIds, (response) => rooms.ToList().ForEach(room => room.PeopleCount = response[room.Id])));
-        // todo: update room status
+        StartCoroutine(CallGetStatuses(roomIds, (response) => rooms.ToList().ForEach(room => room.Status = response[room.Id])));
     }
 
 
@@ -104,12 +112,12 @@ public class DelphiClient : MonoBehaviour
     /// <summary>
     /// Updates the status of the room associated with the given id.
     /// </summary>
-    IEnumerator CallUpdateStatus(int id, string status)
+    IEnumerator CallToggleStatus(Room room)
     {
         JSONObject requestData = new JSONObject();
-        requestData.Add("enable", status);
+        requestData.Add("enable", (!room.Status).ToString());
 
-        UnityWebRequest www = UnityWebRequest.Put(BASE_URL + "/enable/" + id, requestData.ToString());
+        UnityWebRequest www = UnityWebRequest.Put(BASE_URL + "/enable/" + room.Id, requestData.ToString());
         www.SetRequestHeader("Content-Type", "application/json");
         yield return www.SendWebRequest();
 
@@ -118,5 +126,7 @@ public class DelphiClient : MonoBehaviour
             Debug.LogError(www.error);
             yield break;
         }
+
+        room.Status = !room.Status;
     }
 }
