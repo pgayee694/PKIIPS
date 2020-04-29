@@ -1,4 +1,5 @@
 from app import app
+from app import global_model_engine
 from app.graph import GraphEdge, GraphNode, PKI
 from flask import request, jsonify
 
@@ -6,11 +7,9 @@ from flask import request, jsonify
 def updateSensorData():
     try:
         data = request.get_json()
-        sensorId = int(data.get('id'))
-        count = int(data.get('count'))
-
-        # TODO: store sensor data
-        return '', 204
+        if data is not None:
+            global_model_engine.update_data(data)
+            return '', 204
     except:
         pass
 
