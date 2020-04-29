@@ -173,8 +173,10 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                 y = int((startY + endY)/2)
 
                 disparity = self.stereoMatcher.compute(grayL, grayR)
+                plt.imshow(disparity, 'gray')
+                plt.show()
                 depth = self.baseline * self.focal_length / disparity
-                distances.append(depth[y][x])
+                distances.append(depth[x][y])
 
         return {PeopleCount.COUNT_KEY: detection_count,
                 PeopleCount.DISTANCES_KEY: distances}
@@ -241,7 +243,7 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         #res = cv2.drawMatches(query, kp_q, image, kp_i, top_half, None, flags=None)
         #plt.imshow(res), plt.show()
     
-    def calculate_focal_length(leftCamMtx, rightCamMtx):
+    def calculate_focal_length(self, leftCamMtx, rightCamMtx):
         """
         Calculates the focal length to use. Takes the average of the left and right
         focal lengths of each camera and then returns the average of those values
