@@ -92,8 +92,14 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
             raise IOError(self.prototxt)
 
         self.net		= cv2.dnn.readNetFromCaffe(self.prototxt, self.model)
+
         self.videoL             = cv2.VideoCapture(0)
+        self.videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        self.videoL.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+
         self.videoR             = cv2.VideoCapture(1)
+        self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 
         calibration = np.load('./calibration/generated/calibration.npz', allow_pickle=False)
         self.calib_size = tuple(calibration['imageSize'])
@@ -103,13 +109,15 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         self.rightMapX = calibration['rightMapX']
         self.rightMapY = calibration['rightMapY']
         self.rightROI = tuple(calibration['rightROI'])
-        self.focal_length = 3.04
-        self.baseline = 254
+        leftCamMtx = calibration['leftCamMtx']
+        rightCamMtx = calibration['rightCamMtx']
+
+        self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx)
+        self.baseline = 7.5 # cm
 
         self.stereoMatcher = cv2.StereoBM_create()
-        #self.stereoMatcher.setMinDisparity(4)
-        self.stereoMatcher.setNumDisparities(32)
-        self.stereoMatcher.setBlockSize(15)
+        self.stereoMatcher.setBlockSize(9)
+        self.stereoMatcher.setTextureThreshold(507)
 
     def shutdown(self):
         """
@@ -148,12 +156,6 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
         grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
 
-        depth = self.stereoMatcher.compute(grayL, grayR)
-        #plt.imshow(depth, 'gray')
-        #plt.show()
-
-        distance_mtx = (self.baseline * self.focal_length)/depth
-        #print(distance_mtx)
 
         for i in numpy.arange(0, detections.shape[2]):
             confidence = detections[0, 0, i, 2]
@@ -164,13 +166,18 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                     continue
 
                 detection_count += 1
+
                 box = detections[0,0,i, 3:7] * np.array([width, height, width, height])
                 startX, startY, endX, endY = box.astype('int')
                 x = int((startX + endX)/2)
                 y = int((startY + endY)/2)
-                print(distance_mtx[y][x])
 
-        return {PeopleCount.COUNT_KEY: detection_count}
+                disparity = self.stereoMatcher.compute(grayL, grayR)
+                depth = self.baseline * self.focal_length / disparity
+                distances.append(depth[y][x])
+
+        return {PeopleCount.COUNT_KEY: detection_count,
+                PeopleCount.DISTANCES_KEY: distances}
 
     def find_marker(query, image):
         """
@@ -233,3 +240,27 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         #res = cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 3)
         #res = cv2.drawMatches(query, kp_q, image, kp_i, top_half, None, flags=None)
         #plt.imshow(res), plt.show()
+    
+    def calculate_focal_length(leftCamMtx, rightCamMtx):
+        """
+        Calculates the focal length to use. Takes the average of the left and right
+        focal lengths of each camera and then returns the average of those values
+        across both cameras.
+
+        Parameters:
+            leftCamMtx: left camera matrix from calibration
+            rightCamMtx: right camera matrix from calibration
+        
+        Returns:
+            focal_length: focal length to use, in pixels
+        """
+
+        fxL = leftCamMtx[0][0]
+        fyL = leftCamMtx[1][1]
+        fxR = rightCamMtx[0][0]
+        fyR = rightCamMtx[1][1]
+        
+        fL = (fxL + fyL) / 2.0
+        fR = (fxR + fyR) / 2.0
+
+        return (fL + fR) / 2.0

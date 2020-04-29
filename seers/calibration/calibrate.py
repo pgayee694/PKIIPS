@@ -7,6 +7,12 @@ import os
 import sys
 import matplotlib.pyplot as plt
 
+"""
+Calibrates a stereo camera pair using chessboard calibration
+and writes the parameters to a .npz to be loaded for the
+people_count plugin
+"""
+
 parser = argparse.ArgumentParser(description='Calibrates cameras using chessboard calibration')
 parser.add_argument('--path', help='Path to preexisting training files', required=False)
 parser.add_argument('--num', help='Number of images to calibrate using, default is 10', required=False)
