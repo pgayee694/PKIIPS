@@ -169,14 +169,10 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 
                 box = detections[0,0,i, 3:7] * np.array([width, height, width, height])
                 startX, startY, endX, endY = box.astype('int')
-                x = int((startX + endX)/2)
-                y = int((startY + endY)/2)
 
                 disparity = self.stereoMatcher.compute(grayL, grayR)
-                plt.imshow(disparity, 'gray')
-                plt.show()
                 depth = self.baseline * self.focal_length / disparity
-                distances.append(depth[x][y])
+                distances.append(self.get_closest(depth, startX, endX, startY, endY))
 
         return {PeopleCount.COUNT_KEY: detection_count,
                 PeopleCount.DISTANCES_KEY: distances}
@@ -266,3 +262,27 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         fR = (fxR + fyR) / 2.0
 
         return (fL + fR) / 2.0
+    
+    def get_closest(distances, startX, endX, startY, endY):
+        """
+        Finds the closest positive distance in the range specified by start/end X/Y.
+
+        Parameters:
+            distances: distance matrix from disparity map
+            startX: starting x coordinate
+            endX: ending x coordinate
+            startY: start y coordinate
+            endY: ending y coordinate
+
+        Returns:
+            distance: closest distance, in cm
+        """
+
+        distance = distances[startY][startX]
+
+        for y in range(startY, endY):
+            for x in range(startX, endX):
+                if distances[y][x] >= 0 and distances[y][x] < distance:
+                    distance = distances[y][x]
+        
+        return distance
