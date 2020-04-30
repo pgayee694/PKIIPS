@@ -70,6 +70,9 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
     PROTOTXT_INI	= 'prototxt-path'
     RPI_MODEL_INI       = 'rpi-model-path'
     LABELMAP_INI        = 'labelmap-path'
+    CALIBRATION_DATA = 'calibration-data'
+    BLOCKSIZE = 'blocksize'
+    BASELINE = 'baseline'
 
     DEFAULT_CONFIDENCE	= 0.2
     COUNT_KEY			= 'count'
@@ -104,7 +107,12 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
         self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
 
-        calibration = np.load('./calibration/generated/calibration.npz', allow_pickle=False)
+        calibration_path = seer_config.configuration[PeopleCount.INI].get(PeopleCount.CALIBRATION_DATA)
+
+        if not os.path.isfile(calibration_path):
+            raise IOError(calibration_path)
+
+        calibration = np.load(calibration_path, allow_pickle=False)
         self.calib_size = tuple(calibration['imageSize'])
         self.leftMapX = calibration['leftMapX']
         self.leftMapY = calibration['leftMapY']
@@ -116,10 +124,10 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         rightCamMtx = calibration['rightCamMtx']
 
         self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx)
-        self.baseline = 7.5 # cm
+        self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE)
 
         self.stereoMatcher = cv2.StereoBM_create()
-        self.stereoMatcher.setBlockSize(31)
+        self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].get(PeopleCount.BLOCKSIZE))
 
         self.initial_disparity = self.get_initial_disparity()
 
@@ -141,10 +149,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                                           frame of the video feed.
         """
         ret, frameL = self.videoL.read()
-        #frameL = imutils.resize(frameL, width=400)
 
         ret, frameR = self.videoR.read()
-        #frameR = imutils.resize(frameR, width=400)
 
         height, width	= frameL.shape[:2]
         blob			= cv2.dnn.blobFromImage(cv2.resize(frameL, (300, 300)),
@@ -181,8 +187,6 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                 if closest_disp <= 0:
                     # try to see if we can get some sort of distance from the original scene
                     closest_disp = self.get_closest(self.initial_disparity, startX, startY, endX, endY)
-
-                print(closest_disp)
 
                 depth = self.baseline * self.focal_length / (closest_disp / 16.0)
                 distances.append(depth)
@@ -247,11 +251,6 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 
         return [(top, left), (bottom, right)]
 
-        # these lines left in for debugging, will be removed once distance stuff is done
-        #res = cv2.rectangle(image, (left, top), (right, bottom), (0, 255, 0), 3)
-        #res = cv2.drawMatches(query, kp_q, image, kp_i, top_half, None, flags=None)
-        #plt.imshow(res), plt.show()
-    
     def calculate_focal_length(self, leftCamMtx, rightCamMtx):
         """
         Calculates the focal length to use. Takes the average of the left and right
