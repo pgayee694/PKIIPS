@@ -1,7 +1,9 @@
 import unittest
 
 from app import app
-
+from app import global_model_engine
+from app.model_engine import ModelEngine
+from app.plugins.example_plugins import TestDataAnalyzerPlugin
 
 class TestUploadSensorData(unittest.TestCase):
     """Tests the functionality of the '/update-sensor-data' route."""
@@ -10,6 +12,7 @@ class TestUploadSensorData(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         app.config['DEBUG'] = False
+        global_model_engine = ModelEngine()
         self.app = app.test_client()
 
     def tearDown(self):
@@ -61,24 +64,23 @@ class TestUploadSensorData(unittest.TestCase):
     def test_additional_fields(self):
         self.assertSuccess(self.postJson({"id": "1", "count": 1, "rand": 0.1}))
 
-    def test_missing_field(self):
-        self.assertFailure(self.postJson({"id": 1}))
-        self.assertFailure(self.postJson({"count": 1}))
-
-    def test_invalid_field(self):
-        self.assertFailure(self.postJson({"id": "asdf1234"}))
-        self.assertFailure(self.postJson({"count": "asdf1234"}))
-
-    def test_no_fields(self):
-        self.assertFailure(self.postJson({}))
-        self.assertFailure(self.postJson(None))
-        self.assertFailure(self.postData(dict()))
-        self.assertFailure(self.postData(None))
-
     def test_non_json(self):
         self.assertFailure(self.postData('test'))
         self.assertFailure(self.postData(dict(id=0, count=0)))
 
+    def test_model_engine(self):
+        analyzer = TestDataAnalyzerPlugin()
+        global_model_engine.add_analyzer(analyzer)
+        global_model_engine.start()
+        data_payload = {'increment': 5}
+
+        self.assertEqual(analyzer.num, 0)
+        self.assertIsNone(analyzer.max)
+
+        self.assertSuccess(self.postJson(data_payload))
+
+        self.assertEqual(analyzer.num, 5)
+        self.assertIsNone(analyzer.max)
 
 if __name__ == '__main__':
     unittest.main()
