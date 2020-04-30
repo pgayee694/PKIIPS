@@ -1,4 +1,5 @@
 import json
+from delphi.app import pki_model
 
 
 def find_path(start_node, flow, people):
@@ -222,7 +223,7 @@ class FlowNetwork:
         return sum(edge.flow for edge in self.network[source.name])
 
 
-def main():
+def run_optimization():
     """
     The main program which builds a network flow graph and then runs a network flow algorithm to insure all
     flow desired makes it through the network
@@ -241,17 +242,6 @@ def main():
     # Lists of vertices and dictionaries of edges base on a "level system", where more nodes and edges are added if the
     # desired Flow cannot be obtained through a lower level of graph
     level_count = 1
-    vertices = ['t1', 't2', 's1', 's2', 's3', 'h1', 'h2', 'h5']
-    l2vertices = ['t3', 't4', 'h3', 'h4']
-    l3vertices = ['h6']
-    edges = {"sa": [("s1", 1000), ("s2", 1000), ('s3', 1000)], "s1": [("h1", count_data.get('s1'))],
-             "s2": [("h1", count_data.get('s2'))], "s3": [("h1", count_data.get('s3'))], "h1": [("h2", 80)],
-             "h2": [("h5", 75), ("t1", 25)], "t1": [("ta", 1000)], "t2": [("ta", 1000)], "h5": [("t2", 80)]}
-    l2edges = {"s1": [("h1", count_data.get('s1') / 2), ("h3", count_data.get('s1') / 2)], "h3": [("h4", 1)],
-               "h4": [("t3", 1), ("t4", 1)], "t3": [("ta", 1000)],
-               "t4": [("ta", 1)]}
-    l3edges = {"s3": [("h1", count_data.get('s3') / 2), ("h6", count_data.get('s3') / 2)], "h6": [("h4", 1)]}
-
     # create empty graph
     opt_graph = FlowNetwork()
 
@@ -261,11 +251,11 @@ def main():
 
     while True:
         # add vertices for graph level in use
-        for nameIn in vertices:
+        for nameIn in pki_model.vertices:
             opt_graph.add_vertex(nameIn)
 
         # add edges for the rooms in specific graph level
-        for key, value in edges.items():
+        for key, value in pki_model.edges.items():
             for v in value:
                 opt_graph.add_edge(key, v[0], v[1])
 
@@ -277,11 +267,11 @@ def main():
             break
         # Else Add the second or third level of nodes and edges
         if level_count == 1:
-            vertices = vertices + l2vertices
-            edges.update(l2edges)
+            pki_model.vertices = pki_model.vertices + pki_model.l2vertices
+            pki_model.edges.update(pki_model.l2edges)
         if level_count == 2:
-            vertices = vertices + l3vertices
-            edges.update(l3edges)
+            pki_model.vertices = pki_model.vertices + pki_model.l3vertices
+            pki_model.edges.update(pki_model.l3edges)
         # if the desired flow cant be found, return an error
         if level_count == 3:
             return -1
@@ -303,10 +293,6 @@ def main():
     path_c = find_path('s3', positive_flow_network, 20)
     all_paths = {'s1': path_a, 's2': path_b, 's3': path_c}
 
-    print(['%s' % e for e in path_a])
-    print(['%s' % e for e in path_b])
-    print(['%s' % e for e in path_c])
-
-
-if __name__ == '__main__':
-    main()
+    #print(['%s' % e for e in path_a])
+    #print(['%s' % e for e in path_b])
+    #print(['%s' % e for e in path_c])
