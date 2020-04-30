@@ -93,13 +93,16 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 
         self.net		= cv2.dnn.readNetFromCaffe(self.prototxt, self.model)
 
+        self.height = 720 # px
+        self.width = 1280 # px
+
         self.videoL             = cv2.VideoCapture(0)
-        self.videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        self.videoL.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self.videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.videoL.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
 
         self.videoR             = cv2.VideoCapture(1)
-        self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-        self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
 
         calibration = np.load('./calibration/generated/calibration.npz', allow_pickle=False)
         self.calib_size = tuple(calibration['imageSize'])
@@ -116,8 +119,9 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         self.baseline = 7.5 # cm
 
         self.stereoMatcher = cv2.StereoBM_create()
-        self.stereoMatcher.setBlockSize(9)
-        self.stereoMatcher.setTextureThreshold(507)
+        self.stereoMatcher.setBlockSize(31)
+
+        self.initial_disparity = self.get_initial_disparity()
 
     def shutdown(self):
         """
@@ -171,8 +175,17 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                 startX, startY, endX, endY = box.astype('int')
 
                 disparity = self.stereoMatcher.compute(grayL, grayR)
-                depth = self.baseline * self.focal_length / disparity
-                distances.append(self.get_closest(depth, startX, endX, startY, endY))
+
+                closest_disp = self.get_closest(disparity, startX, startY, endX, endY)
+
+                if closest_disp <= 0:
+                    # try to see if we can get some sort of distance from the original scene
+                    closest_disp = self.get_closest(self.initial_disparity, startX, startY, endX, endY)
+
+                print(closest_disp)
+
+                depth = self.baseline * self.focal_length / (closest_disp / 16.0)
+                distances.append(depth)
 
         return {PeopleCount.COUNT_KEY: detection_count,
                 PeopleCount.DISTANCES_KEY: distances}
@@ -263,9 +276,9 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 
         return (fL + fR) / 2.0
     
-    def get_closest(distances, startX, endX, startY, endY):
+    def get_closest(self, disparities, startX, endX, startY, endY):
         """
-        Finds the closest positive distance in the range specified by start/end X/Y.
+        Finds the closest positive disparity in the range specified by start/end X/Y.
 
         Parameters:
             distances: distance matrix from disparity map
@@ -275,14 +288,42 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
             endY: ending y coordinate
 
         Returns:
-            distance: closest distance, in cm
+            disparity: closest disparity
         """
 
-        distance = distances[startY][startX]
+        # modify bounds to make sure theyre in the image in case of remapping issues
+        startX = min(max(startX, 0), self.width - 1)
+        startY = min(max(startY, 0), self.height - 1)
+        endX = max(min(endX, self.width - 1), 0)
+        endY = max(min(endY, self.height - 1), 0)
+
+        disparity = disparities[startY][startX]
 
         for y in range(startY, endY):
             for x in range(startX, endX):
-                if distances[y][x] >= 0 and distances[y][x] < distance:
-                    distance = distances[y][x]
+                if disparities[y][x] > disparity:
+                    disparity = disparities[y][x]
         
-        return distance
+        return disparity
+
+    def get_initial_disparity(self):
+        """
+        Finds the initial disparity map of the scene before it starts looking for people.
+        This helps to at least approximate gaps that might be in the image when people
+        start walking through the scene.
+
+        TODO: Remove this and find a better solution.
+
+        Returns:
+            disparity: disparity map of the scene
+        """
+
+        ret, frameL = self.videoL.read()
+        ret, frameR = self.videoR.read()
+
+        frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+        frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+        grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+        grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+        return self.stereoMatcher.compute(grayL, grayR)

@@ -10,6 +10,8 @@ leftROI = tuple(calibration['leftROI'])
 rightMapX = calibration['rightMapX']
 rightMapY = calibration['rightMapY']
 rightROI = tuple(calibration['rightROI'])
+leftCamMtx = calibration['leftCamMtx']
+rightCamMtx = calibration['rightCamMtx']
 
 videoL = cv2.VideoCapture(0)
 videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -36,9 +38,9 @@ fixedR = cv2.cvtColor(fixedR, cv2.COLOR_BGR2GRAY)
 cn = fixedL.shape[2] if len(fixedL.shape) > 2 else 3
 
 #BM params
-stereo.setBlockSize(9)
-#stereo.setNumDisparities(48)
-stereo.setTextureThreshold(507)
+stereo.setBlockSize(31)
+#stereo.setNumDisparities(32)
+#stereo.setTextureThreshold(507)
 
 #SGBM params
 #stereo.setBlockSize(9)
@@ -47,6 +49,7 @@ stereo.setTextureThreshold(507)
 #stereo.setP2(900)
 
 disparity = stereo.compute(fixedL, fixedR)
+print(disparity[155][1200])
 plt.imshow(disparity, 'gray')
 plt.show()
 
