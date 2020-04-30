@@ -1,75 +1,312 @@
-"""
-Contains classes and utilities for graph operations.
-"""
+import json
 
-class GraphNode():
+
+def find_path(start_node, flow, people):
     """
-    Contains information about each node within the graph representation
+    find_path is a utility function that returns all that nodes that are able to carry flow from a specific source
+    node
+    :param start_node: The source node to calculate paths for
+    :param flow: List of all nodes in the network with positive flow
+    :param people: The amount of people that must be carried from the source node
+    :return: A list of all possible nodes that contribute to viable paths for start_node
     """
-
-    def __init__(self, id_, edges=[], enabled=True):
-        """
-        Constructs the GraphNode object. Initialized count to 0.
-
-        Params:
-            id_: string representing id of the node (room #)
-            edges: list of GraphEdge objects with this node as the source
-            enabled: if the node is enabled or not
-        """
-
-        self.id_ = id_
-        self.edges = edges
-        self.enabled = enabled
-        self.count = 0
-    
-    def enable(self, enable=True):
-        """
-        Toggles the availability of a node
-        
-        Params:
-            enable: If the node should be enabled or not
-        """
-
-        self.enabled = enable
-
-    def update_count(self, count):
-        """
-        Updates the count of the node
-        
-        Params:
-            count: the number of people in the node
-        """
-
-        self.count = count
+    path_list = [start_node]
+    for node in path_list:
+        current_node = node
+        for edge_check in flow:
+            if edge_check.start == current_node and edge_check.end != 'ta':
+                if edge_check.flow >= people/2:
+                    if edge_check.end not in path_list:
+                        path_list.append(edge_check.end)
+    return path_list
 
 
-class GraphEdge():
+class Vertex:
     """
-    Contains information about each directed edge within the graph representation
+    This is a class representing a node in a graph.
+
+    Attributes:
+        name(string): the label given to the node
+        source(boolean): true if source, false otherwise
+        sink(boolean): true if sink, false otherwise
     """
 
-    def __init__(self, source, dest, capacity=0):
+    def __init__(self, name, source=False, sink=False):
         """
-        Constructs the GraphEdge object.
+         The constructor for the vertex class
 
-        Params:
-            source: source node
-            dest: destination node
-            capacity: default capacity of the edge
+         :param name: the label given to the node
+         :param source:true if source, false otherwise
+         :param sink: true if sink, false otherwise
         """
-
+        self.name = name
         self.source = source
-        self.dest = dest
-        self.capacity = capacity
-    
-    def update_capacity(self, capacity):
+        self.sink = sink
+
+
+class Edge:
+    """
+        This is a class representing a directed edge in a graph.
+
+        Attributes:
+            start(string): the node the edge is starting from
+            end(string): the node the edge is going to
+            capacity(int): How much flow the edge can handle
+            flow(int): How much flow the edge ends up carrying
+            returnEdge(Edge): sister edge in the residual graph
         """
-        Updates the capacity of the edge. Cannot be greater than MAX_CAPACITY.
 
-        TODO: Have this do calculations on how to update the capacity rather than just setting it.
+    def __init__(self, start, end, capacity):
         """
-
+        This is the constructor for the Edge class
+        :param start: the node the edge is starting from
+        :param end: the node the edge is going to
+        :param capacity:  How much flow the edge can handle
+        """
+        self.start = start
+        self.end = end
         self.capacity = capacity
+        self.flow = 0
+        self.returnEdge = None
 
-# TODO: Have this actually populated and easier to access/manipulate
-PKI = []
+
+class FlowNetwork:
+    """
+    FlowNetwork represents a graph of nodes and directed edges, pushing flow from one source to one sink
+
+    Attributes:
+        vertices(list): The set of vertices in the flow network
+        network(dictionary): A collection of nodes and edges with weights to represent a network flow graph
+    """
+
+    def __init__(self):
+        """
+        The constructor for the FlowNetwork Class
+        """
+        self.vertices = []
+        self.network = {}
+
+    def get_source(self):
+        """
+        retrieves the source node for the flow network
+        :return: the source node
+        """
+        for vertex in self.vertices:
+            if vertex.source:
+                return vertex
+        return None
+
+    def get_sink(self):
+        """
+        Retrieves the sink node for the flow network
+        :return: the sink node
+        """
+        for vertex in self.vertices:
+            if vertex.sink:
+                return vertex
+        return None
+
+    def get_vertex(self, name):
+        """
+        Finds the vertex associated with the name passed in
+        :param name: The name associated with the vertex to find
+        :return: The vertex represented by name
+        """
+        for vertex in self.vertices:
+            if name == vertex.name:
+                return vertex
+
+    def vertex_in_network(self, name):
+        """
+        Decides if a vertex is in the network based off of name
+        :param name: The name of the vertex to check for
+        :return: True if the vertex is already in the network; false otherwise
+        """
+        for vertex in self.vertices:
+            if vertex.name == name:
+                return True
+        return False
+
+    def get_edges(self):
+        """
+        Retrieves all the edges in the network
+        :return: The edges in the network
+        """
+        all_edges = []
+        for vertex in self.network:
+            for edge_check in self.network[vertex]:
+                all_edges.append(edge_check)
+        return all_edges
+
+    def add_vertex(self, name, source=False, sink=False):
+        """
+        Adds a vertex to the flow network
+        :param name: The identifier to be associated with the node
+        :param source: True if it's a source node, false otherwise
+        :param sink: True if it's a sink node, false otherwise
+        :return: Returns a string if error, nothing otherwise
+        """
+        if source is True and sink is True:
+            return "Vertex cannot be source and sink"
+        if self.vertex_in_network(name):
+            return "ERROR"
+        if source:
+            if self.get_source() is not None:
+                return "ERROR"
+        if sink:
+            if self.get_sink() is not None:
+                return "ERROR"
+        new_vertex = Vertex(name, source, sink)
+        self.vertices.append(new_vertex)
+        self.network[new_vertex.name] = []
+
+    def add_edge(self, start, end, capacity):
+        """
+        Adds a directed edge to the flow network
+        :param start: The node the edge is directed out of
+        :param end: The node the edge is directed into
+        :param capacity: The initial amount that can flow through the edge
+        :return: string if error occurs, nothing otherwise
+        """
+        if start == end:
+            return "Cannot have same start and end"
+        if not self.vertex_in_network(start):
+            return "Start vertex has not been added yet"
+        if not self.vertex_in_network(end):
+            return "End vertex has not been added yet"
+        for edge_check in self.get_edges():
+            if edge_check.start == start and edge_check.end == end and edge_check.capacity == capacity:
+                return "STOP"
+        new_edge = Edge(start, end, capacity)
+        return_edge = Edge(end, start, 0)
+        new_edge.returnEdge = return_edge
+        return_edge.returnEdge = new_edge
+        vertex = self.get_vertex(start)
+        self.network[vertex.name].append(new_edge)
+        return_vertex = self.get_vertex(end)
+        self.network[return_vertex.name].append(return_edge)
+
+    def get_path(self, start, end, path):
+        """
+        Finds a path from a a start node to an end node
+        :param start: the node to start searching from
+        :param end: The node to arrive at
+        :param path: The set of nodes and edges to look for a path through
+        :return: the found path
+        """
+        if start == end:
+            return path
+        for edge_check in self.network[start]:
+            residual_capacity = edge_check.capacity - edge_check.flow
+            if residual_capacity > 0 and not (edge_check, residual_capacity) in path:
+                result = self.get_path(edge_check.end, end, path + [(edge_check, residual_capacity)])
+                if result is not None:
+                    return result
+
+    def calculate_max_flow(self):
+        """
+        Calculates the max flow of the flow network using the Ford-Fulkerson algorithm
+        :return: and integer representing the max flow
+        """
+        source = self.get_source()
+        sink = self.get_sink()
+        if source is None or sink is None:
+            return "Network does not have source and sink"
+        path = self.get_path(source.name, sink.name, [])
+        while path is not None:
+            flow = min(edge[1] for edge in path)
+            for edge, res in path:
+                edge.flow += flow
+                edge.returnEdge.flow -= flow
+            path = self.get_path(source.name, sink.name, [])
+        return sum(edge.flow for edge in self.network[source.name])
+
+
+def main():
+    """
+    The main program which builds a network flow graph and then runs a network flow algorithm to insure all
+    flow desired makes it through the network
+    :return: n/a
+    """
+    # Reads in room and people count data from a json file and puts it in a more usable format
+    f = open('room_pc.json')
+    data = json.load(f)
+    count_data = {}
+    for room in data['classes']:
+        count_data.update({room.get("Room#"): room.get("Count")})
+
+    # Sets the desired_flow to be the desired flow through the network
+    desired_flow = count_data.get('s1') + count_data.get('s2') + count_data.get('s3')
+
+    # Lists of vertices and dictionaries of edges base on a "level system", where more nodes and edges are added if the
+    # desired Flow cannot be obtained through a lower level of graph
+    level_count = 1
+    vertices = ['t1', 't2', 's1', 's2', 's3', 'h1', 'h2', 'h5']
+    l2vertices = ['t3', 't4', 'h3', 'h4']
+    l3vertices = ['h6']
+    edges = {"sa": [("s1", 1000), ("s2", 1000), ('s3', 1000)], "s1": [("h1", count_data.get('s1'))],
+             "s2": [("h1", count_data.get('s2'))], "s3": [("h1", count_data.get('s3'))], "h1": [("h2", 80)],
+             "h2": [("h5", 75), ("t1", 25)], "t1": [("ta", 1000)], "t2": [("ta", 1000)], "h5": [("t2", 80)]}
+    l2edges = {"s1": [("h1", count_data.get('s1') / 2), ("h3", count_data.get('s1') / 2)], "h3": [("h4", 1)],
+               "h4": [("t3", 1), ("t4", 1)], "t3": [("ta", 1000)],
+               "t4": [("ta", 1)]}
+    l3edges = {"s3": [("h1", count_data.get('s3') / 2), ("h6", count_data.get('s3') / 2)], "h6": [("h4", 1)]}
+
+    # create empty graph
+    opt_graph = FlowNetwork()
+
+    # add artificial source and sink
+    opt_graph.add_vertex('sa', True, False)
+    opt_graph.add_vertex('ta', False, True)
+
+    while True:
+        # add vertices for graph level in use
+        for nameIn in vertices:
+            opt_graph.add_vertex(nameIn)
+
+        # add edges for the rooms in specific graph level
+        for key, value in edges.items():
+            for v in value:
+                opt_graph.add_edge(key, v[0], v[1])
+
+        # where we calculate our max flow
+        flow_amount = opt_graph.calculate_max_flow()
+
+        # if flow desired is found in current level of graph, we've found the graph to use
+        if flow_amount == desired_flow:
+            break
+        # Else Add the second or third level of nodes and edges
+        if level_count == 1:
+            vertices = vertices + l2vertices
+            edges.update(l2edges)
+        if level_count == 2:
+            vertices = vertices + l3vertices
+            edges.update(l3edges)
+        # if the desired flow cant be found, return an error
+        if level_count == 3:
+            return -1
+
+        level_count = level_count + 1
+
+    #print(opt_graph.calculate_max_flow())
+
+    # Builds a network of only the edges with positive flow for usability in finding paths
+    positive_flow_network = []
+    for edge in opt_graph.get_edges():
+        if edge.flow >= 0:
+            positive_flow_network = positive_flow_network + [edge]
+    #print(['%s -> %s; %s/%s' % (e.start, e.end, e.flow, e.capacity) for e in positive_flow_network])
+
+    # TODO: Ask group how we want to package these up to send
+    path_a = find_path('s1', positive_flow_network, 25)
+    path_b = find_path('s2', positive_flow_network, 30)
+    path_c = find_path('s3', positive_flow_network, 20)
+    all_paths = {'s1': path_a, 's2': path_b, 's3': path_c}
+
+    print(['%s' % e for e in path_a])
+    print(['%s' % e for e in path_b])
+    print(['%s' % e for e in path_c])
+
+
+if __name__ == '__main__':
+    main()

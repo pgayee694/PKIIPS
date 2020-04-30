@@ -1,0 +1,16 @@
+{
+  "classes": [
+    {
+      "Room#": "s1",
+      "Count": 25
+    },
+        {
+      "Room#": "s2",
+      "Count": 30
+    },
+        {
+      "Room#": "s3",
+      "Count": 20
+    }
+  ]
+}

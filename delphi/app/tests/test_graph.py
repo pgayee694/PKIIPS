@@ -1,42 +1,87 @@
 import unittest
-from app.graph import GraphNode, GraphEdge
+from delphi.app.graph import *
 
-class TestGraph(unittest.TestCase):
+
+class TestNetworkFlow(unittest.TestCase):
     """
-    Tests the functionality of the graph module
+    Tests the functionality of the NetworkFlow class
     """
 
-    def test_enable_false(self):
-        enable = False
-        node = GraphNode(256)
+    def test_add_vertex(self):
+        fn = FlowNetwork()
+        fn.add_vertex('s', True, False)
+        fn.add_vertex('t', False, True)
+        fn.add_vertex('a', False, False)
+        fn.add_vertex('b', False, False)
+        fn.add_vertex('c', False, False)
+        fn.add_vertex('d', False, False)
+        self.assertTrue(fn.vertices)
+        assert len(fn.vertices) == 6
 
-        node.enable(enable)
-        
-        actual = node.enabled
-        self.assertFalse(actual)
-    
-    def test_enable_true(self):
-        node = GraphNode(256, [], False)
+    def test_add_edge(self):
+        fn = FlowNetwork()
+        fn.add_vertex('s', True, False)
+        fn.add_vertex('t', False, True)
+        fn.add_vertex('a', False, False)
+        fn.add_vertex('b', False, False)
+        fn.add_vertex('c', False, False)
+        fn.add_vertex('d', False, False)
+        fn.add_edge('s', 'a', 4)
+        fn.add_edge('a', 'b', 4)
+        fn.add_edge('b', 't', 2)
+        fn.add_edge('s', 'c', 3)
+        fn.add_edge('c', 'd', 6)
+        fn.add_edge('d', 't', 6)
+        fn.add_edge('b', 'c', 3)
+        self.assertTrue(fn.network)
+        assert len(fn.network) == 6
 
-        node.enable()
+    def test_calculate_max_flow(self):
+        fn = FlowNetwork()
+        assert fn.calculate_max_flow() == "Network does not have source and sink"
+        fn.add_vertex('s', True, False)
+        fn.add_vertex('t', False, True)
+        assert fn.calculate_max_flow() == 0
+        fn.add_vertex('a', False, False)
+        fn.add_vertex('b', False, False)
+        fn.add_vertex('c', False, False)
+        fn.add_vertex('d', False, False)
+        assert fn.calculate_max_flow() == 0
+        fn.add_edge('s', 'a', 4)
+        fn.add_edge('a', 'b', 4)
+        fn.add_edge('b', 't', 2)
+        assert fn.calculate_max_flow() == 2
+        fn.add_edge('s', 'c', 3)
+        fn.add_edge('c', 'd', 6)
+        fn.add_edge('d', 't', 6)
+        assert fn.calculate_max_flow() == 5
+        fn.add_edge('b', 'c', 3)
+        assert fn.calculate_max_flow() == 7
 
-        actual = node.enabled
-        self.assertTrue(actual)
-    
-    def test_update_count(self):
-        count = 12
-        node = GraphNode(256)
-        
-        node.update_count(count)
+    def test_find_path(self):
+        fn = FlowNetwork()
+        fn.add_vertex('s', True, False)
+        fn.add_vertex('t', False, True)
+        fn.add_vertex('a', False, False)
+        fn.add_vertex('b', False, False)
+        fn.add_vertex('c', False, False)
+        fn.add_vertex('d', False, False)
+        fn.add_edge('s', 'a', 4)
+        fn.add_edge('a', 'b', 4)
+        fn.add_edge('b', 't', 2)
+        fn.add_edge('s', 'c', 3)
+        fn.add_edge('c', 'd', 6)
+        fn.add_edge('d', 't', 6)
+        fn.add_edge('b', 'c', 3)
+        fn.calculate_max_flow()
+        positive_flow_network = []
+        for edge in fn.get_edges():
+            if edge.flow >= 0:
+                positive_flow_network = positive_flow_network + [edge]
+        assert find_path('s', positive_flow_network, 2) == ['s', 'a', 'c', 'b', 'd', 't']
+        assert find_path('s', positive_flow_network, 1000) == ['s']
+        assert find_path('s', positive_flow_network, 4) == ['s', 'a', 'c', 'b', 'd', 't']
 
-        actual = node.count
-        self.assertEqual(actual, count)
-    
-    def test_update_capacity(self):
-        capacity = 15
-        edge = GraphEdge(GraphNode(256), GraphNode(260), 20)
 
-        edge.update_capacity(15)
-
-        actual = edge.capacity
-        self.assertEqual(actual, capacity)
+if __name__ == "__main__":
+    TestNetworkFlow()
