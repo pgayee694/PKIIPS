@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -25,7 +23,7 @@ public class StatisticsBox : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        if(font == null)
+        if (font == null)
         {
             font = Resources.GetBuiltinResource<Font>("Arial.ttf");
         }
@@ -39,7 +37,7 @@ public class StatisticsBox : MonoBehaviour
     {
         var textTransform = gameObject.transform.Find(name);
         Text text;
-        if(textTransform != null)
+        if (textTransform != null)
         {
             text = textTransform.gameObject.GetComponent<Text>();
         }
@@ -62,7 +60,7 @@ public class StatisticsBox : MonoBehaviour
     public void removeEntry(string name)
     {
         var textObject = gameObject.transform.Find(name).gameObject;
-        if(textObject != null)
+        if (textObject != null)
         {
             Destroy(textObject);
         }
