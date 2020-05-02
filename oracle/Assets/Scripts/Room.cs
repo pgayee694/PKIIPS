@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Assertions;
+﻿using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// Script used to model a room in our graph model.
@@ -22,6 +20,21 @@ public class Room : GraphComponent
     /// The name of the status attribute.
     /// </summary>
     public const string StatusAttribute = "Status";
+
+    /// <summary>
+    /// The time in which it takes a double click to register.
+    /// </summary>
+    private const float delay = .25f;
+
+    /// <summary>
+    /// Controls when clicks are counted. 
+    /// </summary>
+    private bool waitingOnClicks = false;
+
+    /// <summary>
+    /// The current number of clicks registered within the delay.
+    /// </summary>
+    private int clickCount = 0;
 
     /// <summary>
     /// The number of people in this node.
@@ -80,18 +93,43 @@ public class Room : GraphComponent
         {
             status = value;
             UpdateEntry(StatusAttribute, Status);
-            //UpdateToggle(StatusAttribute, Status);
+
+            ParticleSystem ps = GetComponent<ParticleSystem>();
+            var main = ps.main;
+            main.startColor = Status ? Color.white : Color.grey;
         }
     }
 
     /// <summary>
-    /// Toggles the room status on right click.
+    /// Used to keep track of the number of clicks within a certain wait period.
     /// </summary>
-    void OnMouseOver()
+    private IEnumerator ClickCounter()
     {
-        if (Input.GetMouseButtonDown(1))
+        waitingOnClicks = true;
+        yield return new WaitForSeconds(delay);
+
+        if (clickCount == 1)
+        {
+            ToggleStatisticsBox();
+        }
+        else
         {
             DelphiClient.Instance.ToggleRoomStatus(this);
+        }
+
+        waitingOnClicks = false;
+        clickCount = 0;
+    }
+
+    /// <summary>
+    /// Toggles the room status on a double click and StatisticsBox on a single click.
+    /// </summary>
+    protected override void OnMouseUp()
+    {
+        clickCount++;
+        if (!waitingOnClicks)
+        {
+            StartCoroutine(ClickCounter());
         }
     }
 
@@ -105,6 +143,5 @@ public class Room : GraphComponent
         UpdateEntry(PeopleCountAttribute, PeopleCount);
         UpdateEntry(IdAttribute, Id);
         UpdateEntry(StatusAttribute, Status);
-        //UpdateToggle(StatusAttribute, Status);
     }
 }

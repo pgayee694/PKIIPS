@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -25,7 +23,7 @@ public class StatisticsBox : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        if(font == null)
+        if (font == null)
         {
             font = Resources.GetBuiltinResource<Font>("Arial.ttf");
         }
@@ -60,44 +58,6 @@ public class StatisticsBox : MonoBehaviour
     /// If the given key exists, the entry will be removed from the UI.
     /// </summary>
     public void removeEntry(string name)
-    {
-        var textObject = gameObject.transform.Find(name).gameObject;
-        if(textObject != null)
-        {
-            Destroy(textObject);
-        }
-    }
-
-    /// <summary>
-    /// Adds a toggle into the UI. If one already exists,
-    /// then the value will be updated.
-    /// </summary>
-    public void addToggle(string name, bool value)
-    {
-        var toggleTransform = gameObject.transform.Find(name);
-        Toggle toggle;
-        if (toggleTransform != null)
-        {
-            toggle = toggleTransform.gameObject.GetComponent<Toggle>();
-        }
-        else
-        {
-            var toggleObject = new GameObject(name);
-            toggleObject.transform.parent = gameObject.transform;
-
-            toggle = toggleObject.AddComponent<Toggle>();
-            //var toggleText = toggle.GetComponentInChildren<Text>();
-            //toggleText.font = font;
-            //toggleText.fontSize = fontSize;
-        }
-
-        toggle.isOn = value;
-    }
-
-    /// <summary>
-    /// If the given toggle exists, it will be removed from the UI.
-    /// </summary>
-    public void removeToggle(string name)
     {
         var textObject = gameObject.transform.Find(name).gameObject;
         if (textObject != null)
