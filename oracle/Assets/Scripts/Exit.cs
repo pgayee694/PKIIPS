@@ -5,8 +5,4 @@
 /// </summary>
 public class Exit : Node
 {
-    /// <summary>
-    /// The default color of exit nodes.
-    /// </summary>
-    public override Color NodeColor { get { return Color.green; } }
 }

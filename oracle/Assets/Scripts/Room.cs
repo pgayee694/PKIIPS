@@ -5,8 +5,4 @@
 /// </summary>
 public class Room : Node
 {
-    /// <summary>
-    /// The default color of room nodes.
-    /// </summary>
-    public override Color NodeColor { get { return Color.white; } }
 }

@@ -9,7 +9,7 @@ public abstract class Node : GraphComponent
     /// <summary>
     /// The default color of the node.
     /// </summary>
-    public abstract Color NodeColor { get; }
+    public virtual Color NodeColor { get { return Color.white; } }
 
     /// <summary>
     /// The name of the people count attribute.
