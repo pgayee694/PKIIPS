@@ -16,7 +16,7 @@ public class Edge : GraphComponent
     /// <summary>
     /// The name of the id attribute.
     /// </summary>
-    public const string IdAttribute = "Room";
+    public const string IdAttribute = "Id";
 
     /// <summary>
     /// The number of people in this node.
@@ -65,7 +65,7 @@ public class Edge : GraphComponent
     /// </summary>
     protected override void UpdateStatisticsValues()
     {
-        UpdateEntry(PeopleCountAttribute, PeopleCount);
         UpdateEntry(IdAttribute, Id);
+        UpdateEntry(PeopleCountAttribute, PeopleCount);
     }
 }
