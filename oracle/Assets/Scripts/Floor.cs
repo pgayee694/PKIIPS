@@ -8,19 +8,19 @@
 public class Floor : MonoBehaviour
 {
     /// <summary>
-    /// Sets the delay at which the UpdateRooms is called in seconds.
+    /// Sets the delay at which the UpdateNodes is called in seconds.
     /// </summary>
     private static float DELAY_UPDATE_TIME = 0.0f;
 
     /// <summary>
-    /// Sets the interval at which the UpdateRooms is called in seconds.
+    /// Sets the interval at which the UpdateNodes is called in seconds.
     /// </summary>
     private static float UPDATE_INTERVAL_TIME = 0.5f;
 
     /// <summary>
-    /// The collection of rooms that belong to the floor.
+    /// The collection of nodes that belong to the floor.
     /// </summary>
-    private Room[] rooms;
+    private Node[] nodes;
 
 
     /// <summary>
@@ -28,8 +28,8 @@ public class Floor : MonoBehaviour
     /// </summary>
     void Start()
     {
-        rooms = GetComponentsInChildren<Room>();
-        InvokeRepeating("UpdateRooms", DELAY_UPDATE_TIME, UPDATE_INTERVAL_TIME);
+        nodes = GetComponentsInChildren<Node>();
+        InvokeRepeating("UpdateNodes", DELAY_UPDATE_TIME, UPDATE_INTERVAL_TIME);
     }
 
     /// <summary>
@@ -49,15 +49,15 @@ public class Floor : MonoBehaviour
 
 
     /// <summary>
-    /// Continiously called to update the rooms of the floor.
+    /// Continiously called to update the nodes of the floor.
     /// Updates according to the value of the <code>UPDATE_INTERVAL_TIME</code> property.
     /// <see cref="UPDATE_INTERVAL_TIME"/>
     /// </summary>
-    void UpdateRooms()
+    void UpdateNodes()
     {
-        if (rooms.Length > 0)
+        if (nodes.Length > 0)
         {
-            DelphiClient.Instance.UpdateRooms(rooms);
+            DelphiClient.Instance.UpdateNodes(nodes);
         }
     }
 }

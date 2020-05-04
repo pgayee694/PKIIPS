@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Assertions;
 
 /// <summary>
@@ -51,7 +49,7 @@ public class GraphComponent : MonoBehaviour
     /// <param name="attribute">The value of the attribute to show</param>
     public void UpdateEntry<T>(string attributeName, T attribute)
     {
-        if(statistics != null)
+        if (statistics != null)
         {
             statistics.addEntry(attributeName, attribute);
         }
@@ -63,12 +61,12 @@ public class GraphComponent : MonoBehaviour
     /// <param name="attributeName">The name of the attribute to remove</param>
     public void RemoveEntry(string attributeName)
     {
-        if(statistics != null)
+        if (statistics != null)
         {
             statistics.removeEntry(attributeName);
         }
     }
-    
+
     /// <summary>
     /// Called on the first frame. Sets up certain variables.
     /// </summary>
@@ -89,19 +87,11 @@ public class GraphComponent : MonoBehaviour
 
     /// <summary>
     /// The currently instantiated <code>StatisticsBox</code>.
+    /// This method is meant to be overridden to add double click logic.
     /// </summary>
     virtual protected void OnMouseUp()
     {
-        if(statistics == null)
-        {
-            statistics = CreateStatisticsBox();
-            UpdateStatisticsValues();
-            UpdateStatisticsPosition();
-        }
-        else
-        {
-            Destroy(statistics.gameObject);
-        }
+        ToggleStatisticsBox();
     }
 
     /// <summary>
@@ -130,7 +120,7 @@ public class GraphComponent : MonoBehaviour
     /// </summary>
     private void OnDestroy()
     {
-        if(statistics != null)
+        if (statistics != null)
         {
             Destroy(statistics.gameObject);
         }
@@ -139,12 +129,29 @@ public class GraphComponent : MonoBehaviour
     }
 
     /// <summary>
+    /// Creates a new StatisticsBox if one doesn't exist. If one does exist, it is destroyed.
+    /// </summary>
+    protected void ToggleStatisticsBox()
+    {
+        if (statistics == null)
+        {
+            statistics = CreateStatisticsBox();
+            UpdateStatisticsValues();
+            UpdateStatisticsPosition();
+        }
+        else
+        {
+            Destroy(statistics.gameObject);
+        }
+    }
+
+    /// <summary>
     /// Moves the statistics box's position to the node, rather than just being stuck in
     /// the UI screen space.
     /// </summary>
     private void UpdateStatisticsPosition()
     {
-        if(statistics != null)
+        if (statistics != null)
         {
             var pos = Camera.main.WorldToScreenPoint(transform.position);
             var mappedValue = ui.RemapZoomValue(1, .2f);
