@@ -240,7 +240,7 @@ def run_optimization(PKI_model):
         for nameIn in PKI_model.vertices:
             if PKI_model.vertices[nameIn]:
                 opt_graph.add_vertex(nameIn)
-                print(nameIn)
+                # print(nameIn)
         # add edges for the rooms in specific graph level
         # print(opt_graph.vertices)
         for key, value in PKI_model.edges.items():
@@ -280,5 +280,4 @@ def run_optimization(PKI_model):
     print(all_paths)
 
 
-if __name__ == "__main__":
-    run_optimization()
+
