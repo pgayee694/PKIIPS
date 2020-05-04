@@ -1,6 +1,3 @@
-import json
-from delphi.app import pki_model
-
 
 def find_path(start_node, flow, people):
     """
@@ -16,7 +13,7 @@ def find_path(start_node, flow, people):
         current_node = node
         for edge_check in flow:
             if edge_check.start == current_node and edge_check.end != 'ta':
-                if edge_check.flow >= people/2:
+                if edge_check.flow >= people / 2:
                     if edge_check.end not in path_list:
                         path_list.append(edge_check.end)
     return path_list
@@ -189,7 +186,7 @@ class FlowNetwork:
 
     def get_path(self, start, end, path):
         """
-        Finds a path from a a start node to an end node
+        Finds a path from a start node to an end node
         :param start: the node to start searching from
         :param end: The node to arrive at
         :param path: The set of nodes and edges to look for a path through
@@ -223,24 +220,13 @@ class FlowNetwork:
         return sum(edge.flow for edge in self.network[source.name])
 
 
-def run_optimization():
+def run_optimization(PKI_model):
     """
     The main program which builds a network flow graph and then runs a network flow algorithm to insure all
     flow desired makes it through the network
     :return: n/a
     """
-    # Reads in room and people count data from a json file and puts it in a more usable format
-    f = open('room_pc.json')
-    data = json.load(f)
-    count_data = {}
-    for room in data['classes']:
-        count_data.update({room.get("Room#"): room.get("Count")})
-
-    # Sets the desired_flow to be the desired flow through the network
-    desired_flow = count_data.get('s1') + count_data.get('s2') + count_data.get('s3')
-
-    # Lists of vertices and dictionaries of edges base on a "level system", where more nodes and edges are added if the
-    # desired Flow cannot be obtained through a lower level of graph
+    # for iterating through while loop
     level_count = 1
     # create empty graph
     opt_graph = FlowNetwork()
@@ -248,51 +234,51 @@ def run_optimization():
     # add artificial source and sink
     opt_graph.add_vertex('sa', True, False)
     opt_graph.add_vertex('ta', False, True)
-
+    # print(opt_graph.vertices)
     while True:
         # add vertices for graph level in use
-        for nameIn in pki_model.vertices:
-            opt_graph.add_vertex(nameIn)
-
+        for nameIn in PKI_model.vertices:
+            if PKI_model.vertices[nameIn]:
+                opt_graph.add_vertex(nameIn)
+                print(nameIn)
         # add edges for the rooms in specific graph level
-        for key, value in pki_model.edges.items():
+        # print(opt_graph.vertices)
+        for key, value in PKI_model.edges.items():
             for v in value:
+                # print(v)
                 opt_graph.add_edge(key, v[0], v[1])
 
         # where we calculate our max flow
         flow_amount = opt_graph.calculate_max_flow()
-
+        print(flow_amount)
         # if flow desired is found in current level of graph, we've found the graph to use
-        if flow_amount == desired_flow:
+        if flow_amount == PKI_model.desired_flow:
             break
         # Else Add the second or third level of nodes and edges
         if level_count == 1:
-            pki_model.vertices = pki_model.vertices + pki_model.l2vertices
-            pki_model.edges.update(pki_model.l2edges)
+            PKI_model.vertices.update(PKI_model.l2vertices)
+            PKI_model.edges.update(PKI_model.l2edges)
         if level_count == 2:
-            pki_model.vertices = pki_model.vertices + pki_model.l3vertices
-            pki_model.edges.update(pki_model.l3edges)
+            PKI_model.vertices.update(PKI_model.l3vertices)
+            PKI_model.edges.update(PKI_model.l3edges)
         # if the desired flow cant be found, return an error
         if level_count == 3:
-            return -1
+            print("desired flow cannot be found")
+            break
 
         level_count = level_count + 1
-
-    #print(opt_graph.calculate_max_flow())
 
     # Builds a network of only the edges with positive flow for usability in finding paths
     positive_flow_network = []
     for edge in opt_graph.get_edges():
         if edge.flow >= 0:
             positive_flow_network = positive_flow_network + [edge]
-    #print(['%s -> %s; %s/%s' % (e.start, e.end, e.flow, e.capacity) for e in positive_flow_network])
-
-    # TODO: Ask group how we want to package these up to send
-    path_a = find_path('s1', positive_flow_network, 25)
-    path_b = find_path('s2', positive_flow_network, 30)
-    path_c = find_path('s3', positive_flow_network, 20)
+    path_a = find_path('s1', positive_flow_network, PKI_model.s1)
+    path_b = find_path('s2', positive_flow_network, PKI_model.s2)
+    path_c = find_path('s3', positive_flow_network, PKI_model.s3)
     all_paths = {'s1': path_a, 's2': path_b, 's3': path_c}
+    print(all_paths)
 
-    #print(['%s' % e for e in path_a])
-    #print(['%s' % e for e in path_b])
-    #print(['%s' % e for e in path_c])
+
+if __name__ == "__main__":
+    run_optimization()
