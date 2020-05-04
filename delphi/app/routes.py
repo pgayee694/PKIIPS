@@ -35,6 +35,10 @@ def updateConstraintData():
 
     return 'Invalid Request Syntax', 400
 
+@app.route('/get-model-data', methods=['GET'])
+def getModelData():
+    return jsonify(global_model_engine.collect())
+
 @app.route('/enable/<int:room_id>', methods=['PUT'])
 def enable(room_id):
     """

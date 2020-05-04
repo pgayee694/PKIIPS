@@ -60,7 +60,7 @@ class TestDataAnalyzerPlugin2(data_analyzer.DataAnalyzerPlugin):
         self.nodes.clear()
 
     def collect(self):
-        return {'nodes': self.nodes}
+        return {'nodes': list(self.nodes)}
 
     def analyze(self, data):
         if self.maxsize is not None and len(self.nodes) >= self.maxsize:
