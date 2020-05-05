@@ -104,9 +104,3 @@ class PKI:
         run_optimization(self)
 
 
-testpki = PKI()
-print(testpki.edges)
-testpki.run()
-testpki.update_room('s1', 20)
-testpki.run()
-

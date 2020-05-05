@@ -250,7 +250,6 @@ def run_optimization(PKI_model):
 
         # where we calculate our max flow
         flow_amount = opt_graph.calculate_max_flow()
-        print(flow_amount)
         # if flow desired is found in current level of graph, we've found the graph to use
         if flow_amount == PKI_model.desired_flow:
             break
@@ -277,7 +276,6 @@ def run_optimization(PKI_model):
     path_b = find_path('s2', positive_flow_network, PKI_model.s2)
     path_c = find_path('s3', positive_flow_network, PKI_model.s3)
     all_paths = {'s1': path_a, 's2': path_b, 's3': path_c}
-    print(all_paths)
-
+    return all_paths
 
 
