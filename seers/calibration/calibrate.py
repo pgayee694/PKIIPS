@@ -70,7 +70,6 @@ if imagesl == None or imagesr == None:
     videor.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     videor.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-    #videol.set(cv2.CAP_PROP_AUTOFOCUS, 0)
     videor.set(cv2.CAP_PROP_AUTOFOCUS, 0)
 
     while num_pics < num:
@@ -82,11 +81,6 @@ if imagesl == None or imagesr == None:
         ret, framer = videor.retrieve()
         grayl = cv2.cvtColor(framel, cv2.COLOR_BGR2GRAY)
         grayr = cv2.cvtColor(framer, cv2.COLOR_BGR2GRAY)
-
-        #cv2.imshow('framel', framel)
-        #cv2.imshow('framer', framer)
-
-        #cv2.waitKey(1)
 
         print('looking for corners')
         foundl, cornersl = cv2.findChessboardCorners(grayl, (9,6), None)
@@ -109,13 +103,9 @@ if imagesl == None or imagesr == None:
 
                 framel = videol.read()
                 framer = videor.read()
-                #cv2.imshow('left', framel)
-                #cv2.imshow('right', framer)
 
-                #cv2.waitKey(1)
                 now = time.time()
 
-        #cv2.waitKey(1)
     
     videol.release()
     videor.release()
@@ -125,10 +115,8 @@ else:
 
     for imagel, imager in zip(imagesl, imagesr):
         imgl = cv2.imread(imagel)
-        #grayl = cv2.cvtColor(imgl, cv2.COLOR_BGR2GRAY)
 
         imgr = cv2.imread(imager)
-        #grayr = cv2.cvtColor(imgr, cv2.COLOR_BGR2GRAY)
 
         foundl, cornersl = cv2.findChessboardCorners(imgl, (9,6), None)
         foundr, cornersr = cv2.findChessboardCorners(imgr, (9,6), None)
@@ -189,12 +177,8 @@ framer = cv2.imread('./images/chessboard-5r.jpg')
 undistorted_rectifiedl = cv2.remap(framel, mapXl, mapYl, cv2.INTER_LINEAR)
 undistorted_rectifiedr = cv2.remap(framer, mapXr, mapYr, cv2.INTER_LINEAR)
 
-#cv2.imshow('rectifiedl', undistorted_rectifiedl)
-#cv2.imshow('rectifiedr', undistorted_rectifiedr)
 cv2.imwrite('./generated/undistorted_rectifiedl.jpg', undistorted_rectifiedl)
 cv2.imwrite('./generated/undistorted_rectifiedr.jpg', undistorted_rectifiedr)
-
-#cv2.waitKey(0)
 
 np.savez_compressed('./generated/calibration', imageSize=(1280, 720), leftMapX=mapXl, leftMapY=mapYl, leftROI=roil, rightMapX=mapXr, rightMapY=mapYr, rightROI=roir, leftCamMtx=mtxl, rightCamMtx=mtxr, leftDist=distl, rightDist=distr)
 
