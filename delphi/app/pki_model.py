@@ -35,7 +35,7 @@ class PKI:
         """
         This method is designed to toggle the enabled status of the node passed in
         :param node: the name of the ndoe to toggle
-        :return: n/a
+        :return: the changed node and new status
         """
         if node in self.vertices:
             for key in self.vertices:
@@ -64,7 +64,7 @@ class PKI:
                     else:
                         new = {key: True}
                         self.l3vertices.update(new)
-
+        return new
     def update_room(self, node, new_count):
         """
         this method updates the people count of a room
@@ -99,8 +99,8 @@ class PKI:
     def run(self):
         """
         This method runs optimization of PKI
-        :return: n/a
+        :return: list of paths
         """
-        run_optimization(self)
+        return run_optimization(self)
 
 

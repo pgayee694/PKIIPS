@@ -1,11 +1,10 @@
 from delphi.app import data_analyzer
 from collections import namedtuple
-
 from delphi.app.pki_model import PKI
 
 
 class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
-    RoomData = namedtuple('RoomData', ('Room#', 'Count'))
+    RoomData = namedtuple('RoomData', ('Room', 'Count'))
     NodeConstraint = namedtuple('NodeConstraint', ('node',))
 
     def __init__(self):
@@ -57,8 +56,7 @@ class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
         :param data: room numbers with associated people counts
         :return:
         """
-        for room in data:
-            self.pki.update_room(room[0], room[1])
+        self.pki.update_room(data.Room, data.Count)
         self.routes = self.pki.run()
 
     def constraint(self, constraints):
@@ -67,5 +65,5 @@ class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
         :param constraints: a list of node names passed in as strings
         :return:
         """
-        for node in constraints:
-            self.pki.toggle(node)
+        self.pki.toggle(constraints.node)
+        self.routes = self.pki.run()

@@ -262,7 +262,6 @@ def run_optimization(PKI_model):
             PKI_model.edges.update(PKI_model.l3edges)
         # if the desired flow cant be found, return an error
         if level_count == 3:
-            print("desired flow cannot be found")
             break
 
         level_count = level_count + 1
