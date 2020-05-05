@@ -160,29 +160,7 @@ class TestNetworkFlow(unittest.TestCase):
         fn.add_edge('b', 'c', 3)
         assert fn.calculate_max_flow() == 7
 
-    def test_find_path(self):
-        fn = FlowNetwork()
-        fn.add_vertex('s', True, False)
-        fn.add_vertex('t', False, True)
-        fn.add_vertex('a', False, False)
-        fn.add_vertex('b', False, False)
-        fn.add_vertex('c', False, False)
-        fn.add_vertex('d', False, False)
-        fn.add_edge('s', 'a', 4)
-        fn.add_edge('a', 'b', 4)
-        fn.add_edge('b', 't', 2)
-        fn.add_edge('s', 'c', 3)
-        fn.add_edge('c', 'd', 6)
-        fn.add_edge('d', 't', 6)
-        fn.add_edge('b', 'c', 3)
-        fn.calculate_max_flow()
-        positive_flow_network = []
-        for edge in fn.get_edges():
-            if edge.flow >= 0:
-                positive_flow_network = positive_flow_network + [edge]
-        assert find_path('s', positive_flow_network, 2) == ['s', 'a', 'c', 'b', 'd', 't']
-        assert find_path('s', positive_flow_network, 1000) == ['s']
-        assert find_path('s', positive_flow_network, 4) == ['s', 'a', 'c', 'b', 'd', 't']
+
 
 
 if __name__ == "__main__":
