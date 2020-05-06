@@ -146,7 +146,7 @@ class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
         for edge in opt_graph.get_edges():
             if edge.flow >= 0:
                 positive_flow_network = positive_flow_network + [edge]
-        path_a = find_path('s1', positive_flow_network, self.pki.room_counts['s1'])
-        path_b = find_path('s2', positive_flow_network, self.pki.room_counts['s2'])
-        path_c = find_path('s3', positive_flow_network, self.pki.room_counts['s3'])
-        self.routes = {'s1': path_a, 's2': path_b, 's3': path_c}
+        path_a = find_path('252', positive_flow_network, self.pki.room_counts['252'])
+        path_b = find_path('256', positive_flow_network, self.pki.room_counts['256'])
+        path_c = find_path('260', positive_flow_network, self.pki.room_counts['260'])
+        self.routes = {'252': path_a, '256': path_b, '260': path_c}

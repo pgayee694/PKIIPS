@@ -1,5 +1,3 @@
-from delphi.app.graph import run_optimization
-
 
 class PKI:
     """
@@ -17,7 +15,7 @@ class PKI:
         PKI constructor
         """
         self.setVertices()
-        self.room_counts = {'s1': 25, 's2': 30, 's3': 20}
+        self.room_counts = {'252': 25, '256': 30, '260': 20}
         self.setDesiredFlow()
         self.setEdges()
 
@@ -46,12 +44,12 @@ class PKI:
         :param node: the name of the room to update
         :param new_count: the new people count for that room
         """
-        if node == 's1':
-            self.room_counts['s1'] = new_count
-        elif node == 's2':
-            self.room_counts['s2'] = new_count
-        elif node == 's3':
-            self.room_counts['s3'] = new_count
+        if node == '252':
+            self.room_counts['252'] = new_count
+        elif node == '256':
+            self.room_counts['256'] = new_count
+        elif node == '260':
+            self.room_counts['260'] = new_count
 
         self.setDesiredFlow()
         self.setEdges()
@@ -62,31 +60,24 @@ class PKI:
         when it is updated
         """
         self.edge_levels = {
-            "l1": {"sa": [("s1", 1000), ("s2", 1000), ('s3', 1000)], "s1": [("h1", self.room_counts['s1'])],
-                   "s2": [("h1", self.room_counts['s2'])], "s3": [("h1", self.room_counts['s3'])], "h1": [("h2", 80)],
+            "l1": {"sa": [("252", 1000), ("256", 1000), ('260', 1000)], "252": [("h1", self.room_counts['252'])],
+                   "256": [("h1", self.room_counts['256'])], "260": [("h1", self.room_counts['260'])], "h1": [("h2", 80)],
                    "h2": [("h5", 75), ("t1", 25)], "t1": [("ta", 1000)], "t2": [("ta", 1000)], "h5": [("t2", 80)]},
-            "l2": {"s1": [("h1", self.room_counts['s1'] / 2), ("h3", self.room_counts['s1'] / 2)], "h3": [("h4", 1)],
+            "l2": {"252": [("h1", self.room_counts['252'] / 2), ("h3", self.room_counts['252'] / 2)], "h3": [("h4", 1)],
                    "h4": [("t3", 1), ("t4", 1)], "t3": [("ta", 1000)],
                    "t4": [("ta", 1)]},
-            'l3': {"s3": [("h1", self.room_counts['s3'] / 2), ("h6", self.room_counts['s3'] / 2)], "h6": [("h4", 1)]}}
+            'l3': {"260": [("h1", self.room_counts['260'] / 2), ("h6", self.room_counts['260'] / 2)], "h6": [("h4", 1)]}}
 
     def setVertices(self):
         """
         A set function for the vertex dictionary
         """
         self.vertex_levels = {
-            'l1': {'t1': True, 't2': True, 's1': True, 's2': True, 's3': True, 'h1': True, 'h2': True, 'h5': True},
+            'l1': {'t1': True, 't2': True, '252': True, '256': True, '260': True, 'h1': True, 'h2': True, 'h5': True},
             'l2': {'t3': True, 't4': True, 'h3': True, 'h4': True}, 'l3': {'h6': True}}
 
     def setDesiredFlow(self):
         """
         A set function for the desired flow
         """
-        self.desired_flow = self.room_counts['s1'] + self.room_counts['s2'] + self.room_counts['s3']
-
-    def run(self):
-        """
-        This method runs optimization of PKI
-        :return: list of paths
-        """
-        return run_optimization(self)
+        self.desired_flow = self.room_counts['252'] + self.room_counts['256'] + self.room_counts['260']

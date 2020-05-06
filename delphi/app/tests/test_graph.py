@@ -25,44 +25,44 @@ class TestGraphPlugin(unittest.TestCase):
         analyzer = GraphPlugin()
         analyzer.init()
 
-        data_payload = {'Room': 's1', 'Count': 25}
+        data_payload = {'Room': '252', 'Count': 25}
         data_object = analyzer.get_data_class()(**data_payload)
 
         self.assertEqual(analyzer.collect(), {})
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'s1': ['s1', 'h1', 'h2', 'h5', 't1', 't2'], 's2': ['s2', 'h1', 'h2', 'h5', 't1', 't2'],
-                          's3': ['s3', 'h1', 'h2', 'h5', 't1', 't2']})
+                         {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']})
 
-        data_payload = {'Room': 's1', 'Count': 20}
+        data_payload = {'Room': '252', 'Count': 20}
         data_object = analyzer.get_data_class()(**data_payload)
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'s1': ['s1', 'h1', 'h2', 'h5', 't1', 't2'], 's2': ['s2', 'h1', 'h2', 'h5', 't1', 't2'],
-                          's3': ['s3', 'h1', 'h2', 'h5', 't1', 't2']})
+                         {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']})
 
     def test_analyze_constraint(self):
         analyzer = GraphPlugin()
         analyzer.init()
 
-        data_payload = {'Room': 's1', 'Count': 25}
+        data_payload = {'Room': '252', 'Count': 25}
         constraint_payload = {'node': 't2'}
         data_object = analyzer.get_data_class()(**data_payload)
         constraint_object = analyzer.get_constraint_class()(**constraint_payload)
 
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'s1': ['s1', 'h1', 'h2', 'h5', 't1', 't2'], 's2': ['s2', 'h1', 'h2', 'h5', 't1', 't2'],
-                          's3': ['s3', 'h1', 'h2', 'h5', 't1', 't2']})
+                         {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']})
 
         analyzer.constraint(constraint_object)
-        self.assertEqual(analyzer.collect(), {'s1': ['s1', 'h1', 'h2', 't1'], 's2': ['s2'], 's3': ['s3']})
+        self.assertEqual(analyzer.collect(), {'252': ['252', 'h1', 'h2', 't1'], '256': ['256'], '260': ['260']})
 
     def test_shutdown(self):
         analyzer = GraphPlugin()
         analyzer.init()
 
-        data_payload = {'Room': 's1', 'Count': 25}
+        data_payload = {'Room': '252', 'Count': 25}
         data_object = analyzer.get_data_class()(**data_payload)
 
         analyzer.analyze(data_object)
@@ -75,6 +75,7 @@ class TestPKI(unittest.TestCase):
     """
     Tests for the PKI model
     """
+
     def test_toggle(self):
         pki = PKI()
         assert pki.toggle('h1') == {'h1': False}
@@ -82,26 +83,21 @@ class TestPKI(unittest.TestCase):
 
     def test_update_room(self):
         pki = PKI()
-        assert pki.edge_levels == {'l1': {'sa': [('s1', 1000), ('s2', 1000), ('s3', 1000)], 's1': [('h1', 25)],
-                                          's2': [('h1', 30)], 's3': [('h1', 20)], 'h1': [('h2', 80)],
+        assert pki.edge_levels == {'l1': {'sa': [('252', 1000), ('256', 1000), ('260', 1000)], '252': [('h1', 25)],
+                                          '256': [('h1', 30)], '260': [('h1', 20)], 'h1': [('h2', 80)],
                                           'h2': [('h5', 75), ('t1', 25)], 't1': [('ta', 1000)], 't2': [('ta', 1000)],
                                           'h5': [('t2', 80)]},
-                                   'l2': {'s1': [('h1', 12.5), ('h3', 12.5)], 'h3': [('h4', 1)],
+                                   'l2': {'252': [('h1', 12.5), ('h3', 12.5)], 'h3': [('h4', 1)],
                                           'h4': [('t3', 1), ('t4', 1)], 't3': [('ta', 1000)], 't4': [('ta', 1)]},
-                                   'l3': {'s3': [('h1', 10.0), ('h6', 10.0)], 'h6': [('h4', 1)]}}
-        pki.update_room('s1', 30)
-        assert pki.edge_levels == {'l1': {'sa': [('s1', 1000), ('s2', 1000), ('s3', 1000)], 's1': [('h1', 30)],
-                                          's2': [('h1', 30)], 's3': [('h1', 20)], 'h1': [('h2', 80)],
+                                   'l3': {'260': [('h1', 10.0), ('h6', 10.0)], 'h6': [('h4', 1)]}}
+        pki.update_room('252', 30)
+        assert pki.edge_levels == {'l1': {'sa': [('252', 1000), ('256', 1000), ('260', 1000)], '252': [('h1', 30)],
+                                          '256': [('h1', 30)], '260': [('h1', 20)], 'h1': [('h2', 80)],
                                           'h2': [('h5', 75), ('t1', 25)], 't1': [('ta', 1000)], 't2': [('ta', 1000)],
                                           'h5': [('t2', 80)]},
-                                   'l2': {'s1': [('h1', 15), ('h3', 15)], 'h3': [('h4', 1)],
+                                   'l2': {'252': [('h1', 15), ('h3', 15)], 'h3': [('h4', 1)],
                                           'h4': [('t3', 1), ('t4', 1)], 't3': [('ta', 1000)], 't4': [('ta', 1)]},
-                                   'l3': {'s3': [('h1', 10.0), ('h6', 10.0)], 'h6': [('h4', 1)]}}
-
-    def test_run(self):
-        pki = PKI()
-        assert pki.run() == {'s1': ['s1', 'h1', 'h2', 'h5', 't1', 't2'], 's2': ['s2', 'h1', 'h2', 'h5', 't1', 't2'],
-                             's3': ['s3', 'h1', 'h2', 'h5', 't1', 't2']}
+                                   'l3': {'260': [('h1', 10.0), ('h6', 10.0)], 'h6': [('h4', 1)]}}
 
 
 class TestNetworkFlow(unittest.TestCase):
@@ -159,8 +155,6 @@ class TestNetworkFlow(unittest.TestCase):
         assert fn.calculate_max_flow() == 5
         fn.add_edge('b', 'c', 3)
         assert fn.calculate_max_flow() == 7
-
-
 
 
 if __name__ == "__main__":
