@@ -44,12 +44,8 @@ class PKI:
         :param node: the name of the room to update
         :param new_count: the new people count for that room
         """
-        if node == '252':
-            self.room_counts['252'] = new_count
-        elif node == '256':
-            self.room_counts['256'] = new_count
-        elif node == '260':
-            self.room_counts['260'] = new_count
+        if node in self.room_counts:
+            self.room_counts[node] = new_count
 
         self.setDesiredFlow()
         self.setEdges()
@@ -80,4 +76,4 @@ class PKI:
         """
         A set function for the desired flow
         """
-        self.desired_flow = self.room_counts['252'] + self.room_counts['256'] + self.room_counts['260']
+        self.desired_flow = sum(list(self.room_counts.values()))
