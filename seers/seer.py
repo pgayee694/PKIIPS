@@ -36,8 +36,7 @@ url						= '{}:{}{}'.format(seer_config.delphi_address, seer_config.delphi_port,
 # a function. Capturing variables such
 # as http_session and url.
 def http_send_json(delivery_system, data):
-	headers = {'Content-Type': 'application/json'}
-
+        headers = {'Content-Type': 'application/json'}
 	try:
 		r = http_session.post(url, headers=headers, data=json.dumps(data))
 		if r.status_code not in [requests.codes.ok, requests.codes.no_content, requests.codes.bad_request]:
