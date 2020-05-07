@@ -140,6 +140,14 @@ public class UIManager : MonoBehaviour
     private Floor currentFloor = null;
 
     /// <summary>
+    /// Public attribute to the current floor.
+    /// </summary>
+    public Floor CurrentFloor
+    {
+        get { return currentFloor; }
+    }
+
+    /// <summary>
     /// The event system attached to this game object.
     /// </summary>
     private EventSystem eventSystem;

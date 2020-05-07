@@ -2,7 +2,7 @@
 using SharpConfig;
 using System.IO;
 
-public class Config : MonoBehaviour
+public class Config
 {
     /// <summary>
     /// Configuration file's location.
@@ -14,11 +14,7 @@ public class Config : MonoBehaviour
     /// </summary>
     public static Configuration cfg;
 
-
-    /// <summary>
-    /// Called when this game object is created.
-    /// </summary>
-    void Start()
+    static Config()
     {
         if (!File.Exists(CONFIG_FILE))
         {
@@ -32,13 +28,13 @@ public class Config : MonoBehaviour
         }
     }
 
-
     /// <summary>
     /// Applies the default configuration settings when no configuration file is found.
     /// </summary>
-    private void SetupDefaultConfig()
+    private static void SetupDefaultConfig()
     {
         cfg = new Configuration();
         cfg["delphi client"]["base-url"].StringValue = "localhost:5000";
+        cfg["delphi client"]["update-constraint-endpoint"].StringValue = "/update-constraint-data";
     }
 }

@@ -1,7 +1,9 @@
 ﻿using System.Collections;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Linq;
+using UnityEngine.Assertions;
 using SimpleJSON;
 
 /// <summary>
@@ -15,118 +17,126 @@ public class DelphiClient : MonoBehaviour
     private static readonly string BASE_URL = Config.cfg["delphi client"]["base-url"].StringValue;
 
     /// <summary>
-    /// Single instance of the client.
+    /// Delphi's update constraint endpoint.
     /// </summary>
-    private static DelphiClient _instance;
+    private static readonly string UPDATE_CONSTRAINT_ENDPOINT = Config.cfg["delphi client"]["update-constraint-endpoint"].StringValue;
 
     /// <summary>
-    /// Publicly accessible client instance.
+    /// Delphi's get data endpoint.
     /// </summary>
-    public static DelphiClient Instance
-    {
-        get
-        {
-            if (_instance == null)
-                _instance = new GameObject("DelphiClient").AddComponent<DelphiClient>();
-            return _instance;
-        }
-    }
-
+    private static readonly string GET_DATA_ENDPOINT = Config.cfg["delphi client"]["get-data-endpoint"].StringValue;
 
     /// <summary>
-    /// Prevents the client from being destroyed on scene change.
+    /// Sets the delay at which the UpdateNodes is called in seconds.
     /// </summary>
-    void Awake()
-    {
-        if (_instance != null) Destroy(this);
-        DontDestroyOnLoad(this);
-    }
-
+    [SerializeField]
+    private static float DELAY_UPDATE_TIME = 0.0f;
 
     /// <summary>
-    /// Updates all of the fields for each of the nodes supplied.
+    /// Sets the interval at which the UpdateNodes is called in seconds.
     /// </summary>
-    public void ToggleNodeStatus(Node node)
-    {
-        StartCoroutine(CallToggleStatus(node));
-    }
+    [SerializeField]
+    private static float UPDATE_INTERVAL_TIME = 0.5f;
 
     /// <summary>
-    /// Updates all of the fields for each of the nodes supplied.
+    /// The current game's <code>UIManager</code>. This is used to
+    /// add the <code>StatisticsBox</code> UI to the game.
+    /// <see cref="UIManager"/>
+    /// <see cref="StatisticsBox"/>
     /// </summary>
-    public void UpdateNodes(Node[] nodes)
+    private UIManager ui;
+
+    void Start()
     {
-        int[] nodeIds = nodes.Select(node => node.Id).ToArray();
-        StartCoroutine(CallGetCounts(nodeIds, (response) => nodes.ToList().ForEach(node => node.PeopleCount = response[node.Id])));
-        StartCoroutine(CallGetStatuses(nodeIds, (response) => nodes.ToList().ForEach(node => node.Status = response[node.Id])));
-    }
-
-
-    /// <summary>
-    /// Helper method used to generate a list of parameters.
-    /// </summary>
-    private string GenerateParams(string key, int[] values)
-    {
-        return "?" + string.Join("&", values.Select(value => key + "=" + value).ToArray());
-    }
-
-
-    /// <summary>
-    /// Gets the status of all of the nodes given in the list of ids.
-    /// </summary>
-    IEnumerator CallGetStatuses(int[] nodeIds, System.Action<JSONNode> callback)
-    {
-        UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-statuses" + GenerateParams("room_id", nodeIds));
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.LogError(www.error);
-            yield break;
-        }
-
-        JSONNode response = JSON.Parse(www.downloadHandler.text);
-
-        callback(response);
+        ui = GameObject.Find("EventSystem").GetComponent<UIManager>();
+        Assert.IsNotNull(ui);
+        InvokeRepeating("GetData", DELAY_UPDATE_TIME, UPDATE_INTERVAL_TIME);
     }
 
     /// <summary>
-    /// Gets the people count of all of the nodes given in the list of ids.
+    /// Updates all of the fields for each of the GraphComponents supplied.
+    /// <param name="node">The graph component to toggle status</param>
     /// </summary>
-    IEnumerator CallGetCounts(int[] nodeIds, System.Action<JSONNode> callback)
+    public void ToggleNodeStatus(GraphComponentStatus node)
     {
-        UnityWebRequest www = UnityWebRequest.Get(BASE_URL + "/get-counts" + GenerateParams("room_id", nodeIds));
-        yield return www.SendWebRequest();
-
-        if (www.isNetworkError || www.isHttpError)
-        {
-            Debug.LogError(www.error);
-            yield break;
-        }
-
-        JSONNode response = JSON.Parse(www.downloadHandler.text);
-
-        callback(response);
+        StartCoroutine(ToggleStatus(node));
     }
 
     /// <summary>
     /// Updates the status of the node associated with the given id.
+    /// <param name="node">The graph component to toggle status</param>
     /// </summary>
-    IEnumerator CallToggleStatus(Node node)
+    private IEnumerator ToggleStatus(GraphComponentStatus node)
     {
         JSONObject requestData = new JSONObject();
-        requestData.Add("enable", (!node.Status).ToString());
+        requestData.Add("node", node.Id);
+        requestData.Add("status", (!node.Status));
 
-        UnityWebRequest www = UnityWebRequest.Put(BASE_URL + "/enable/" + node.Id, requestData.ToString());
-        www.SetRequestHeader("Content-Type", "application/json");
-        yield return www.SendWebRequest();
+        return PostJson(BASE_URL + UPDATE_CONSTRAINT_ENDPOINT, requestData);
+    }
 
-        if (www.isNetworkError || www.isHttpError)
+    /// <summary>
+    /// Continiously called to fetch data from Delphi.
+    /// Updates according to the value of the <code>UPDATE_INTERVAL_TIME</code> property.
+    /// <see cref="UPDATE_INTERVAL_TIME"/>
+    /// </summary>
+    private void GetData()
+    {
+        StartCoroutine(GetDelphiData(BASE_URL + GET_DATA_ENDPOINT));
+    }
+
+    /// <summary>
+    /// Calls a post request to the given uri with the given json.
+    /// <param name="uri">The uri to send the request to</param>
+    /// <param name="json">The json to put into the body of the request</param>
+    /// </summary>
+    private IEnumerator PostJson(string uri, JSONObject json) 
+    {
+        // Cannot using UnityWebRequest.Post because it will URL encode the JSON.
+        using(UnityWebRequest www = new UnityWebRequest(uri, UnityWebRequest.kHttpVerbPOST))
         {
-            Debug.LogError(www.error);
+            www.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json.ToString()));
+            www.SetRequestHeader("Content-Type", "application/json");
+
+            yield return www.SendWebRequest();
+
+            if(www.isNetworkError || www.isHttpError)
+            {
+                Debug.LogError(www.error);
+            }
+
             yield break;
         }
+    }
 
-        node.Status = !node.Status;
+    /// <summary>
+    /// Calls a get request to gather data from Delphi.
+    /// <param name="uri">The uri to send the request to</param>
+    /// </summary>
+    private IEnumerator GetDelphiData(string uri)
+    {
+        using(UnityWebRequest www = UnityWebRequest.Get(uri))
+        {
+            www.SetRequestHeader("Content-Type", "application/json");
+            yield return www.SendWebRequest();
+
+            if(www.isNetworkError || www.isHttpError)
+            {
+                Debug.LogError(www.error);
+            }
+            else
+            {
+                Debug.Log("We got data!");
+                // Once we get the keywords figured out, this is where we will update the nodes on the currently selected floor.
+
+                // Update the statuses of all the graph components on this floor
+
+                // Update the room counts on this floor
+                
+                // Update the current paths available
+            }
+
+            yield break;
+        }
     }
 }
