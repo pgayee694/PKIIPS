@@ -1,23 +1,4 @@
 
-def find_path(start_node, flow, people):
-    """
-    find_path is a utility function that returns all that nodes that are able to carry flow from a specific source
-    node
-    :param start_node: The source node to calculate paths for
-    :param flow: List of all nodes in the network with positive flow
-    :param people: The amount of people that must be carried from the source node
-    :return: A list of all possible nodes that contribute to viable paths for start_node
-    """
-    path_list = [start_node]
-    for node in path_list:
-        current_node = node
-        for edge_check in flow:
-            if edge_check.start == current_node and edge_check.end != 'ta':
-                if edge_check.flow >= people / 2:
-                    if edge_check.end not in path_list:
-                        path_list.append(edge_check.end)
-    return path_list
-
 
 class Vertex:
     """

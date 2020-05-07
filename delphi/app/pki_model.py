@@ -54,6 +54,10 @@ class PKI:
         """
         This method sets the values of the edges. It is accessed when PKI is initialized and
         when it is updated
+        h = hallways and stairways
+        s = classrooms
+        t = exits
+        l = levels
         """
         self.edge_levels = {
             "l1": {"sa": [("252", 1000), ("256", 1000), ('260', 1000)], "252": [("h1", self.room_counts['252'])],
