@@ -12,7 +12,7 @@ class TestGraphPlugin(unittest.TestCase):
     def test_constructor(self):
         analyzer = GraphPlugin()
         assert analyzer.get_data_keywords() == {'Count', 'Room'}
-        self.assertIn('node', analyzer.get_constraint_keywords())
+        self.assertIn('node_id', analyzer.get_constraint_keywords())
 
     def test_init(self):
         analyzer = GraphPlugin()
@@ -46,7 +46,7 @@ class TestGraphPlugin(unittest.TestCase):
         analyzer.init()
 
         data_payload = {'Room': '252', 'Count': 25}
-        constraint_payload = {'node': 't2'}
+        constraint_payload = {'node_id': 't2'}
         data_object = analyzer.get_data_class()(**data_payload)
         constraint_object = analyzer.get_constraint_class()(**constraint_payload)
 

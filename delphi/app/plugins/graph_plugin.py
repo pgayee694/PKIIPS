@@ -27,7 +27,7 @@ def find_path(start_node, flow, people):
 
 class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
     RoomData = namedtuple('RoomData', ('Room', 'Count'))
-    NodeConstraint = namedtuple('NodeConstraint', ('node',))
+    NodeConstraint = namedtuple('NodeConstraint', ('node_id',))
 
     def __init__(self):
         super().__init__(GraphPlugin.RoomData._fields, GraphPlugin.NodeConstraint._fields)
@@ -87,7 +87,7 @@ class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
         :param constraints: a list of node names passed in as strings
         :return:
         """
-        self.pki.toggle(constraints.node)
+        self.pki.toggle(constraints.node_id)
         self.optimize()
 
     def optimize(self):
