@@ -75,6 +75,7 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
     BASELINE = 'baseline'
     RANGE = 'range'
     ID = 'id'
+    ROOM = 'room'
     DEFAULT_CONFIDENCE	= 0.2
     COUNT_KEY			= 'count'
     DISTANCES_KEY = 'distances'
@@ -86,6 +87,7 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         """
 
         self.id = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
+        self.room = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
 
         self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
         self.model		= seer_config.configuration[PeopleCount.INI].get(PeopleCount.MODEL_INI)
@@ -199,7 +201,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         return {PeopleCount.COUNT_KEY: detection_count,
                 PeopleCount.DISTANCES_KEY: distances,
                 PeopleCount.RANGE: self.range,
-                PeopleCount.ID: self.id}
+                PeopleCount.ID: self.id,
+                PeopleCount.ROOM, self.room}
 
     def find_marker(query, image):
         """
