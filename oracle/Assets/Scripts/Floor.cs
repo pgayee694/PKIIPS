@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// Script to be placed onto a game object that contains
@@ -12,12 +14,15 @@ public class Floor : MonoBehaviour
     /// </summary>
     private GraphComponent[] graphComponents;
 
-    /// <summary>
-    /// Called when this game object is created.
-    /// </summary>
-    void Start()
+    private Dictionary<string, GraphComponent> idToComponent = new Dictionary<string, GraphComponent>();
+
+    void Awake()
     {
         graphComponents = GetComponentsInChildren<GraphComponent>();
+        foreach(var component in graphComponents)
+        {
+            idToComponent[component.Id] = component;
+        }
     }
 
     /// <summary>
@@ -33,5 +38,15 @@ public class Floor : MonoBehaviour
         }
 
         Destroy(gameObject);
+    }
+
+    public GraphComponent GetGraphComponentByID(string id)
+    {
+        if(idToComponent.ContainsKey(id))
+        {
+            return idToComponent[id];
+        }
+
+        return null;
     }
 }

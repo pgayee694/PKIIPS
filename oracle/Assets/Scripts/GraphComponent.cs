@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 /// <summary>
@@ -46,14 +47,17 @@ public class GraphComponent : MonoBehaviour
     /// to the node in the X coordinate.
     /// </summary>
     [SerializeField]
-    private float statisticsPositionOffsetX = 0;
+    private float statisticsPositionOffsetX = 0f;
 
     /// <summary>
     /// An offset of where the statistics box shows up relative
     /// to the node in the Y coordinate.
     /// </summary>
     [SerializeField]
-    private float statisticsPositionOffsetY = 0;
+    private float statisticsPositionOffsetY = 0f;
+
+    [SerializeField]
+    private float mouseDownWaitSeconds = 0.3f;
 
     /// <summary>
     /// The current game's <code>UIManager</code>. This is used to
@@ -63,10 +67,16 @@ public class GraphComponent : MonoBehaviour
     /// </summary>
     private UIManager ui;
 
+    protected DelphiClient delphiClient;
+    private PathManager pathManager;
+
     /// <summary>
     /// The currently instantiaed <code>StatisticsBox</code>.
     /// </summary>
     private StatisticsBox statistics = null;
+
+    private float mouseDownLimit;
+    private bool mouseDown = false;
 
     /// <summary>
     /// Updates an entry in the statistics box, if one exists.
@@ -99,16 +109,50 @@ public class GraphComponent : MonoBehaviour
     virtual protected void Start()
     {
         ui = GameObject.Find("EventSystem").GetComponent<UIManager>();
+        delphiClient = GameObject.Find("DelphiClient").GetComponent<DelphiClient>();
+        pathManager = GameObject.Find("PathManager").GetComponent<PathManager>();
         Assert.IsNotNull(statisticsTemplate);
         Assert.IsNotNull(ui);
+        Assert.IsNotNull(delphiClient);
+        Assert.IsNotNull(pathManager);
     }
 
     /// <summary>
     /// Called every frame.
     /// </summary>
-    virtual protected void LateUpdate()
+    virtual protected void Update()
     {
         UpdateStatisticsPosition();
+        if(Input.GetAxis("Fire1") != 0)
+        {
+            if(mouseDown)
+            {
+                if(Time.fixedTime > mouseDownLimit)
+                {
+                    foreach(var path in delphiClient.CurrentPaths)
+                    {
+                        if(path[0] == Id)
+                        {
+                            if(pathManager.CurrentPath != null && path.SequenceEqual(pathManager.CurrentPath))
+                            {
+                                pathManager.CurrentPath = null;
+                            }
+                            else
+                            {
+                                pathManager.CurrentPath = path;
+                            }
+                            
+                            break;
+                        }
+                    }
+                    mouseDown = false;
+                }
+            }
+        }
+        else
+        {
+            mouseDown = false;
+        }
     }
 
     /// <summary>
@@ -118,6 +162,15 @@ public class GraphComponent : MonoBehaviour
     virtual protected void OnMouseUp()
     {
         ToggleStatisticsBox();
+    }
+
+    virtual protected void OnMouseDown()
+    {
+        if(!mouseDown)
+        {
+            mouseDownLimit = Time.fixedTime + mouseDownWaitSeconds;
+            mouseDown = true;
+        }
     }
 
     /// <summary>
@@ -186,4 +239,5 @@ public class GraphComponent : MonoBehaviour
             statistics.transform.localScale = new Vector3(mappedValue, mappedValue, 1);
         }
     }
+
 }

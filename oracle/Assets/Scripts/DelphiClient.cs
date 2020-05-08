@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -38,18 +39,28 @@ public class DelphiClient : MonoBehaviour
     [SerializeField]
     private static float UPDATE_INTERVAL_TIME = 0.5f;
 
+    private List<List<string>> currentPaths;
+
+    public List<List<string>> CurrentPaths
+    {
+        get { return currentPaths; }
+    }
+
+    [SerializeField]
+    private PathManager pathManager = null;
+
     /// <summary>
-    /// The current game's <code>UIManager</code>. This is used to
-    /// add the <code>StatisticsBox</code> UI to the game.
+    /// The current game's <code>UIManager</code>. This is used to grab the current floor.
     /// <see cref="UIManager"/>
-    /// <see cref="StatisticsBox"/>
     /// </summary>
     private UIManager ui;
 
     void Start()
     {
+        currentPaths = new List<List<string>>();
         ui = GameObject.Find("EventSystem").GetComponent<UIManager>();
         Assert.IsNotNull(ui);
+        Assert.IsNotNull(pathManager);
         InvokeRepeating("GetData", DELAY_UPDATE_TIME, UPDATE_INTERVAL_TIME);
     }
 
@@ -126,14 +137,51 @@ public class DelphiClient : MonoBehaviour
             }
             else
             {
-                Debug.Log("We got data!");
+                var json = JSON.Parse(www.downloadHandler.text).AsObject;
+
                 // Once we get the keywords figured out, this is where we will update the nodes on the currently selected floor.
 
                 // Update the statuses of all the graph components on this floor
+                if(json["statuses"] != null)
+                {
+                    foreach(var status in json["statuses"])
+                    {
+                        var component = ui.CurrentFloor.GetGraphComponentByID(status.Value["id"]) as GraphComponentStatus;
+                        if(component != null)
+                        {
+                            component.Status = status.Value["status"];
+                        }
+                    }
+                }
 
                 // Update the room counts on this floor
+                if(json["Counts"] != null)
+                {
+                    foreach(var count in json["Counts"])
+                    {
+                        var component = ui.CurrentFloor.GetGraphComponentByID(count.Key) as Room;
+                        if(component != null)
+                        {
+                            component.PeopleCount = count.Value;
+                        }
+                    }
+                }
                 
                 // Update the current paths available
+                if(json["paths"] != null)
+                {
+                    currentPaths.Clear();
+                    foreach(var path in json["paths"])
+                    {
+                        var newPath = new List<string>();
+                        foreach(var node in path.Value)
+                        {
+                            newPath.Add(node.Value);
+                        }
+                        currentPaths.Add(newPath);
+                        pathManager.PathUpdate(newPath);
+                    }
+                }
             }
 
             yield break;

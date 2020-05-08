@@ -38,6 +38,11 @@ public class GraphComponentStatus : GraphComponent
     /// </summary>
     private bool status = false;
 
+     /// <summary>
+    /// The particle system for this node.
+    /// </summary>
+    private ParticleSystem ps;
+
     /// <summary>
     /// Public attribute for the <code>status</code> member.
     /// Updates the UI entry when this value gets sets.
@@ -48,28 +53,25 @@ public class GraphComponentStatus : GraphComponent
         get { return status; }
         set
         {
-            status = value;
-            UpdateEntry(StatusAttribute, Status);
-
-            if (this != null)
+            if(status != value)
             {
-                ParticleSystem ps = GetComponent<ParticleSystem>();
-                var main = ps.main;
-                main.startColor = Status ? ObjectColor : Color.grey;
+                status = value;
+                UpdateEntry(StatusAttribute, Status);
+
+                if (this != null && ps != null)
+                {
+                    var main = ps.main;
+                    main.startColor = Status ? ObjectColor : Color.grey;
+                }
             }
         }
     }
 
-    /// <summary>
-    /// The HTTP client for communicating with Delphi.
-    /// </summary>
-    private DelphiClient delphiClient;
-
     protected override void Start()
     {
         base.Start();
-        delphiClient = GameObject.Find("DelphiClient").GetComponent<DelphiClient>();
-        Assert.IsNotNull(delphiClient);
+        ps = GetComponent<ParticleSystem>();
+        Status = true;
     }
 
     /// <summary>
