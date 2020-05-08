@@ -16,7 +16,7 @@ class DistanceAnalyzerTest(unittest.TestCase):
     def test_constructor(self):
         analyzer = DistanceAnalyzerPlugin()
 
-        self.assertEqual(set(['id', 'room', 'range', 'count', 'distances']), analyzer.get_data_keywords())
+        self.assertEqual(set(['id_', 'room', 'range_', 'count', 'distances']), analyzer.get_data_keywords())
         self.assertEqual(set(), analyzer.get_constraint_keywords())
 
     def test_init(self):

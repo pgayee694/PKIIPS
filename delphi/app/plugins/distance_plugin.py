@@ -18,7 +18,7 @@ class DistanceAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
             self.distances = distances
 
     def __init__(self):
-        super().__init__(['id', 'room', 'range', 'count', 'distances'], None)
+        super().__init__(['id_', 'room', 'range_', 'count', 'distances'], None)
     
     def get_data_class(self):
         return DistanceAnalyzerPlugin.PeopleCount

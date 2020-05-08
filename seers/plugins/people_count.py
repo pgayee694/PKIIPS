@@ -73,8 +73,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
     CALIBRATION_DATA = 'calibration-data'
     BLOCKSIZE = 'blocksize'
     BASELINE = 'baseline'
-    RANGE = 'range'
-    ID = 'id'
+    RANGE = 'range_'
+    ID = 'id_'
     ROOM = 'room'
     DEFAULT_CONFIDENCE	= 0.2
     COUNT_KEY			= 'count'
@@ -86,7 +86,7 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         Sets up the network and video stream.
         """
 
-        self.id = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
+        self.id_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
         self.room = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
 
         self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
@@ -131,7 +131,7 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 
         self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx) #px
         self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE) #cm
-        self.range = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
+        self.range_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
 
         self.stereoMatcher = cv2.StereoBM_create()
         self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].get(PeopleCount.BLOCKSIZE))
@@ -200,8 +200,8 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
 
         return {PeopleCount.COUNT_KEY: detection_count,
                 PeopleCount.DISTANCES_KEY: distances,
-                PeopleCount.RANGE: self.range,
-                PeopleCount.ID: self.id,
+                PeopleCount.RANGE: self.range_,
+                PeopleCount.ID: self.id_,
                 PeopleCount.ROOM, self.room}
 
     def find_marker(query, image):
