@@ -8,56 +8,30 @@
 public class Floor : MonoBehaviour
 {
     /// <summary>
-    /// Sets the delay at which the UpdateNodes is called in seconds.
-    /// </summary>
-    private static float DELAY_UPDATE_TIME = 0.0f;
-
-    /// <summary>
-    /// Sets the interval at which the UpdateNodes is called in seconds.
-    /// </summary>
-    private static float UPDATE_INTERVAL_TIME = 0.5f;
-
-    /// <summary>
     /// The collection of nodes that belong to the floor.
     /// </summary>
-    private Node[] nodes;
-
+    private GraphComponent[] graphComponents;
 
     /// <summary>
     /// Called when this game object is created.
     /// </summary>
     void Start()
     {
-        nodes = GetComponentsInChildren<Node>();
-        InvokeRepeating("UpdateNodes", DELAY_UPDATE_TIME, UPDATE_INTERVAL_TIME);
+        graphComponents = GetComponentsInChildren<GraphComponent>();
     }
 
     /// <summary>
     /// Called when this game object is destroyed.
-    /// Will destroy all children <code>Node</code>s.
-    /// <see cref="Node"/>
+    /// Will destroy all children <code>GraphComponent</code>s.
+    /// <see cref="GraphComponent"/>
     /// </summary>
     void OnDestroy()
     {
-        foreach (var node in GetComponentsInChildren<GraphComponent>())
+        foreach (var node in graphComponents)
         {
             Destroy(node);
         }
 
         Destroy(gameObject);
-    }
-
-
-    /// <summary>
-    /// Continiously called to update the nodes of the floor.
-    /// Updates according to the value of the <code>UPDATE_INTERVAL_TIME</code> property.
-    /// <see cref="UPDATE_INTERVAL_TIME"/>
-    /// </summary>
-    void UpdateNodes()
-    {
-        if (nodes.Length > 0)
-        {
-            DelphiClient.Instance.UpdateNodes(nodes);
-        }
     }
 }

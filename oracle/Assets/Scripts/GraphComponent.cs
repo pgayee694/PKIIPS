@@ -8,6 +8,32 @@ using UnityEngine.Assertions;
 public class GraphComponent : MonoBehaviour
 {
     /// <summary>
+    /// The name of the id attribute.
+    /// </summary>
+    public virtual string IDAttribute { get {return "ID"; } }
+
+    /// <summary>
+    /// An ID for this node.
+    /// </summary>
+    [SerializeField]
+    private string id;
+
+    /// <summary>
+    /// Public attribute for the <code>id</code> member.
+    /// Updates the UI entry when this value gets sets.
+    /// <see cref="id"/>
+    /// </summary>
+    public string Id
+    {
+        get { return id; }
+        set
+        {
+            id = value;
+            UpdateEntry(IDAttribute, id);
+        }
+    }
+
+    /// <summary>
     /// A <code>StatisticsBox</code> game object that can be used as
     /// a template to instantiate.
     /// <see cref="StatisticsBox"/>
@@ -80,7 +106,7 @@ public class GraphComponent : MonoBehaviour
     /// <summary>
     /// Called every frame.
     /// </summary>
-    virtual protected void Update()
+    virtual protected void LateUpdate()
     {
         UpdateStatisticsPosition();
     }
@@ -101,6 +127,7 @@ public class GraphComponent : MonoBehaviour
     /// </summary>
     virtual protected void UpdateStatisticsValues()
     {
+        UpdateEntry(IDAttribute, Id);
     }
 
     /// <summary>
