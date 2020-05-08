@@ -73,7 +73,9 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
     CALIBRATION_DATA = 'calibration-data'
     BLOCKSIZE = 'blocksize'
     BASELINE = 'baseline'
-
+    RANGE = 'range_'
+    ID = 'id_'
+    ROOM = 'room'
     DEFAULT_CONFIDENCE	= 0.2
     COUNT_KEY			= 'count'
     DISTANCES_KEY = 'distances'
@@ -83,6 +85,10 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         Gets configuration for confidence and model paths.
         Sets up the network and video stream.
         """
+
+        self.id_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
+        self.room = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+
         self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
         self.model		= seer_config.configuration[PeopleCount.INI].get(PeopleCount.MODEL_INI)
         self.prototxt	= seer_config.configuration[PeopleCount.INI].get(PeopleCount.PROTOTXT_INI)
@@ -123,8 +129,9 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         leftCamMtx = calibration['leftCamMtx']
         rightCamMtx = calibration['rightCamMtx']
 
-        self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx)
-        self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE)
+        self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx) #px
+        self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE) #cm
+        self.range_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
 
         self.stereoMatcher = cv2.StereoBM_create()
         self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].get(PeopleCount.BLOCKSIZE))
@@ -192,7 +199,10 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                 distances.append(depth)
 
         return {PeopleCount.COUNT_KEY: detection_count,
-                PeopleCount.DISTANCES_KEY: distances}
+                PeopleCount.DISTANCES_KEY: distances,
+                PeopleCount.RANGE: self.range_,
+                PeopleCount.ID: self.id_,
+                PeopleCount.ROOM, self.room}
 
     def find_marker(query, image):
         """
