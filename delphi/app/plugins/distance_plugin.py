@@ -8,16 +8,23 @@ class DistanceAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
     overcounting
     """
 
-    PeopleCount = namedtuple('PeopleCount', ('id', 'room', 'range', 'count', 'distances'))
+    class PeopleCount():
+
+        def __init__(self, id_, room, range_, count, distances):
+            self.id_ = id_
+            self.room = room
+            self.range_ = range_
+            self.count = count
+            self.distances = distances
 
     def __init__(self):
-        super().__init__(DistanceAnalyzerPlugin.SeerCount._fields, None)
+        super().__init__(['id', 'room', 'range', 'count', 'distances'], None)
     
     def get_data_class(self):
-        return DistanceAnalyzerPlugin.SeerCount
+        return DistanceAnalyzerPlugin.PeopleCount
     
     def get_constraint_class(self):
-        return None
+        pass
     
     def init(self):
         """
@@ -38,8 +45,8 @@ class DistanceAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
 
         data = {}
 
-        for seer in seers:
-            if data[seer.room]:
+        for seer in self.seers:
+            if seer.room in data.keys():
                 data[seer.room] += seer.count
             else:
                 data[seer.room] = seer.count
@@ -58,23 +65,29 @@ class DistanceAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
         roomExists = False
 
         for seer in self.seers:
-            if seer.room == seerCount.room and seer.id == seerCount.id:
+            if seer.room == seerCount.room and seer.id_ == seerCount.id_:
                 # update an existing entry
                 newCount = seerCount.count
 
                 for d in seerCount.distances:
-                    if d > seerCount.range:
+                    if d > seerCount.range_:
                         newCount -= 1
 
                 seer.count = newCount
                 break
             elif seer.room == seerCount.room:
+                # we have multiple seers in the same room, so process the "old's" counts to be within range
                 roomExists = True
+                for d in seer.distances:
+                    if d > seer.range_:
+                        seer.count -= 1
         else:
+            # new seer
             if roomExists:
+                # new node in the same room as another
                 for d in seerCount.distances:
-                    if d > seerCount.range:
-                        seerCount -= 1
+                    if d > seerCount.range_:
+                        seerCount.count -= 1
 
             self.seers.append(seerCount)
         
@@ -84,9 +97,12 @@ class DistanceAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
                 count += seer.count
         
         propagate = {
-            'Room': seerCount.room
+            'Room': seerCount.room,
             'Count': count
         }
 
         # update the model engine with the newly processed data
         global_model_engine.update_data(propagate)
+    
+    def constraint(self):
+        pass
