@@ -134,9 +134,12 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         self.range_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
 
         self.stereoMatcher = cv2.StereoBM_create()
-        self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].get(PeopleCount.BLOCKSIZE))
+        self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].getint(PeopleCount.BLOCKSIZE))
 
         self.initial_disparity = self.get_initial_disparity()
+
+        #plt.imshow(initial_disparity, 'gray')
+        #plt.show()
 
     def shutdown(self):
         """
@@ -202,7 +205,7 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
                 PeopleCount.DISTANCES_KEY: distances,
                 PeopleCount.RANGE: self.range_,
                 PeopleCount.ID: self.id_,
-                PeopleCount.ROOM, self.room}
+                PeopleCount.ROOM: self.room}
 
     def find_marker(query, image):
         """
