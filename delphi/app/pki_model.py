@@ -1,5 +1,3 @@
-from delphi.app.graph import run_optimization
-
 
 class PKI:
     """
@@ -109,4 +107,3 @@ print(testpki.edges)
 testpki.run()
 testpki.update_room('s1', 20)
 testpki.run()
-
