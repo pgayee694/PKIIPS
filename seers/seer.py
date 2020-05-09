@@ -21,7 +21,7 @@ import json
 # This is where to put plugins
 PLUGINS = \
 [
-	plugins.people_count.PeopleCountTest
+	plugins.people_count.PeopleCount
 ]
 
 logging.basicConfig(level=seer_config.logging_level, format='[%(levelname)s] %(asctime)s (%(module)s): %(message)s')
