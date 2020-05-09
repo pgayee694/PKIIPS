@@ -1,3 +1,5 @@
+import logging
+
 """
 The model engine is where analyzers are stored for updating
 and collecting data from.
@@ -32,7 +34,10 @@ class ModelEngine(object):
         for analyzer in self.analyzers:
             specific_data = {keyword: data_payload[keyword] for keyword in analyzer.get_data_keywords() if keyword in data_payload}
             if len(specific_data) != 0:
-                analyzer.analyze(analyzer.get_data_class()(**specific_data))
+                try:
+                    analyzer.analyze(analyzer.get_data_class()(**specific_data))
+                except Exception as e:
+                    logging.warning(f"Exception thrown from sending data to '{analyzer.__name__}': {e}")
 
     def update_constraint(self, constraint_payload):
         """

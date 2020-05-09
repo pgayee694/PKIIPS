@@ -70,7 +70,7 @@ class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
         to collect routes
         :return: A dictionary of routes for each rooms
         """
-        return self.routes
+        return {'paths': self.routes}
 
     def analyze(self, data):
         """

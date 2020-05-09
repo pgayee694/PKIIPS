@@ -138,6 +138,7 @@ public class DelphiClient : MonoBehaviour
             else
             {
                 var json = JSON.Parse(www.downloadHandler.text).AsObject;
+                Debug.Log(json);
 
                 // Once we get the keywords figured out, this is where we will update the nodes on the currently selected floor.
 

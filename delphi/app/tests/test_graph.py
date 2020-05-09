@@ -28,18 +28,18 @@ class TestGraphPlugin(unittest.TestCase):
         data_payload = {'Room': '252', 'Count': 25}
         data_object = analyzer.get_data_class()(**data_payload)
 
-        self.assertEqual(analyzer.collect(), {})
+        self.assertEqual(analyzer.collect(), {'paths': {}})
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
-                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']})
+                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
 
         data_payload = {'Room': '252', 'Count': 20}
         data_object = analyzer.get_data_class()(**data_payload)
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
-                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']})
+                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
 
     def test_analyze_constraint(self):
         analyzer = GraphPlugin()
@@ -52,11 +52,11 @@ class TestGraphPlugin(unittest.TestCase):
 
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
-                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']})
+                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
 
         analyzer.constraint(constraint_object)
-        self.assertEqual(analyzer.collect(), {'252': ['252', 'h1', 'h2', 't1'], '256': ['256'], '260': ['260']})
+        self.assertEqual(analyzer.collect(), {'paths': {'252': ['252', 'h1', 'h2', 't1'], '256': ['256'], '260': ['260']}})
 
     def test_shutdown(self):
         analyzer = GraphPlugin()

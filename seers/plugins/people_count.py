@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import utils
 import sys
+import random
 
 class PeopleCount(seer_plugin.DataCollectorPlugin):
     """
@@ -339,3 +340,27 @@ class PeopleCount(seer_plugin.DataCollectorPlugin):
         grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
 
         return self.stereoMatcher.compute(grayL, grayR)
+
+class PeopleCountTest(seer_plugin.DataCollectorPlugin):
+    """
+    Data collector plugin that will send fake test data to delphi
+    to mimic a real implementation.
+    """
+
+    TEST_COUNT = 'test-count'
+
+    def init(self):
+        self.id_        = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID)
+        self.room       = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+        self.range_     = seer_config.configuration[PeopleCount.INI].getint(PeopleCount.RANGE) #cm
+        self.test_count = seer_config.configuration[PeopleCount.INI].getint(PeopleCountTest.TEST_COUNT)
+        self.distances  = [random.randint(0, self.range_) for _ in range(self.test_count)]
+
+    def collect(self):
+        return {
+            'count': self.test_count,
+            'distances': self.distances,
+            'range_': self.range_,
+            'id_': self.id_,
+            'room': self.room
+        }
