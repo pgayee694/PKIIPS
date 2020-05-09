@@ -21,7 +21,7 @@ import json
 # This is where to put plugins
 PLUGINS = \
 [
-	plugins.people_count.PeopleCount
+	plugins.people_count.PeopleCountTest
 ]
 
 logging.basicConfig(level=seer_config.logging_level, format='[%(levelname)s] %(asctime)s (%(module)s): %(message)s')
@@ -37,7 +37,6 @@ url						= '{}:{}{}'.format(seer_config.delphi_address, seer_config.delphi_port,
 # as http_session and url.
 def http_send_json(delivery_system, data):
     headers = {'Content-Type': 'application/json'}
-    """
     try:
         r = http_session.post(url, headers=headers, data=json.dumps(data))
         if r.status_code not in [requests.codes.ok, requests.codes.no_content, requests.codes.bad_request]:
@@ -47,8 +46,6 @@ def http_send_json(delivery_system, data):
     except requests.exceptions.ConnectionError as e:
         logging.error(f'Unable to connect to delphi, stopping: {e}')
         delivery_system.stop()
-    """
-    print(data)
 
 if len(PLUGINS) == 0:
     logging.error('No plugins loaded!')

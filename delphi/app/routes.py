@@ -1,6 +1,8 @@
 from app import app
 from app import global_model_engine
+
 from flask import request, jsonify
+import logging
 
 @app.route('/update-sensor-data', methods=['POST'])
 def updateSensorData():
