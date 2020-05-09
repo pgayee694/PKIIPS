@@ -8,5 +8,5 @@ This folder is the root folder of a Unity project. Just open this folder up in U
 
 # Building
 
-1. Set up necessary configuration is oracle_config.ini
+1. Set up necessary configuration in oracle_config.ini
 2. Open this folder in Unity and build it
