@@ -118,6 +118,7 @@ public class UIManager : MonoBehaviour
             }
 
             currentFloor = Instantiate<Floor>(floors[Floor - 1], new Vector3(0, 0, 0), Quaternion.identity);
+            pathManager.CurrentPath = pathManager.CurrentPath;
         }
     }
 
@@ -133,11 +134,22 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private List<Floor> floors = new List<Floor>();
 
+    [SerializeField]
+    private PathManager pathManager = null;
+
     /// <summary>
     /// The currently instantiated <code>Floor</code> game object.
     /// <see cref="Floor"/>
     /// </summary>
     private Floor currentFloor = null;
+
+    /// <summary>
+    /// Public attribute to the current floor.
+    /// </summary>
+    public Floor CurrentFloor
+    {
+        get { return currentFloor; }
+    }
 
     /// <summary>
     /// The event system attached to this game object.
@@ -154,6 +166,7 @@ public class UIManager : MonoBehaviour
         Assert.IsNotNull(UpFloorButton);
         Assert.IsNotNull(DownFloorButton);
         Assert.IsNotNull(FloorText);
+        Assert.IsNotNull(pathManager);
         eventSystem = GetComponent<EventSystem>();
         Assert.IsNotNull(eventSystem);
         Floor = 1;

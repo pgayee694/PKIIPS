@@ -216,7 +216,7 @@ class TestModelEngine(unittest.TestCase):
         self.assertSetEqual(analyzer2.nodes, set((2,)))
         self.assertEqual(analyzer2.maxsize, 1)
 
-        self.assertDictEqual(engine.collect(), {'nodes': set((2,)), 'num': 8})
+        self.assertDictEqual(engine.collect(), {'nodes': [2], 'num': 8})
 
         engine.stop()
 

@@ -1,10 +1,13 @@
 from app import app
 from app import global_model_engine
-from app.graph import GraphEdge, GraphNode, PKI
 from flask import request, jsonify
 
 @app.route('/update-sensor-data', methods=['POST'])
 def updateSensorData():
+    """
+    Endpoint for updating the data of the data analyzers.
+    This endpoint is used by a Seer to deliver data.
+    """
     try:
         data = request.get_json()
         if data is not None:
@@ -15,57 +18,22 @@ def updateSensorData():
 
     return 'Invalid Request Syntax', 400
 
-@app.route('/enable/<int:room_id>', methods=['PUT'])
-def enable(room_id):
+@app.route('/update-constraint-data', methods=['POST'])
+def updateConstraintData():
     """
-    Enables and disables a node
-
-    Params:
-        room_id: id of the node to disable
+    Endpoint for updating the constraints of the data analyzers.
+    This endpoint is used by an Oracle to deliver constraints.
     """
-
-    data = request.get_json()
-    enable = data.get('enable')
-
-    # json bools are lowercases, so need to parse them to python
-    if enable == 'True' or enable == 'true':
-        enable = True
-    elif enable == 'False' or enable == 'false':
-        enable = False
-    else:
-        return jsonify(error='Enable flag not found'), 400
-
-    for room in PKI:
-        if room.id_ == room_id:
-            room.enable(enable)
+    try:
+        data = request.get_json()
+        if data is not None:
+            global_model_engine.update_constraint(data)
             return '', 204
-    
-    return jsonify(error='Room id not found'), 400
+    except:
+        pass
 
-@app.route('/get-counts', methods=['GET'])
-def get_counts():
-    """
-    Gets the count of people in the specified rooms
-    """
+    return 'Invalid Request Syntax', 400
 
-    rooms = {int(r) for r in request.args.getlist('room_id')}
-    counts = {}
-    for r in PKI:
-        if r.id_ in rooms:
-            counts[r.id_] = r.count
-    
-    return jsonify(counts), 200
-
-@app.route('/get-statuses', methods=['GET'])
-def get_statuses():
-    """
-    Gets the status (enabled/disabled) of the specified rooms
-    """
-
-    rooms = {int(r) for r in request.args.getlist('room_id')}
-    status = {}
-    for r in PKI:
-        if r.id_ in rooms:
-            status[r.id_] = r.enabled
-    
-    return jsonify(status), 200
+@app.route('/get-model-data', methods=['GET'])
+def getModelData():
+    return jsonify(global_model_engine.collect())

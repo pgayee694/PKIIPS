@@ -1,23 +1,4 @@
 
-def find_path(start_node, flow, people):
-    """
-    find_path is a utility function that returns all that nodes that are able to carry flow from a specific source
-    node
-    :param start_node: The source node to calculate paths for
-    :param flow: List of all nodes in the network with positive flow
-    :param people: The amount of people that must be carried from the source node
-    :return: A list of all possible nodes that contribute to viable paths for start_node
-    """
-    path_list = [start_node]
-    for node in path_list:
-        current_node = node
-        for edge_check in flow:
-            if edge_check.start == current_node and edge_check.end != 'ta':
-                if edge_check.flow >= people / 2:
-                    if edge_check.end not in path_list:
-                        path_list.append(edge_check.end)
-    return path_list
-
 
 class Vertex:
     """
@@ -38,8 +19,8 @@ class Vertex:
          :param sink: true if sink, false otherwise
         """
         self.name = name
-        self.source = source
-        self.sink = sink
+        self.isSource = source
+        self.isSink = sink
 
 
 class Edge:
@@ -51,7 +32,7 @@ class Edge:
             end(string): the node the edge is going to
             capacity(int): How much flow the edge can handle
             flow(int): How much flow the edge ends up carrying
-            returnEdge(Edge): sister edge in the residual graph
+            backwardsEdge(Edge): sister edge in the residual graph
         """
 
     def __init__(self, start, end, capacity):
@@ -65,7 +46,7 @@ class Edge:
         self.end = end
         self.capacity = capacity
         self.flow = 0
-        self.returnEdge = None
+        self.backwardsEdge = None
 
 
 class FlowNetwork:
@@ -90,7 +71,7 @@ class FlowNetwork:
         :return: the source node
         """
         for vertex in self.vertices:
-            if vertex.source:
+            if vertex.isSource:
                 return vertex
         return None
 
@@ -100,7 +81,7 @@ class FlowNetwork:
         :return: the sink node
         """
         for vertex in self.vertices:
-            if vertex.sink:
+            if vertex.isSink:
                 return vertex
         return None
 
@@ -136,25 +117,29 @@ class FlowNetwork:
                 all_edges.append(edge_check)
         return all_edges
 
-    def add_vertex(self, name, source=False, sink=False):
+    def add_vertex(self, name, isSource=False, isSink=False):
         """
         Adds a vertex to the flow network
         :param name: The identifier to be associated with the node
-        :param source: True if it's a source node, false otherwise
-        :param sink: True if it's a sink node, false otherwise
-        :return: Returns a string if error, nothing otherwise
+        :param isSource: True if it's a source node, false otherwise
+        :param isSink: True if it's a sink node, false otherwise
+        :return: False if error
         """
-        if source is True and sink is True:
-            return "Vertex cannot be source and sink"
+        if isSource is True and isSink is True:
+            return False
+
         if self.vertex_in_network(name):
-            return "ERROR"
-        if source:
+            return False
+
+        if isSource:
             if self.get_source() is not None:
-                return "ERROR"
-        if sink:
+                return False
+
+        if isSink:
             if self.get_sink() is not None:
-                return "ERROR"
-        new_vertex = Vertex(name, source, sink)
+                return False
+
+        new_vertex = Vertex(name, isSource, isSink)
         self.vertices.append(new_vertex)
         self.network[new_vertex.name] = []
 
@@ -164,21 +149,25 @@ class FlowNetwork:
         :param start: The node the edge is directed out of
         :param end: The node the edge is directed into
         :param capacity: The initial amount that can flow through the edge
-        :return: string if error occurs, nothing otherwise
+        :return: False if error
         """
         if start == end:
-            return "Cannot have same start and end"
+            return False
+
         if not self.vertex_in_network(start):
-            return "Start vertex has not been added yet"
+            return False
+
         if not self.vertex_in_network(end):
-            return "End vertex has not been added yet"
+            return False
+
         for edge_check in self.get_edges():
             if edge_check.start == start and edge_check.end == end and edge_check.capacity == capacity:
-                return "STOP"
+                return False
+
         new_edge = Edge(start, end, capacity)
         return_edge = Edge(end, start, 0)
-        new_edge.returnEdge = return_edge
-        return_edge.returnEdge = new_edge
+        new_edge.backwardsEdge = return_edge
+        return_edge.backwardsEdge = new_edge
         vertex = self.get_vertex(start)
         self.network[vertex.name].append(new_edge)
         return_vertex = self.get_vertex(end)
@@ -194,6 +183,7 @@ class FlowNetwork:
         """
         if start == end:
             return path
+
         for edge_check in self.network[start]:
             residual_capacity = edge_check.capacity - edge_check.flow
             if residual_capacity > 0 and not (edge_check, residual_capacity) in path:
@@ -215,69 +205,10 @@ class FlowNetwork:
             flow = min(edge[1] for edge in path)
             for edge, res in path:
                 edge.flow += flow
-                edge.returnEdge.flow -= flow
+                edge.backwardsEdge.flow -= flow
             path = self.get_path(source.name, sink.name, [])
         return sum(edge.flow for edge in self.network[source.name])
 
-
-def run_optimization(PKI_model):
-    """
-    The main program which builds a network flow graph and then runs a network flow algorithm to insure all
-    flow desired makes it through the network
-    :return: n/a
-    """
-    # for iterating through while loop
-    level_count = 1
-    # create empty graph
-    opt_graph = FlowNetwork()
-
-    # add artificial source and sink
-    opt_graph.add_vertex('sa', True, False)
-    opt_graph.add_vertex('ta', False, True)
-    # print(opt_graph.vertices)
-    while True:
-        # add vertices for graph level in use
-        for nameIn in PKI_model.vertices:
-            if PKI_model.vertices[nameIn]:
-                opt_graph.add_vertex(nameIn)
-                # print(nameIn)
-        # add edges for the rooms in specific graph level
-        # print(opt_graph.vertices)
-        for key, value in PKI_model.edges.items():
-            for v in value:
-                # print(v)
-                opt_graph.add_edge(key, v[0], v[1])
-
-        # where we calculate our max flow
-        flow_amount = opt_graph.calculate_max_flow()
-        print(flow_amount)
-        # if flow desired is found in current level of graph, we've found the graph to use
-        if flow_amount == PKI_model.desired_flow:
-            break
-        # Else Add the second or third level of nodes and edges
-        if level_count == 1:
-            PKI_model.vertices.update(PKI_model.l2vertices)
-            PKI_model.edges.update(PKI_model.l2edges)
-        if level_count == 2:
-            PKI_model.vertices.update(PKI_model.l3vertices)
-            PKI_model.edges.update(PKI_model.l3edges)
-        # if the desired flow cant be found, return an error
-        if level_count == 3:
-            print("desired flow cannot be found")
-            break
-
-        level_count = level_count + 1
-
-    # Builds a network of only the edges with positive flow for usability in finding paths
-    positive_flow_network = []
-    for edge in opt_graph.get_edges():
-        if edge.flow >= 0:
-            positive_flow_network = positive_flow_network + [edge]
-    path_a = find_path('s1', positive_flow_network, PKI_model.s1)
-    path_b = find_path('s2', positive_flow_network, PKI_model.s2)
-    path_c = find_path('s3', positive_flow_network, PKI_model.s3)
-    all_paths = {'s1': path_a, 's2': path_b, 's3': path_c}
-    print(all_paths)
 
 
 

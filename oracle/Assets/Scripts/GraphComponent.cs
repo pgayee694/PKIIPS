@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 /// <summary>
@@ -7,6 +8,32 @@ using UnityEngine.Assertions;
 /// </summary>
 public class GraphComponent : MonoBehaviour
 {
+    /// <summary>
+    /// The name of the id attribute.
+    /// </summary>
+    public virtual string IDAttribute { get {return "ID"; } }
+
+    /// <summary>
+    /// An ID for this node.
+    /// </summary>
+    [SerializeField]
+    private string id;
+
+    /// <summary>
+    /// Public attribute for the <code>id</code> member.
+    /// Updates the UI entry when this value gets sets.
+    /// <see cref="id"/>
+    /// </summary>
+    public string Id
+    {
+        get { return id; }
+        set
+        {
+            id = value;
+            UpdateEntry(IDAttribute, id);
+        }
+    }
+
     /// <summary>
     /// A <code>StatisticsBox</code> game object that can be used as
     /// a template to instantiate.
@@ -20,14 +47,17 @@ public class GraphComponent : MonoBehaviour
     /// to the node in the X coordinate.
     /// </summary>
     [SerializeField]
-    private float statisticsPositionOffsetX = 0;
+    private float statisticsPositionOffsetX = 0f;
 
     /// <summary>
     /// An offset of where the statistics box shows up relative
     /// to the node in the Y coordinate.
     /// </summary>
     [SerializeField]
-    private float statisticsPositionOffsetY = 0;
+    private float statisticsPositionOffsetY = 0f;
+
+    [SerializeField]
+    private float mouseDownWaitSeconds = 0.3f;
 
     /// <summary>
     /// The current game's <code>UIManager</code>. This is used to
@@ -37,10 +67,16 @@ public class GraphComponent : MonoBehaviour
     /// </summary>
     private UIManager ui;
 
+    protected DelphiClient delphiClient;
+    private PathManager pathManager;
+
     /// <summary>
     /// The currently instantiaed <code>StatisticsBox</code>.
     /// </summary>
     private StatisticsBox statistics = null;
+
+    private float mouseDownLimit;
+    private bool mouseDown = false;
 
     /// <summary>
     /// Updates an entry in the statistics box, if one exists.
@@ -73,8 +109,12 @@ public class GraphComponent : MonoBehaviour
     virtual protected void Start()
     {
         ui = GameObject.Find("EventSystem").GetComponent<UIManager>();
+        delphiClient = GameObject.Find("DelphiClient").GetComponent<DelphiClient>();
+        pathManager = GameObject.Find("PathManager").GetComponent<PathManager>();
         Assert.IsNotNull(statisticsTemplate);
         Assert.IsNotNull(ui);
+        Assert.IsNotNull(delphiClient);
+        Assert.IsNotNull(pathManager);
     }
 
     /// <summary>
@@ -83,6 +123,36 @@ public class GraphComponent : MonoBehaviour
     virtual protected void Update()
     {
         UpdateStatisticsPosition();
+        if(Input.GetAxis("Fire1") != 0)
+        {
+            if(mouseDown)
+            {
+                if(Time.fixedTime > mouseDownLimit)
+                {
+                    foreach(var path in delphiClient.CurrentPaths)
+                    {
+                        if(path[0] == Id)
+                        {
+                            if(pathManager.CurrentPath != null && path.SequenceEqual(pathManager.CurrentPath))
+                            {
+                                pathManager.CurrentPath = null;
+                            }
+                            else
+                            {
+                                pathManager.CurrentPath = path;
+                            }
+                            
+                            break;
+                        }
+                    }
+                    mouseDown = false;
+                }
+            }
+        }
+        else
+        {
+            mouseDown = false;
+        }
     }
 
     /// <summary>
@@ -94,6 +164,15 @@ public class GraphComponent : MonoBehaviour
         ToggleStatisticsBox();
     }
 
+    virtual protected void OnMouseDown()
+    {
+        if(!mouseDown)
+        {
+            mouseDownLimit = Time.fixedTime + mouseDownWaitSeconds;
+            mouseDown = true;
+        }
+    }
+
     /// <summary>
     /// Updates the statistics box with all the up-to-date values.
     /// This method is meant to be overridden and is called after the statistics box
@@ -101,6 +180,7 @@ public class GraphComponent : MonoBehaviour
     /// </summary>
     virtual protected void UpdateStatisticsValues()
     {
+        UpdateEntry(IDAttribute, Id);
     }
 
     /// <summary>
@@ -159,4 +239,5 @@ public class GraphComponent : MonoBehaviour
             statistics.transform.localScale = new Vector3(mappedValue, mappedValue, 1);
         }
     }
+
 }
