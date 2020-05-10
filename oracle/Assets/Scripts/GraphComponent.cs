@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -68,7 +69,7 @@ public class GraphComponent : MonoBehaviour
     private UIManager ui;
 
     protected DelphiClient delphiClient;
-    private PathManager pathManager;
+    protected PathManager pathManager;
 
     /// <summary>
     /// The currently instantiaed <code>StatisticsBox</code>.
@@ -131,7 +132,22 @@ public class GraphComponent : MonoBehaviour
                 {
                     foreach(var path in delphiClient.CurrentPaths)
                     {
-                        if(path[0] == Id)
+                        var foundStart = false;
+                        var buildingPath = new List<string>();
+                        foreach(var node in path)
+                        {
+                            if(node == Id)
+                            {
+                                foundStart = true;
+                            }
+
+                            if(foundStart)
+                            {
+                                buildingPath.Add(node);
+                            }
+                        }
+
+                        if(foundStart)
                         {
                             if(pathManager.CurrentPath != null && path.SequenceEqual(pathManager.CurrentPath))
                             {
@@ -139,9 +155,8 @@ public class GraphComponent : MonoBehaviour
                             }
                             else
                             {
-                                pathManager.CurrentPath = path;
+                                pathManager.CurrentPath = buildingPath;
                             }
-                            
                             break;
                         }
                     }
