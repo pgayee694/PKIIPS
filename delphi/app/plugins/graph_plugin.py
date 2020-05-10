@@ -15,13 +15,13 @@ def find_path(start_node, flow, people):
     :return: A list of all possible nodes that contribute to viable paths for start_node
     """
     path_list = [start_node]
-    for node in path_list:
-        current_node = node
-        for edge_check in flow:
-            if edge_check.start == current_node and edge_check.end != 'ta':
-                if edge_check.flow >= people / 2:
-                    if edge_check.end not in path_list:
-                        path_list.append(edge_check.end)
+    current_node = start_node
+    for edge_check in flow:
+        if edge_check.start == current_node and edge_check.end != 'ta':
+            if edge_check.flow >= people / 2:
+                if edge_check.end not in path_list:
+                    path_list.append(edge_check.end)
+                    current_node = edge_check.end
     return path_list
 
 
