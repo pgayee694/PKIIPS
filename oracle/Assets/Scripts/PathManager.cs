@@ -4,12 +4,21 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+/// <summary>
+/// Script used to hold the current user's path and draws it.
+/// </summary>
 [RequireComponent(typeof(LineRenderer))]
 public class PathManager : MonoBehaviour
 {
+    /// <summary>
+    /// The current game's <code>UIManager</code>. This is used to grab the current floor.
+    /// <see cref="UIManager"/>
+    /// </summary>
     [SerializeField]
     private UIManager ui = null;
 
+    /// <summary>
+    /// </summary>
     private List<string> currentPath = null;
     private LineRenderer currentLine = null;
 

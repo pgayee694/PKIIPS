@@ -39,6 +39,9 @@ public class DelphiClient : MonoBehaviour
     [SerializeField]
     private static float UPDATE_INTERVAL_TIME = 0.5f;
 
+    /// <summary>
+    /// A list of the current paths from delphi.
+    /// </summary>
     private List<List<string>> currentPaths;
 
     public List<List<string>> CurrentPaths
@@ -80,8 +83,7 @@ public class DelphiClient : MonoBehaviour
     private IEnumerator ToggleStatus(GraphComponentStatus node)
     {
         JSONObject requestData = new JSONObject();
-        requestData.Add("node", node.Id);
-        requestData.Add("status", (!node.Status));
+        requestData.Add("node_id", node.Id);
 
         return PostJson(BASE_URL + UPDATE_CONSTRAINT_ENDPOINT, requestData);
     }
@@ -147,10 +149,10 @@ public class DelphiClient : MonoBehaviour
                 {
                     foreach(var status in json["statuses"])
                     {
-                        var component = ui.CurrentFloor.GetGraphComponentByID(status.Value["id"]) as GraphComponentStatus;
+                        var component = ui.CurrentFloor.GetGraphComponentByID(status.Key) as GraphComponentStatus;
                         if(component != null)
                         {
-                            component.Status = status.Value["status"];
+                            component.Status = status.Value;
                         }
                     }
                 }

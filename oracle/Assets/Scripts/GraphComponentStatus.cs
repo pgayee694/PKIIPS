@@ -58,10 +58,19 @@ public class GraphComponentStatus : GraphComponent
                 status = value;
                 UpdateEntry(StatusAttribute, Status);
 
-                if (this != null && ps != null)
+                if (this != null)
                 {
-                    var main = ps.main;
-                    main.startColor = Status ? ObjectColor : Color.grey;
+                    if(ps != null)
+                    {
+                        var main = ps.main;
+                        main.startColor = Status ? ObjectColor : Color.grey;
+                    }
+
+                    if(!status && pathManager.CurrentPath != null)
+                    {
+                        pathManager.CurrentPath.Remove(Id);
+                        pathManager.CurrentPath = pathManager.CurrentPath;
+                    }
                 }
             }
         }

@@ -7,6 +7,7 @@ logging.basicConfig(format='[%(levelname)s] %(asctime)s (%(module)s): %(message)
 
 from app.plugins.distance_plugin import DistanceAnalyzerPlugin
 from app.plugins.graph_plugin import GraphPlugin
+from app.plugins.status_plugin import StatusPlugin
 
 app = Flask(__name__)
 
@@ -14,7 +15,8 @@ DATA_ANALYZER_PLUGINS = \
 [
     # Put data analyzer plugin instances here
     DistanceAnalyzerPlugin(),
-    GraphPlugin()
+    GraphPlugin(),
+    StatusPlugin()
 ]
 
 
