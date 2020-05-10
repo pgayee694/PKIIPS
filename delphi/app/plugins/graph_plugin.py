@@ -1,8 +1,8 @@
-from app import data_analyzer
+from delphi.app import data_analyzer
 from collections import namedtuple
 
-from app.graph import FlowNetwork
-from app.pki_model import PKI
+from delphi.app.graph import FlowNetwork
+from delphi.app.pki_model import PKI
 
 
 def find_path(start_node, flow, people):

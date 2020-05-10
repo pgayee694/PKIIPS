@@ -1,7 +1,7 @@
 import unittest
-from delphi.app.graph import *
-from delphi.app.pki_model import PKI
-from delphi.app.plugins.graph_plugin import GraphPlugin
+from app.graph import *
+from app.pki_model import PKI
+from app.plugins.graph_plugin import GraphPlugin
 
 
 class TestGraphPlugin(unittest.TestCase):
