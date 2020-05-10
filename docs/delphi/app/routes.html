@@ -25,77 +25,46 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from app import app
-from app.graph import GraphEdge, GraphNode, PKI
+from app import global_model_engine
+
 from flask import request, jsonify
+import logging
 
 @app.route(&#39;/update-sensor-data&#39;, methods=[&#39;POST&#39;])
 def updateSensorData():
+    &#34;&#34;&#34;
+    Endpoint for updating the data of the data analyzers.
+    This endpoint is used by a Seer to deliver data.
+    &#34;&#34;&#34;
     try:
         data = request.get_json()
-        sensorId = int(data.get(&#39;id&#39;))
-        count = int(data.get(&#39;count&#39;))
-
-        # TODO: store sensor data
-        return &#39;&#39;, 204
+        if data is not None:
+            global_model_engine.update_data(data)
+            return &#39;&#39;, 204
     except:
         pass
 
     return &#39;Invalid Request Syntax&#39;, 400
 
-@app.route(&#39;/enable/&lt;int:room_id&gt;&#39;, methods=[&#39;PUT&#39;])
-def enable(room_id):
+@app.route(&#39;/update-constraint-data&#39;, methods=[&#39;POST&#39;])
+def updateConstraintData():
     &#34;&#34;&#34;
-    Enables and disables a node
-
-    Params:
-        room_id: id of the node to disable
+    Endpoint for updating the constraints of the data analyzers.
+    This endpoint is used by an Oracle to deliver constraints.
     &#34;&#34;&#34;
-
-    data = request.get_json()
-    enable = data.get(&#39;enable&#39;)
-
-    # json bools are lowercases, so need to parse them to python
-    if enable == &#39;True&#39; or enable == &#39;true&#39;:
-        enable = True
-    elif enable == &#39;False&#39; or enable == &#39;false&#39;:
-        enable = False
-    else:
-        return jsonify(error=&#39;Enable flag not found&#39;), 400
-
-    for room in PKI:
-        if room.id_ == room_id:
-            room.enable(enable)
+    try:
+        data = request.get_json()
+        if data is not None:
+            global_model_engine.update_constraint(data)
             return &#39;&#39;, 204
-    
-    return jsonify(error=&#39;Room id not found&#39;), 400
+    except:
+        pass
 
-@app.route(&#39;/get-counts&#39;, methods=[&#39;GET&#39;])
-def get_counts():
-    &#34;&#34;&#34;
-    Gets the count of people in the specified rooms
-    &#34;&#34;&#34;
+    return &#39;Invalid Request Syntax&#39;, 400
 
-    rooms = {int(r) for r in request.args.getlist(&#39;room_id&#39;)}
-    counts = {}
-    for r in PKI:
-        if r.id_ in rooms:
-            counts[r.id_] = r.count
-    
-    return jsonify(counts), 200
-
-@app.route(&#39;/get-statuses&#39;, methods=[&#39;GET&#39;])
-def get_statuses():
-    &#34;&#34;&#34;
-    Gets the status (enabled/disabled) of the specified rooms
-    &#34;&#34;&#34;
-
-    rooms = {int(r) for r in request.args.getlist(&#39;room_id&#39;)}
-    status = {}
-    for r in PKI:
-        if r.id_ in rooms:
-            status[r.id_] = r.enabled
-    
-    return jsonify(status), 200</code></pre>
+@app.route(&#39;/get-model-data&#39;, methods=[&#39;GET&#39;])
+def getModelData():
+    return jsonify(global_model_engine.collect())</code></pre>
 </details>
 </section>
 <section>
@@ -105,95 +74,8 @@ def get_statuses():
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="app.routes.enable"><code class="name flex">
-<span>def <span class="ident">enable</span></span>(<span>room_id)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Enables and disables a node</p>
-<h2 id="params">Params</h2>
-<p>room_id: id of the node to disable</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.route(&#39;/enable/&lt;int:room_id&gt;&#39;, methods=[&#39;PUT&#39;])
-def enable(room_id):
-    &#34;&#34;&#34;
-    Enables and disables a node
-
-    Params:
-        room_id: id of the node to disable
-    &#34;&#34;&#34;
-
-    data = request.get_json()
-    enable = data.get(&#39;enable&#39;)
-
-    # json bools are lowercases, so need to parse them to python
-    if enable == &#39;True&#39; or enable == &#39;true&#39;:
-        enable = True
-    elif enable == &#39;False&#39; or enable == &#39;false&#39;:
-        enable = False
-    else:
-        return jsonify(error=&#39;Enable flag not found&#39;), 400
-
-    for room in PKI:
-        if room.id_ == room_id:
-            room.enable(enable)
-            return &#39;&#39;, 204
-    
-    return jsonify(error=&#39;Room id not found&#39;), 400</code></pre>
-</details>
-</dd>
-<dt id="app.routes.get_counts"><code class="name flex">
-<span>def <span class="ident">get_counts</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Gets the count of people in the specified rooms</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.route(&#39;/get-counts&#39;, methods=[&#39;GET&#39;])
-def get_counts():
-    &#34;&#34;&#34;
-    Gets the count of people in the specified rooms
-    &#34;&#34;&#34;
-
-    rooms = {int(r) for r in request.args.getlist(&#39;room_id&#39;)}
-    counts = {}
-    for r in PKI:
-        if r.id_ in rooms:
-            counts[r.id_] = r.count
-    
-    return jsonify(counts), 200</code></pre>
-</details>
-</dd>
-<dt id="app.routes.get_statuses"><code class="name flex">
-<span>def <span class="ident">get_statuses</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Gets the status (enabled/disabled) of the specified rooms</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@app.route(&#39;/get-statuses&#39;, methods=[&#39;GET&#39;])
-def get_statuses():
-    &#34;&#34;&#34;
-    Gets the status (enabled/disabled) of the specified rooms
-    &#34;&#34;&#34;
-
-    rooms = {int(r) for r in request.args.getlist(&#39;room_id&#39;)}
-    status = {}
-    for r in PKI:
-        if r.id_ in rooms:
-            status[r.id_] = r.enabled
-    
-    return jsonify(status), 200</code></pre>
-</details>
-</dd>
-<dt id="app.routes.updateSensorData"><code class="name flex">
-<span>def <span class="ident">updateSensorData</span></span>(<span>)</span>
+<dt id="app.routes.getModelData"><code class="name flex">
+<span>def <span class="ident">getModelData</span></span>(<span>)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -201,15 +83,59 @@ def get_statuses():
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@app.route(&#39;/update-sensor-data&#39;, methods=[&#39;POST&#39;])
-def updateSensorData():
+<pre><code class="python">@app.route(&#39;/get-model-data&#39;, methods=[&#39;GET&#39;])
+def getModelData():
+    return jsonify(global_model_engine.collect())</code></pre>
+</details>
+</dd>
+<dt id="app.routes.updateConstraintData"><code class="name flex">
+<span>def <span class="ident">updateConstraintData</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Endpoint for updating the constraints of the data analyzers.
+This endpoint is used by an Oracle to deliver constraints.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.route(&#39;/update-constraint-data&#39;, methods=[&#39;POST&#39;])
+def updateConstraintData():
+    &#34;&#34;&#34;
+    Endpoint for updating the constraints of the data analyzers.
+    This endpoint is used by an Oracle to deliver constraints.
+    &#34;&#34;&#34;
     try:
         data = request.get_json()
-        sensorId = int(data.get(&#39;id&#39;))
-        count = int(data.get(&#39;count&#39;))
+        if data is not None:
+            global_model_engine.update_constraint(data)
+            return &#39;&#39;, 204
+    except:
+        pass
 
-        # TODO: store sensor data
-        return &#39;&#39;, 204
+    return &#39;Invalid Request Syntax&#39;, 400</code></pre>
+</details>
+</dd>
+<dt id="app.routes.updateSensorData"><code class="name flex">
+<span>def <span class="ident">updateSensorData</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Endpoint for updating the data of the data analyzers.
+This endpoint is used by a Seer to deliver data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.route(&#39;/update-sensor-data&#39;, methods=[&#39;POST&#39;])
+def updateSensorData():
+    &#34;&#34;&#34;
+    Endpoint for updating the data of the data analyzers.
+    This endpoint is used by a Seer to deliver data.
+    &#34;&#34;&#34;
+    try:
+        data = request.get_json()
+        if data is not None:
+            global_model_engine.update_data(data)
+            return &#39;&#39;, 204
     except:
         pass
 
@@ -234,9 +160,8 @@ def updateSensorData():
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="app.routes.enable" href="#app.routes.enable">enable</a></code></li>
-<li><code><a title="app.routes.get_counts" href="#app.routes.get_counts">get_counts</a></code></li>
-<li><code><a title="app.routes.get_statuses" href="#app.routes.get_statuses">get_statuses</a></code></li>
+<li><code><a title="app.routes.getModelData" href="#app.routes.getModelData">getModelData</a></code></li>
+<li><code><a title="app.routes.updateConstraintData" href="#app.routes.updateConstraintData">updateConstraintData</a></code></li>
 <li><code><a title="app.routes.updateSensorData" href="#app.routes.updateSensorData">updateSensorData</a></code></li>
 </ul>
 </li>

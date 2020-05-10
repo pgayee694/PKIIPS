@@ -65,7 +65,43 @@ class TestDataAnalyzerPlugin(data_analyzer.DataAnalyzerPlugin):
 
     def constraint(self, constraints):
         self.max = constraints.max
-        self.num = min(self.num, self.max)</code></pre>
+        self.num = min(self.num, self.max)
+
+class TestDataAnalyzerPlugin2(data_analyzer.DataAnalyzerPlugin):
+    NodeData            = namedtuple(&#39;NodeData&#39;, (&#39;node_id&#39;, &#39;extra&#39;,), defaults=(None, None))
+    MaxSizeConstraint   = namedtuple(&#39;MaxSizeConstraint&#39;, (&#39;maxsize&#39;,))
+
+    def __init__(self):
+        super().__init__(TestDataAnalyzerPlugin2.NodeData._fields, TestDataAnalyzerPlugin2.MaxSizeConstraint._fields)
+
+    def get_data_class(self):
+        return TestDataAnalyzerPlugin2.NodeData
+    
+    def get_constraint_class(self):
+        return TestDataAnalyzerPlugin2.MaxSizeConstraint
+        
+    def init(self):
+        self.num      = 0
+        self.nodes    = set()
+        self.maxsize  = None
+
+    def shutdown(self):
+        self.nodes.clear()
+
+    def collect(self):
+        return {&#39;nodes&#39;: list(self.nodes)}
+
+    def analyze(self, data):
+        if self.maxsize is not None and len(self.nodes) &gt;= self.maxsize:
+            return
+
+        if data.node_id is not None:
+            self.nodes.add(data.node_id)
+            if data.extra is not None:
+                self.num += data.extra
+
+    def constraint(self, constraints):
+        self.maxsize = constraints.maxsize</code></pre>
 </details>
 </section>
 <section>
@@ -156,6 +192,89 @@ constraint_keywords (Iterable): An object that is iterable</p></div>
 </li>
 </ul>
 </dd>
+<dt id="app.plugins.example_plugins.TestDataAnalyzerPlugin2"><code class="flex name class">
+<span>class <span class="ident">TestDataAnalyzerPlugin2</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>All Data Analyzer plugins should inherit from this class.</p>
+<p>Initializes what keywords this analyzer is listening for.</p>
+<h2 id="parameters">Parameters</h2>
+<p>data_keywords (Iterable): An object that is iterable
+constraint_keywords (Iterable): An object that is iterable</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TestDataAnalyzerPlugin2(data_analyzer.DataAnalyzerPlugin):
+    NodeData            = namedtuple(&#39;NodeData&#39;, (&#39;node_id&#39;, &#39;extra&#39;,), defaults=(None, None))
+    MaxSizeConstraint   = namedtuple(&#39;MaxSizeConstraint&#39;, (&#39;maxsize&#39;,))
+
+    def __init__(self):
+        super().__init__(TestDataAnalyzerPlugin2.NodeData._fields, TestDataAnalyzerPlugin2.MaxSizeConstraint._fields)
+
+    def get_data_class(self):
+        return TestDataAnalyzerPlugin2.NodeData
+    
+    def get_constraint_class(self):
+        return TestDataAnalyzerPlugin2.MaxSizeConstraint
+        
+    def init(self):
+        self.num      = 0
+        self.nodes    = set()
+        self.maxsize  = None
+
+    def shutdown(self):
+        self.nodes.clear()
+
+    def collect(self):
+        return {&#39;nodes&#39;: list(self.nodes)}
+
+    def analyze(self, data):
+        if self.maxsize is not None and len(self.nodes) &gt;= self.maxsize:
+            return
+
+        if data.node_id is not None:
+            self.nodes.add(data.node_id)
+            if data.extra is not None:
+                self.num += data.extra
+
+    def constraint(self, constraints):
+        self.maxsize = constraints.maxsize</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.data_analyzer.DataAnalyzerPlugin" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin">DataAnalyzerPlugin</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.plugins.example_plugins.TestDataAnalyzerPlugin2.MaxSizeConstraint"><code class="name">var <span class="ident">MaxSizeConstraint</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.plugins.example_plugins.TestDataAnalyzerPlugin2.NodeData"><code class="name">var <span class="ident">NodeData</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="app.data_analyzer.DataAnalyzerPlugin" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin">DataAnalyzerPlugin</a></b></code>:
+<ul class="hlist">
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.analyze" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.analyze">analyze</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.collect" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.collect">collect</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.constraint" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.constraint">constraint</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.get_constraint_class" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.get_constraint_class">get_constraint_class</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.get_constraint_keywords" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.get_constraint_keywords">get_constraint_keywords</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.get_data_class" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.get_data_class">get_data_class</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.get_data_keywords" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.get_data_keywords">get_data_keywords</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.has_constraint_keyword" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.has_constraint_keyword">has_constraint_keyword</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.has_data_keyword" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.has_data_keyword">has_data_keyword</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.init" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.init">init</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.shutdown" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.shutdown">shutdown</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
 </dl>
 </section>
 </article>
@@ -177,6 +296,13 @@ constraint_keywords (Iterable): An object that is iterable</p></div>
 <ul class="">
 <li><code><a title="app.plugins.example_plugins.TestDataAnalyzerPlugin.IncrementData" href="#app.plugins.example_plugins.TestDataAnalyzerPlugin.IncrementData">IncrementData</a></code></li>
 <li><code><a title="app.plugins.example_plugins.TestDataAnalyzerPlugin.MaxConstraint" href="#app.plugins.example_plugins.TestDataAnalyzerPlugin.MaxConstraint">MaxConstraint</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="app.plugins.example_plugins.TestDataAnalyzerPlugin2" href="#app.plugins.example_plugins.TestDataAnalyzerPlugin2">TestDataAnalyzerPlugin2</a></code></h4>
+<ul class="">
+<li><code><a title="app.plugins.example_plugins.TestDataAnalyzerPlugin2.MaxSizeConstraint" href="#app.plugins.example_plugins.TestDataAnalyzerPlugin2.MaxSizeConstraint">MaxSizeConstraint</a></code></li>
+<li><code><a title="app.plugins.example_plugins.TestDataAnalyzerPlugin2.NodeData" href="#app.plugins.example_plugins.TestDataAnalyzerPlugin2.NodeData">NodeData</a></code></li>
 </ul>
 </li>
 </ul>

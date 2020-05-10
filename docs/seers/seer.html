@@ -69,25 +69,24 @@ url                                             = &#39;{}:{}{}&#39;.format(seer_
 # a function. Capturing variables such
 # as http_session and url.
 def http_send_json(delivery_system, data):
-        headers = {&#39;Content-Type&#39;: &#39;application/json&#39;}
-
-        try:
-                r = http_session.post(url, headers=headers, data=json.dumps(data))
-                if r.status_code not in [requests.codes.ok, requests.codes.no_content, requests.codes.bad_request]:
-                        logging.error(f&#39;Error sending delivery. Status code: {r.status_code}&#39;)
-                        delivery_system.stop()
-                connection_tries = 0
-        except requests.exceptions.ConnectionError as e:
-                logging.error(f&#39;Unable to connect to delphi, stopping: {e}&#39;)
-                delivery_system.stop()
+    headers = {&#39;Content-Type&#39;: &#39;application/json&#39;}
+    try:
+        r = http_session.post(url, headers=headers, data=json.dumps(data))
+        if r.status_code not in [requests.codes.ok, requests.codes.no_content, requests.codes.bad_request]:
+            logging.error(f&#39;Error sending delivery. Status code: {r.status_code}&#39;)
+            delivery_system.stop()
+        connection_tries = 0
+    except requests.exceptions.ConnectionError as e:
+        logging.error(f&#39;Unable to connect to delphi, stopping: {e}&#39;)
+        delivery_system.stop()
 
 if len(PLUGINS) == 0:
-        logging.error(&#39;No plugins loaded!&#39;)
-        sys.exit(1)
+    logging.error(&#39;No plugins loaded!&#39;)
+    sys.exit(1)
 
 delivery = seer_plugin.PluginDelivery(PLUGINS, 
-        http_send_json, seer_config.data_collection_timeout, 
-        seer_config.data_collection_queue_size)
+    http_send_json, seer_config.data_collection_timeout, 
+    seer_config.data_collection_queue_size)
 
 delivery.start()</code></pre>
 </details>
@@ -109,17 +108,16 @@ delivery.start()</code></pre>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def http_send_json(delivery_system, data):
-        headers = {&#39;Content-Type&#39;: &#39;application/json&#39;}
-
-        try:
-                r = http_session.post(url, headers=headers, data=json.dumps(data))
-                if r.status_code not in [requests.codes.ok, requests.codes.no_content, requests.codes.bad_request]:
-                        logging.error(f&#39;Error sending delivery. Status code: {r.status_code}&#39;)
-                        delivery_system.stop()
-                connection_tries = 0
-        except requests.exceptions.ConnectionError as e:
-                logging.error(f&#39;Unable to connect to delphi, stopping: {e}&#39;)
-                delivery_system.stop()</code></pre>
+    headers = {&#39;Content-Type&#39;: &#39;application/json&#39;}
+    try:
+        r = http_session.post(url, headers=headers, data=json.dumps(data))
+        if r.status_code not in [requests.codes.ok, requests.codes.no_content, requests.codes.bad_request]:
+            logging.error(f&#39;Error sending delivery. Status code: {r.status_code}&#39;)
+            delivery_system.stop()
+        connection_tries = 0
+    except requests.exceptions.ConnectionError as e:
+        logging.error(f&#39;Unable to connect to delphi, stopping: {e}&#39;)
+        delivery_system.stop()</code></pre>
 </details>
 </dd>
 </dl>

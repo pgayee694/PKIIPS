@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
 <title>app.graph API documentation</title>
-<meta name="description" content="Contains classes and utilities for graph operations." />
+<meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -20,86 +20,218 @@
 <h1 class="title">Module <code>app.graph</code></h1>
 </header>
 <section id="section-intro">
-<p>Contains classes and utilities for graph operations.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#34;&#34;&#34;
-Contains classes and utilities for graph operations.
-&#34;&#34;&#34;
-
-class GraphNode():
+<pre><code class="python">class Vertex:
     &#34;&#34;&#34;
-    Contains information about each node within the graph representation
-    &#34;&#34;&#34;
+    This is a class representing a node in a graph.
 
-    def __init__(self, id_, edges=[], enabled=True):
-        &#34;&#34;&#34;
-        Constructs the GraphNode object. Initialized count to 0.
-
-        Params:
-            id_: string representing id of the node (room #)
-            edges: list of GraphEdge objects with this node as the source
-            enabled: if the node is enabled or not
-        &#34;&#34;&#34;
-
-        self.id_ = id_
-        self.edges = edges
-        self.enabled = enabled
-        self.count = 0
-    
-    def enable(self, enable=True):
-        &#34;&#34;&#34;
-        Toggles the availability of a node
-        
-        Params:
-            enable: If the node should be enabled or not
-        &#34;&#34;&#34;
-
-        self.enabled = enable
-
-    def update_count(self, count):
-        &#34;&#34;&#34;
-        Updates the count of the node
-        
-        Params:
-            count: the number of people in the node
-        &#34;&#34;&#34;
-
-        self.count = count
-
-
-class GraphEdge():
-    &#34;&#34;&#34;
-    Contains information about each directed edge within the graph representation
+    Attributes:
+        name(string): the label given to the node
+        source(boolean): true if source, false otherwise
+        sink(boolean): true if sink, false otherwise
     &#34;&#34;&#34;
 
-    def __init__(self, source, dest, capacity=0):
+    def __init__(self, name, source=False, sink=False):
         &#34;&#34;&#34;
-        Constructs the GraphEdge object.
+         The constructor for the vertex class
 
-        Params:
-            source: source node
-            dest: destination node
-            capacity: default capacity of the edge
+         :param name: the label given to the node
+         :param source:true if source, false otherwise
+         :param sink: true if sink, false otherwise
+        &#34;&#34;&#34;
+        self.name = name
+        self.isSource = source
+        self.isSink = sink
+
+
+class Edge:
+    &#34;&#34;&#34;
+        This is a class representing a directed edge in a graph.
+
+        Attributes:
+            start(string): the node the edge is starting from
+            end(string): the node the edge is going to
+            capacity(int): How much flow the edge can handle
+            flow(int): How much flow the edge ends up carrying
+            backwardsEdge(Edge): sister edge in the residual graph
         &#34;&#34;&#34;
 
-        self.source = source
-        self.dest = dest
+    def __init__(self, start, end, capacity):
+        &#34;&#34;&#34;
+        This is the constructor for the Edge class
+        :param start: the node the edge is starting from
+        :param end: the node the edge is going to
+        :param capacity:  How much flow the edge can handle
+        &#34;&#34;&#34;
+        self.start = start
+        self.end = end
         self.capacity = capacity
-    
-    def update_capacity(self, capacity):
+        self.flow = 0
+        self.backwardsEdge = None
+
+
+class FlowNetwork:
+    &#34;&#34;&#34;
+    FlowNetwork represents a graph of nodes and directed edges, pushing flow from one source to one sink
+
+    Attributes:
+        vertices(list): The set of vertices in the flow network
+        network(dictionary): A collection of nodes and edges with weights to represent a network flow graph
+    &#34;&#34;&#34;
+
+    def __init__(self):
         &#34;&#34;&#34;
-        Updates the capacity of the edge. Cannot be greater than MAX_CAPACITY.
-
-        TODO: Have this do calculations on how to update the capacity rather than just setting it.
+        The constructor for the FlowNetwork Class
         &#34;&#34;&#34;
+        self.vertices = []
+        self.network = {}
 
-        self.capacity = capacity
+    def get_source(self):
+        &#34;&#34;&#34;
+        retrieves the source node for the flow network
+        :return: the source node
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if vertex.isSource:
+                return vertex
+        return None
 
-# TODO: Have this actually populated and easier to access/manipulate
-PKI = []</code></pre>
+    def get_sink(self):
+        &#34;&#34;&#34;
+        Retrieves the sink node for the flow network
+        :return: the sink node
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if vertex.isSink:
+                return vertex
+        return None
+
+    def get_vertex(self, name):
+        &#34;&#34;&#34;
+        Finds the vertex associated with the name passed in
+        :param name: The name associated with the vertex to find
+        :return: The vertex represented by name
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if name == vertex.name:
+                return vertex
+
+    def vertex_in_network(self, name):
+        &#34;&#34;&#34;
+        Decides if a vertex is in the network based off of name
+        :param name: The name of the vertex to check for
+        :return: True if the vertex is already in the network; false otherwise
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if vertex.name == name:
+                return True
+        return False
+
+    def get_edges(self):
+        &#34;&#34;&#34;
+        Retrieves all the edges in the network
+        :return: The edges in the network
+        &#34;&#34;&#34;
+        all_edges = []
+        for vertex in self.network:
+            for edge_check in self.network[vertex]:
+                all_edges.append(edge_check)
+        return all_edges
+
+    def add_vertex(self, name, isSource=False, isSink=False):
+        &#34;&#34;&#34;
+        Adds a vertex to the flow network
+        :param name: The identifier to be associated with the node
+        :param isSource: True if it&#39;s a source node, false otherwise
+        :param isSink: True if it&#39;s a sink node, false otherwise
+        :return: False if error
+        &#34;&#34;&#34;
+        if isSource is True and isSink is True:
+            return False
+
+        if self.vertex_in_network(name):
+            return False
+
+        if isSource:
+            if self.get_source() is not None:
+                return False
+
+        if isSink:
+            if self.get_sink() is not None:
+                return False
+
+        new_vertex = Vertex(name, isSource, isSink)
+        self.vertices.append(new_vertex)
+        self.network[new_vertex.name] = []
+
+    def add_edge(self, start, end, capacity):
+        &#34;&#34;&#34;
+        Adds a directed edge to the flow network
+        :param start: The node the edge is directed out of
+        :param end: The node the edge is directed into
+        :param capacity: The initial amount that can flow through the edge
+        :return: False if error
+        &#34;&#34;&#34;
+        if start == end:
+            return False
+
+        if not self.vertex_in_network(start):
+            return False
+
+        if not self.vertex_in_network(end):
+            return False
+
+        for edge_check in self.get_edges():
+            if edge_check.start == start and edge_check.end == end and edge_check.capacity == capacity:
+                return False
+
+        new_edge = Edge(start, end, capacity)
+        return_edge = Edge(end, start, 0)
+        new_edge.backwardsEdge = return_edge
+        return_edge.backwardsEdge = new_edge
+        vertex = self.get_vertex(start)
+        self.network[vertex.name].append(new_edge)
+        return_vertex = self.get_vertex(end)
+        self.network[return_vertex.name].append(return_edge)
+
+    def get_path(self, start, end, path):
+        &#34;&#34;&#34;
+        Finds a path from a start node to an end node
+        :param start: the node to start searching from
+        :param end: The node to arrive at
+        :param path: The set of nodes and edges to look for a path through
+        :return: the found path
+        &#34;&#34;&#34;
+        if start == end:
+            return path
+
+        for edge_check in self.network[start]:
+            residual_capacity = edge_check.capacity - edge_check.flow
+            if residual_capacity &gt; 0 and not (edge_check, residual_capacity) in path:
+                result = self.get_path(edge_check.end, end, path + [(edge_check, residual_capacity)])
+                if result is not None:
+                    return result
+
+    def calculate_max_flow(self):
+        &#34;&#34;&#34;
+        Calculates the max flow of the flow network using the Ford-Fulkerson algorithm
+        :return: and integer representing the max flow
+        &#34;&#34;&#34;
+        source = self.get_source()
+        sink = self.get_sink()
+        if source is None or sink is None:
+            return &#34;Network does not have source and sink&#34;
+        path = self.get_path(source.name, sink.name, [])
+        while path is not None:
+            flow = min(edge[1] for edge in path)
+            for edge, res in path:
+                edge.flow += flow
+                edge.backwardsEdge.flow -= flow
+            path = self.get_path(source.name, sink.name, [])
+        return sum(edge.flow for edge in self.network[source.name])</code></pre>
 </details>
 </section>
 <section>
@@ -111,175 +243,524 @@ PKI = []</code></pre>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="app.graph.GraphEdge"><code class="flex name class">
-<span>class <span class="ident">GraphEdge</span></span>
-<span>(</span><span>source, dest, capacity=0)</span>
+<dt id="app.graph.Edge"><code class="flex name class">
+<span>class <span class="ident">Edge</span></span>
+<span>(</span><span>start, end, capacity)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Contains information about each directed edge within the graph representation</p>
-<p>Constructs the GraphEdge object.</p>
-<h2 id="params">Params</h2>
-<p>source: source node
-dest: destination node
-capacity: default capacity of the edge</p></div>
+<div class="desc"><p>This is a class representing a directed edge in a graph.</p>
+<h2 id="attributes">Attributes</h2>
+<p>start(string): the node the edge is starting from
+end(string): the node the edge is going to
+capacity(int): How much flow the edge can handle
+flow(int): How much flow the edge ends up carrying
+backwardsEdge(Edge): sister edge in the residual graph
+This is the constructor for the Edge class
+:param start: the node the edge is starting from
+:param end: the node the edge is going to
+:param capacity:
+How much flow the edge can handle</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class GraphEdge():
+<pre><code class="python">class Edge:
     &#34;&#34;&#34;
-    Contains information about each directed edge within the graph representation
-    &#34;&#34;&#34;
+        This is a class representing a directed edge in a graph.
 
-    def __init__(self, source, dest, capacity=0):
-        &#34;&#34;&#34;
-        Constructs the GraphEdge object.
-
-        Params:
-            source: source node
-            dest: destination node
-            capacity: default capacity of the edge
+        Attributes:
+            start(string): the node the edge is starting from
+            end(string): the node the edge is going to
+            capacity(int): How much flow the edge can handle
+            flow(int): How much flow the edge ends up carrying
+            backwardsEdge(Edge): sister edge in the residual graph
         &#34;&#34;&#34;
 
-        self.source = source
-        self.dest = dest
+    def __init__(self, start, end, capacity):
+        &#34;&#34;&#34;
+        This is the constructor for the Edge class
+        :param start: the node the edge is starting from
+        :param end: the node the edge is going to
+        :param capacity:  How much flow the edge can handle
+        &#34;&#34;&#34;
+        self.start = start
+        self.end = end
         self.capacity = capacity
-    
-    def update_capacity(self, capacity):
-        &#34;&#34;&#34;
-        Updates the capacity of the edge. Cannot be greater than MAX_CAPACITY.
-
-        TODO: Have this do calculations on how to update the capacity rather than just setting it.
-        &#34;&#34;&#34;
-
-        self.capacity = capacity</code></pre>
+        self.flow = 0
+        self.backwardsEdge = None</code></pre>
 </details>
-<h3>Methods</h3>
-<dl>
-<dt id="app.graph.GraphEdge.update_capacity"><code class="name flex">
-<span>def <span class="ident">update_capacity</span></span>(<span>self, capacity)</span>
+</dd>
+<dt id="app.graph.FlowNetwork"><code class="flex name class">
+<span>class <span class="ident">FlowNetwork</span></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Updates the capacity of the edge. Cannot be greater than MAX_CAPACITY.</p>
-<p>TODO: Have this do calculations on how to update the capacity rather than just setting it.</p></div>
+<div class="desc"><p>FlowNetwork represents a graph of nodes and directed edges, pushing flow from one source to one sink</p>
+<h2 id="attributes">Attributes</h2>
+<p>vertices(list): The set of vertices in the flow network
+network(dictionary): A collection of nodes and edges with weights to represent a network flow graph
+The constructor for the FlowNetwork Class</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def update_capacity(self, capacity):
+<pre><code class="python">class FlowNetwork:
     &#34;&#34;&#34;
-    Updates the capacity of the edge. Cannot be greater than MAX_CAPACITY.
+    FlowNetwork represents a graph of nodes and directed edges, pushing flow from one source to one sink
 
-    TODO: Have this do calculations on how to update the capacity rather than just setting it.
+    Attributes:
+        vertices(list): The set of vertices in the flow network
+        network(dictionary): A collection of nodes and edges with weights to represent a network flow graph
     &#34;&#34;&#34;
 
-    self.capacity = capacity</code></pre>
+    def __init__(self):
+        &#34;&#34;&#34;
+        The constructor for the FlowNetwork Class
+        &#34;&#34;&#34;
+        self.vertices = []
+        self.network = {}
+
+    def get_source(self):
+        &#34;&#34;&#34;
+        retrieves the source node for the flow network
+        :return: the source node
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if vertex.isSource:
+                return vertex
+        return None
+
+    def get_sink(self):
+        &#34;&#34;&#34;
+        Retrieves the sink node for the flow network
+        :return: the sink node
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if vertex.isSink:
+                return vertex
+        return None
+
+    def get_vertex(self, name):
+        &#34;&#34;&#34;
+        Finds the vertex associated with the name passed in
+        :param name: The name associated with the vertex to find
+        :return: The vertex represented by name
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if name == vertex.name:
+                return vertex
+
+    def vertex_in_network(self, name):
+        &#34;&#34;&#34;
+        Decides if a vertex is in the network based off of name
+        :param name: The name of the vertex to check for
+        :return: True if the vertex is already in the network; false otherwise
+        &#34;&#34;&#34;
+        for vertex in self.vertices:
+            if vertex.name == name:
+                return True
+        return False
+
+    def get_edges(self):
+        &#34;&#34;&#34;
+        Retrieves all the edges in the network
+        :return: The edges in the network
+        &#34;&#34;&#34;
+        all_edges = []
+        for vertex in self.network:
+            for edge_check in self.network[vertex]:
+                all_edges.append(edge_check)
+        return all_edges
+
+    def add_vertex(self, name, isSource=False, isSink=False):
+        &#34;&#34;&#34;
+        Adds a vertex to the flow network
+        :param name: The identifier to be associated with the node
+        :param isSource: True if it&#39;s a source node, false otherwise
+        :param isSink: True if it&#39;s a sink node, false otherwise
+        :return: False if error
+        &#34;&#34;&#34;
+        if isSource is True and isSink is True:
+            return False
+
+        if self.vertex_in_network(name):
+            return False
+
+        if isSource:
+            if self.get_source() is not None:
+                return False
+
+        if isSink:
+            if self.get_sink() is not None:
+                return False
+
+        new_vertex = Vertex(name, isSource, isSink)
+        self.vertices.append(new_vertex)
+        self.network[new_vertex.name] = []
+
+    def add_edge(self, start, end, capacity):
+        &#34;&#34;&#34;
+        Adds a directed edge to the flow network
+        :param start: The node the edge is directed out of
+        :param end: The node the edge is directed into
+        :param capacity: The initial amount that can flow through the edge
+        :return: False if error
+        &#34;&#34;&#34;
+        if start == end:
+            return False
+
+        if not self.vertex_in_network(start):
+            return False
+
+        if not self.vertex_in_network(end):
+            return False
+
+        for edge_check in self.get_edges():
+            if edge_check.start == start and edge_check.end == end and edge_check.capacity == capacity:
+                return False
+
+        new_edge = Edge(start, end, capacity)
+        return_edge = Edge(end, start, 0)
+        new_edge.backwardsEdge = return_edge
+        return_edge.backwardsEdge = new_edge
+        vertex = self.get_vertex(start)
+        self.network[vertex.name].append(new_edge)
+        return_vertex = self.get_vertex(end)
+        self.network[return_vertex.name].append(return_edge)
+
+    def get_path(self, start, end, path):
+        &#34;&#34;&#34;
+        Finds a path from a start node to an end node
+        :param start: the node to start searching from
+        :param end: The node to arrive at
+        :param path: The set of nodes and edges to look for a path through
+        :return: the found path
+        &#34;&#34;&#34;
+        if start == end:
+            return path
+
+        for edge_check in self.network[start]:
+            residual_capacity = edge_check.capacity - edge_check.flow
+            if residual_capacity &gt; 0 and not (edge_check, residual_capacity) in path:
+                result = self.get_path(edge_check.end, end, path + [(edge_check, residual_capacity)])
+                if result is not None:
+                    return result
+
+    def calculate_max_flow(self):
+        &#34;&#34;&#34;
+        Calculates the max flow of the flow network using the Ford-Fulkerson algorithm
+        :return: and integer representing the max flow
+        &#34;&#34;&#34;
+        source = self.get_source()
+        sink = self.get_sink()
+        if source is None or sink is None:
+            return &#34;Network does not have source and sink&#34;
+        path = self.get_path(source.name, sink.name, [])
+        while path is not None:
+            flow = min(edge[1] for edge in path)
+            for edge, res in path:
+                edge.flow += flow
+                edge.backwardsEdge.flow -= flow
+            path = self.get_path(source.name, sink.name, [])
+        return sum(edge.flow for edge in self.network[source.name])</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="app.graph.FlowNetwork.add_edge"><code class="name flex">
+<span>def <span class="ident">add_edge</span></span>(<span>self, start, end, capacity)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a directed edge to the flow network
+:param start: The node the edge is directed out of
+:param end: The node the edge is directed into
+:param capacity: The initial amount that can flow through the edge
+:return: False if error</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_edge(self, start, end, capacity):
+    &#34;&#34;&#34;
+    Adds a directed edge to the flow network
+    :param start: The node the edge is directed out of
+    :param end: The node the edge is directed into
+    :param capacity: The initial amount that can flow through the edge
+    :return: False if error
+    &#34;&#34;&#34;
+    if start == end:
+        return False
+
+    if not self.vertex_in_network(start):
+        return False
+
+    if not self.vertex_in_network(end):
+        return False
+
+    for edge_check in self.get_edges():
+        if edge_check.start == start and edge_check.end == end and edge_check.capacity == capacity:
+            return False
+
+    new_edge = Edge(start, end, capacity)
+    return_edge = Edge(end, start, 0)
+    new_edge.backwardsEdge = return_edge
+    return_edge.backwardsEdge = new_edge
+    vertex = self.get_vertex(start)
+    self.network[vertex.name].append(new_edge)
+    return_vertex = self.get_vertex(end)
+    self.network[return_vertex.name].append(return_edge)</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.add_vertex"><code class="name flex">
+<span>def <span class="ident">add_vertex</span></span>(<span>self, name, isSource=False, isSink=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Adds a vertex to the flow network
+:param name: The identifier to be associated with the node
+:param isSource: True if it's a source node, false otherwise
+:param isSink: True if it's a sink node, false otherwise
+:return: False if error</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_vertex(self, name, isSource=False, isSink=False):
+    &#34;&#34;&#34;
+    Adds a vertex to the flow network
+    :param name: The identifier to be associated with the node
+    :param isSource: True if it&#39;s a source node, false otherwise
+    :param isSink: True if it&#39;s a sink node, false otherwise
+    :return: False if error
+    &#34;&#34;&#34;
+    if isSource is True and isSink is True:
+        return False
+
+    if self.vertex_in_network(name):
+        return False
+
+    if isSource:
+        if self.get_source() is not None:
+            return False
+
+    if isSink:
+        if self.get_sink() is not None:
+            return False
+
+    new_vertex = Vertex(name, isSource, isSink)
+    self.vertices.append(new_vertex)
+    self.network[new_vertex.name] = []</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.calculate_max_flow"><code class="name flex">
+<span>def <span class="ident">calculate_max_flow</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates the max flow of the flow network using the Ford-Fulkerson algorithm
+:return: and integer representing the max flow</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def calculate_max_flow(self):
+    &#34;&#34;&#34;
+    Calculates the max flow of the flow network using the Ford-Fulkerson algorithm
+    :return: and integer representing the max flow
+    &#34;&#34;&#34;
+    source = self.get_source()
+    sink = self.get_sink()
+    if source is None or sink is None:
+        return &#34;Network does not have source and sink&#34;
+    path = self.get_path(source.name, sink.name, [])
+    while path is not None:
+        flow = min(edge[1] for edge in path)
+        for edge, res in path:
+            edge.flow += flow
+            edge.backwardsEdge.flow -= flow
+        path = self.get_path(source.name, sink.name, [])
+    return sum(edge.flow for edge in self.network[source.name])</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.get_edges"><code class="name flex">
+<span>def <span class="ident">get_edges</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves all the edges in the network
+:return: The edges in the network</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_edges(self):
+    &#34;&#34;&#34;
+    Retrieves all the edges in the network
+    :return: The edges in the network
+    &#34;&#34;&#34;
+    all_edges = []
+    for vertex in self.network:
+        for edge_check in self.network[vertex]:
+            all_edges.append(edge_check)
+    return all_edges</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.get_path"><code class="name flex">
+<span>def <span class="ident">get_path</span></span>(<span>self, start, end, path)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds a path from a start node to an end node
+:param start: the node to start searching from
+:param end: The node to arrive at
+:param path: The set of nodes and edges to look for a path through
+:return: the found path</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_path(self, start, end, path):
+    &#34;&#34;&#34;
+    Finds a path from a start node to an end node
+    :param start: the node to start searching from
+    :param end: The node to arrive at
+    :param path: The set of nodes and edges to look for a path through
+    :return: the found path
+    &#34;&#34;&#34;
+    if start == end:
+        return path
+
+    for edge_check in self.network[start]:
+        residual_capacity = edge_check.capacity - edge_check.flow
+        if residual_capacity &gt; 0 and not (edge_check, residual_capacity) in path:
+            result = self.get_path(edge_check.end, end, path + [(edge_check, residual_capacity)])
+            if result is not None:
+                return result</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.get_sink"><code class="name flex">
+<span>def <span class="ident">get_sink</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Retrieves the sink node for the flow network
+:return: the sink node</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sink(self):
+    &#34;&#34;&#34;
+    Retrieves the sink node for the flow network
+    :return: the sink node
+    &#34;&#34;&#34;
+    for vertex in self.vertices:
+        if vertex.isSink:
+            return vertex
+    return None</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.get_source"><code class="name flex">
+<span>def <span class="ident">get_source</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>retrieves the source node for the flow network
+:return: the source node</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_source(self):
+    &#34;&#34;&#34;
+    retrieves the source node for the flow network
+    :return: the source node
+    &#34;&#34;&#34;
+    for vertex in self.vertices:
+        if vertex.isSource:
+            return vertex
+    return None</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.get_vertex"><code class="name flex">
+<span>def <span class="ident">get_vertex</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds the vertex associated with the name passed in
+:param name: The name associated with the vertex to find
+:return: The vertex represented by name</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_vertex(self, name):
+    &#34;&#34;&#34;
+    Finds the vertex associated with the name passed in
+    :param name: The name associated with the vertex to find
+    :return: The vertex represented by name
+    &#34;&#34;&#34;
+    for vertex in self.vertices:
+        if name == vertex.name:
+            return vertex</code></pre>
+</details>
+</dd>
+<dt id="app.graph.FlowNetwork.vertex_in_network"><code class="name flex">
+<span>def <span class="ident">vertex_in_network</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Decides if a vertex is in the network based off of name
+:param name: The name of the vertex to check for
+:return: True if the vertex is already in the network; false otherwise</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def vertex_in_network(self, name):
+    &#34;&#34;&#34;
+    Decides if a vertex is in the network based off of name
+    :param name: The name of the vertex to check for
+    :return: True if the vertex is already in the network; false otherwise
+    &#34;&#34;&#34;
+    for vertex in self.vertices:
+        if vertex.name == name:
+            return True
+    return False</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="app.graph.GraphNode"><code class="flex name class">
-<span>class <span class="ident">GraphNode</span></span>
-<span>(</span><span>id_, edges=[], enabled=True)</span>
+<dt id="app.graph.Vertex"><code class="flex name class">
+<span>class <span class="ident">Vertex</span></span>
+<span>(</span><span>name, source=False, sink=False)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Contains information about each node within the graph representation</p>
-<p>Constructs the GraphNode object. Initialized count to 0.</p>
-<h2 id="params">Params</h2>
-<p>id_: string representing id of the node (room #)
-edges: list of GraphEdge objects with this node as the source
-enabled: if the node is enabled or not</p></div>
+<div class="desc"><p>This is a class representing a node in a graph.</p>
+<h2 id="attributes">Attributes</h2>
+<p>name(string): the label given to the node
+source(boolean): true if source, false otherwise
+sink(boolean): true if sink, false otherwise
+The constructor for the vertex class</p>
+<p>:param name: the label given to the node
+:param source:true if source, false otherwise
+:param sink: true if sink, false otherwise</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class GraphNode():
+<pre><code class="python">class Vertex:
     &#34;&#34;&#34;
-    Contains information about each node within the graph representation
+    This is a class representing a node in a graph.
+
+    Attributes:
+        name(string): the label given to the node
+        source(boolean): true if source, false otherwise
+        sink(boolean): true if sink, false otherwise
     &#34;&#34;&#34;
 
-    def __init__(self, id_, edges=[], enabled=True):
+    def __init__(self, name, source=False, sink=False):
         &#34;&#34;&#34;
-        Constructs the GraphNode object. Initialized count to 0.
+         The constructor for the vertex class
 
-        Params:
-            id_: string representing id of the node (room #)
-            edges: list of GraphEdge objects with this node as the source
-            enabled: if the node is enabled or not
+         :param name: the label given to the node
+         :param source:true if source, false otherwise
+         :param sink: true if sink, false otherwise
         &#34;&#34;&#34;
-
-        self.id_ = id_
-        self.edges = edges
-        self.enabled = enabled
-        self.count = 0
-    
-    def enable(self, enable=True):
-        &#34;&#34;&#34;
-        Toggles the availability of a node
-        
-        Params:
-            enable: If the node should be enabled or not
-        &#34;&#34;&#34;
-
-        self.enabled = enable
-
-    def update_count(self, count):
-        &#34;&#34;&#34;
-        Updates the count of the node
-        
-        Params:
-            count: the number of people in the node
-        &#34;&#34;&#34;
-
-        self.count = count</code></pre>
+        self.name = name
+        self.isSource = source
+        self.isSink = sink</code></pre>
 </details>
-<h3>Methods</h3>
-<dl>
-<dt id="app.graph.GraphNode.enable"><code class="name flex">
-<span>def <span class="ident">enable</span></span>(<span>self, enable=True)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Toggles the availability of a node</p>
-<h2 id="params">Params</h2>
-<p>enable: If the node should be enabled or not</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def enable(self, enable=True):
-    &#34;&#34;&#34;
-    Toggles the availability of a node
-    
-    Params:
-        enable: If the node should be enabled or not
-    &#34;&#34;&#34;
-
-    self.enabled = enable</code></pre>
-</details>
-</dd>
-<dt id="app.graph.GraphNode.update_count"><code class="name flex">
-<span>def <span class="ident">update_count</span></span>(<span>self, count)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Updates the count of the node</p>
-<h2 id="params">Params</h2>
-<p>count: the number of people in the node</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def update_count(self, count):
-    &#34;&#34;&#34;
-    Updates the count of the node
-    
-    Params:
-        count: the number of people in the node
-    &#34;&#34;&#34;
-
-    self.count = count</code></pre>
-</details>
-</dd>
-</dl>
 </dd>
 </dl>
 </section>
@@ -298,17 +779,24 @@ enabled: if the node is enabled or not</p></div>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="app.graph.GraphEdge" href="#app.graph.GraphEdge">GraphEdge</a></code></h4>
-<ul class="">
-<li><code><a title="app.graph.GraphEdge.update_capacity" href="#app.graph.GraphEdge.update_capacity">update_capacity</a></code></li>
+<h4><code><a title="app.graph.Edge" href="#app.graph.Edge">Edge</a></code></h4>
+</li>
+<li>
+<h4><code><a title="app.graph.FlowNetwork" href="#app.graph.FlowNetwork">FlowNetwork</a></code></h4>
+<ul class="two-column">
+<li><code><a title="app.graph.FlowNetwork.add_edge" href="#app.graph.FlowNetwork.add_edge">add_edge</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.add_vertex" href="#app.graph.FlowNetwork.add_vertex">add_vertex</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.calculate_max_flow" href="#app.graph.FlowNetwork.calculate_max_flow">calculate_max_flow</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.get_edges" href="#app.graph.FlowNetwork.get_edges">get_edges</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.get_path" href="#app.graph.FlowNetwork.get_path">get_path</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.get_sink" href="#app.graph.FlowNetwork.get_sink">get_sink</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.get_source" href="#app.graph.FlowNetwork.get_source">get_source</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.get_vertex" href="#app.graph.FlowNetwork.get_vertex">get_vertex</a></code></li>
+<li><code><a title="app.graph.FlowNetwork.vertex_in_network" href="#app.graph.FlowNetwork.vertex_in_network">vertex_in_network</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="app.graph.GraphNode" href="#app.graph.GraphNode">GraphNode</a></code></h4>
-<ul class="">
-<li><code><a title="app.graph.GraphNode.enable" href="#app.graph.GraphNode.enable">enable</a></code></li>
-<li><code><a title="app.graph.GraphNode.update_count" href="#app.graph.GraphNode.update_count">update_count</a></code></li>
-</ul>
+<h4><code><a title="app.graph.Vertex" href="#app.graph.Vertex">Vertex</a></code></h4>
 </li>
 </ul>
 </li>
