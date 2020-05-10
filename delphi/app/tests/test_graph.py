@@ -31,17 +31,15 @@ class TestGraphPlugin(unittest.TestCase):
         self.assertEqual(analyzer.collect(), {'paths': {}})
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'],
-                                    '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
-                                    '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
+                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
 
         data_payload = {'Room': '252', 'Count': 20}
         data_object = analyzer.get_data_class()(**data_payload)
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'],
-                                    '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
-                                    '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
+                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
 
     def test_analyze_constraint(self):
         analyzer = GraphPlugin()
@@ -54,14 +52,11 @@ class TestGraphPlugin(unittest.TestCase):
 
         analyzer.analyze(data_object)
         self.assertEqual(analyzer.collect(),
-                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'],
-                                    '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
-                                    '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
+                         {'paths': {'252': ['252', 'h1', 'h2', 'h5', 't1', 't2'], '256': ['256', 'h1', 'h2', 'h5', 't1', 't2'],
+                          '260': ['260', 'h1', 'h2', 'h5', 't1', 't2']}})
 
         analyzer.constraint(constraint_object)
-        self.assertEqual(analyzer.collect(), {'paths': {'252': ['252', 'h1', 'h2', 'h3', 't1', 'h4', 't3', 't4'],
-           '256': ['256'],
-           '260': ['260', 'h6', 'h4', 't3', 't4']}})
+        self.assertEqual(analyzer.collect(), {'paths': {'252': ['252', 'h1', 'h3', 'h2', 'h4', 't1', 't3'], '256': ['256'], '260': ['260', 'h6', 'h4', 't3', 't4']}})
 
     def test_shutdown(self):
         analyzer = GraphPlugin()
@@ -93,17 +88,15 @@ class TestPKI(unittest.TestCase):
                                           'h2': [('h5', 75), ('t1', 25)], 't1': [('ta', 1000)], 't2': [('ta', 1000)],
                                           'h5': [('t2', 80)]},
                                    'l2': {'252': [('h1', 12.5), ('h3', 12.5)], 'h3': [('h4', 20)],
-                                          'h4': [('t3', 20), ('t4', 20)], 't3': [('ta', 1000)], 't4': [('ta', 1000)],
-                                          'h1': [('h2', 80), ('h3', 40)]},
+                                          'h4': [('t3', 20), ('t4', 20)], 't3': [('ta', 1000)], 't4': [('ta', 1000)]},
                                    'l3': {'260': [('h1', 10.0), ('h6', 10.0)], 'h6': [('h4', 30)]}}
         pki.update_room('252', 30)
         assert pki.edge_levels == {'l1': {'sa': [('252', 1000), ('256', 1000), ('260', 1000)], '252': [('h1', 30)],
                                           '256': [('h1', 30)], '260': [('h1', 20)], 'h1': [('h2', 80)],
                                           'h2': [('h5', 75), ('t1', 25)], 't1': [('ta', 1000)], 't2': [('ta', 1000)],
                                           'h5': [('t2', 80)]},
-                                   'l2': {'252': [('h1', 15.0), ('h3', 15.0)], 'h3': [('h4', 20)],
-                                          'h4': [('t3', 20), ('t4', 20)], 't3': [('ta', 1000)], 't4': [('ta', 1000)],
-                                          'h1': [('h2', 80), ('h3', 40)]},
+                                   'l2': {'252': [('h1', 15), ('h3', 15)], 'h3': [('h4', 20)],
+                                          'h4': [('t3', 20), ('t4', 20)], 't3': [('ta', 1000)], 't4': [('ta', 1000)]},
                                    'l3': {'260': [('h1', 10.0), ('h6', 10.0)], 'h6': [('h4', 30)]}}
 
 
