@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.8.1" />
-<title>app.tests.test_upload_sensor_data API documentation</title>
+<title>app.tests.test_upload_constraint_data API documentation</title>
 <meta name="description" content="" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
@@ -17,7 +17,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>app.tests.test_upload_sensor_data</code></h1>
+<h1 class="title">Module <code>app.tests.test_upload_constraint_data</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -30,9 +30,12 @@ from app import app
 from app import global_model_engine
 from app.model_engine import ModelEngine
 from app.plugins.example_plugins import TestDataAnalyzerPlugin
+from app.plugins.example_plugins import TestDataAnalyzerPlugin2
 
-class TestUploadSensorData(unittest.TestCase):
-    &#34;&#34;&#34;Tests the functionality of the &#39;/update-sensor-data&#39; route.&#34;&#34;&#34;
+class TestUploadConstraintData(unittest.TestCase):
+    &#34;&#34;&#34;
+    Tests the functionality of the &#39;/update-constraint-data&#39; route.
+    &#34;&#34;&#34;
 
     def setUp(self):
         app.config[&#39;TESTING&#39;] = True
@@ -47,12 +50,17 @@ class TestUploadSensorData(unittest.TestCase):
     def postData(self, data):
         &#34;&#34;&#34;Helper method for posting data in the form of a string or a dict.&#34;&#34;&#34;
         return self.app.post(
-            &#39;/update-sensor-data&#39;, data=data)
+            &#39;/update-constraint-data&#39;, data=data)
 
-    def postJson(self, json):
+    def postDataJson(self, json):
         &#34;&#34;&#34;Helper method for posting data in the form of JSON.&#34;&#34;&#34;
         return self.app.post(
             &#39;/update-sensor-data&#39;, json=json)
+
+    def postConstraintJson(self, json):
+        &#34;&#34;&#34;Helper method for posting data in the form of JSON.&#34;&#34;&#34;
+        return self.app.post(
+            &#39;/update-constraint-data&#39;, json=json)
 
     def assertSuccess(self, response):
         &#34;&#34;&#34;Helper method for asserting a successful response.&#34;&#34;&#34;
@@ -65,26 +73,48 @@ class TestUploadSensorData(unittest.TestCase):
         self.assertEqual(response.get_data(as_text=True),
                          &#39;Invalid Request Syntax&#39;)
 
-    def test_non_json(self):
-        self.assertFailure(self.postData(&#39;test&#39;))
-        self.assertFailure(self.postData(dict(id=0, count=0)))
+    def test_endpoint_success(self):
+        self.assertSuccess(self.postConstraintJson({&#34;max&#34;: 15}))
+
+    def test_endpoint_failure(self):
+        self.assertFailure(self.postData(&#34;max: 15&#34;))
+        self.assertFailure(self.postData(dict(max=15)))
 
     def test_model_engine(self):
         analyzer = TestDataAnalyzerPlugin()
+        analyzer2 = TestDataAnalyzerPlugin2()
         global_model_engine.add_analyzer(analyzer)
+        global_model_engine.add_analyzer(analyzer2)
         global_model_engine.start()
-        data_payload = {&#39;increment&#39;: 5}
+
+        data_payload = {&#39;increment&#39;: 8}
+        constraint_payload = {&#39;max&#39;: 5}
+        constraint_payload2 = {&#39;maxsize&#39;: 4}
 
         self.assertEqual(analyzer.num, 0)
         self.assertIsNone(analyzer.max)
 
-        self.assertSuccess(self.postJson(data_payload))
+        self.assertSuccess(self.postDataJson(data_payload))
 
-        self.assertEqual(analyzer.num, 5)
+        self.assertEqual(analyzer.num, 8)
         self.assertIsNone(analyzer.max)
 
-if __name__ == &#39;__main__&#39;:
-    unittest.main()</code></pre>
+        self.assertSuccess(self.postConstraintJson(constraint_payload))
+
+        self.assertEqual(analyzer.num, 5)
+        self.assertEqual(analyzer.max, 5)
+
+        self.assertDictEqual(analyzer.collect(), {&#39;num&#39;: 5})
+
+        self.assertEqual(analyzer2.num, 0)
+        self.assertSetEqual(analyzer2.nodes, set())
+        self.assertIsNone(analyzer2.maxsize)
+
+        self.assertSuccess(self.postConstraintJson(constraint_payload2))
+
+        self.assertEqual(analyzer2.num, 0)
+        self.assertSetEqual(analyzer2.nodes, set())
+        self.assertEqual(analyzer2.maxsize, 4)</code></pre>
 </details>
 </section>
 <section>
@@ -96,12 +126,12 @@ if __name__ == &#39;__main__&#39;:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData"><code class="flex name class">
-<span>class <span class="ident">TestUploadSensorData</span></span>
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData"><code class="flex name class">
+<span>class <span class="ident">TestUploadConstraintData</span></span>
 <span>(</span><span>methodName='runTest')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Tests the functionality of the '/update-sensor-data' route.</p>
+<div class="desc"><p>Tests the functionality of the '/update-constraint-data' route.</p>
 <p>Create an instance of the class that will use the named test
 method when executed. Raises a ValueError if the instance does
 not have a method with the specified name.</p></div>
@@ -109,8 +139,10 @@ not have a method with the specified name.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class TestUploadSensorData(unittest.TestCase):
-    &#34;&#34;&#34;Tests the functionality of the &#39;/update-sensor-data&#39; route.&#34;&#34;&#34;
+<pre><code class="python">class TestUploadConstraintData(unittest.TestCase):
+    &#34;&#34;&#34;
+    Tests the functionality of the &#39;/update-constraint-data&#39; route.
+    &#34;&#34;&#34;
 
     def setUp(self):
         app.config[&#39;TESTING&#39;] = True
@@ -125,12 +157,17 @@ not have a method with the specified name.</p></div>
     def postData(self, data):
         &#34;&#34;&#34;Helper method for posting data in the form of a string or a dict.&#34;&#34;&#34;
         return self.app.post(
-            &#39;/update-sensor-data&#39;, data=data)
+            &#39;/update-constraint-data&#39;, data=data)
 
-    def postJson(self, json):
+    def postDataJson(self, json):
         &#34;&#34;&#34;Helper method for posting data in the form of JSON.&#34;&#34;&#34;
         return self.app.post(
             &#39;/update-sensor-data&#39;, json=json)
+
+    def postConstraintJson(self, json):
+        &#34;&#34;&#34;Helper method for posting data in the form of JSON.&#34;&#34;&#34;
+        return self.app.post(
+            &#39;/update-constraint-data&#39;, json=json)
 
     def assertSuccess(self, response):
         &#34;&#34;&#34;Helper method for asserting a successful response.&#34;&#34;&#34;
@@ -143,23 +180,48 @@ not have a method with the specified name.</p></div>
         self.assertEqual(response.get_data(as_text=True),
                          &#39;Invalid Request Syntax&#39;)
 
-    def test_non_json(self):
-        self.assertFailure(self.postData(&#39;test&#39;))
-        self.assertFailure(self.postData(dict(id=0, count=0)))
+    def test_endpoint_success(self):
+        self.assertSuccess(self.postConstraintJson({&#34;max&#34;: 15}))
+
+    def test_endpoint_failure(self):
+        self.assertFailure(self.postData(&#34;max: 15&#34;))
+        self.assertFailure(self.postData(dict(max=15)))
 
     def test_model_engine(self):
         analyzer = TestDataAnalyzerPlugin()
+        analyzer2 = TestDataAnalyzerPlugin2()
         global_model_engine.add_analyzer(analyzer)
+        global_model_engine.add_analyzer(analyzer2)
         global_model_engine.start()
-        data_payload = {&#39;increment&#39;: 5}
+
+        data_payload = {&#39;increment&#39;: 8}
+        constraint_payload = {&#39;max&#39;: 5}
+        constraint_payload2 = {&#39;maxsize&#39;: 4}
 
         self.assertEqual(analyzer.num, 0)
         self.assertIsNone(analyzer.max)
 
-        self.assertSuccess(self.postJson(data_payload))
+        self.assertSuccess(self.postDataJson(data_payload))
+
+        self.assertEqual(analyzer.num, 8)
+        self.assertIsNone(analyzer.max)
+
+        self.assertSuccess(self.postConstraintJson(constraint_payload))
 
         self.assertEqual(analyzer.num, 5)
-        self.assertIsNone(analyzer.max)</code></pre>
+        self.assertEqual(analyzer.max, 5)
+
+        self.assertDictEqual(analyzer.collect(), {&#39;num&#39;: 5})
+
+        self.assertEqual(analyzer2.num, 0)
+        self.assertSetEqual(analyzer2.nodes, set())
+        self.assertIsNone(analyzer2.maxsize)
+
+        self.assertSuccess(self.postConstraintJson(constraint_payload2))
+
+        self.assertEqual(analyzer2.num, 0)
+        self.assertSetEqual(analyzer2.nodes, set())
+        self.assertEqual(analyzer2.maxsize, 4)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -167,7 +229,7 @@ not have a method with the specified name.</p></div>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.assertFailure"><code class="name flex">
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.assertFailure"><code class="name flex">
 <span>def <span class="ident">assertFailure</span></span>(<span>self, response)</span>
 </code></dt>
 <dd>
@@ -183,7 +245,7 @@ not have a method with the specified name.</p></div>
                      &#39;Invalid Request Syntax&#39;)</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.assertSuccess"><code class="name flex">
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.assertSuccess"><code class="name flex">
 <span>def <span class="ident">assertSuccess</span></span>(<span>self, response)</span>
 </code></dt>
 <dd>
@@ -198,7 +260,22 @@ not have a method with the specified name.</p></div>
     self.assertEqual(response.get_data(as_text=True), &#39;&#39;)</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.postData"><code class="name flex">
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.postConstraintJson"><code class="name flex">
+<span>def <span class="ident">postConstraintJson</span></span>(<span>self, json)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Helper method for posting data in the form of JSON.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def postConstraintJson(self, json):
+    &#34;&#34;&#34;Helper method for posting data in the form of JSON.&#34;&#34;&#34;
+    return self.app.post(
+        &#39;/update-constraint-data&#39;, json=json)</code></pre>
+</details>
+</dd>
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.postData"><code class="name flex">
 <span>def <span class="ident">postData</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
@@ -210,11 +287,11 @@ not have a method with the specified name.</p></div>
 <pre><code class="python">def postData(self, data):
     &#34;&#34;&#34;Helper method for posting data in the form of a string or a dict.&#34;&#34;&#34;
     return self.app.post(
-        &#39;/update-sensor-data&#39;, data=data)</code></pre>
+        &#39;/update-constraint-data&#39;, data=data)</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.postJson"><code class="name flex">
-<span>def <span class="ident">postJson</span></span>(<span>self, json)</span>
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.postDataJson"><code class="name flex">
+<span>def <span class="ident">postDataJson</span></span>(<span>self, json)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Helper method for posting data in the form of JSON.</p></div>
@@ -222,13 +299,13 @@ not have a method with the specified name.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def postJson(self, json):
+<pre><code class="python">def postDataJson(self, json):
     &#34;&#34;&#34;Helper method for posting data in the form of JSON.&#34;&#34;&#34;
     return self.app.post(
         &#39;/update-sensor-data&#39;, json=json)</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.setUp"><code class="name flex">
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.setUp"><code class="name flex">
 <span>def <span class="ident">setUp</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -245,7 +322,7 @@ not have a method with the specified name.</p></div>
     self.app = app.test_client()</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.tearDown"><code class="name flex">
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.tearDown"><code class="name flex">
 <span>def <span class="ident">tearDown</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -258,7 +335,34 @@ not have a method with the specified name.</p></div>
     pass</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_model_engine"><code class="name flex">
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.test_endpoint_failure"><code class="name flex">
+<span>def <span class="ident">test_endpoint_failure</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_endpoint_failure(self):
+    self.assertFailure(self.postData(&#34;max: 15&#34;))
+    self.assertFailure(self.postData(dict(max=15)))</code></pre>
+</details>
+</dd>
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.test_endpoint_success"><code class="name flex">
+<span>def <span class="ident">test_endpoint_success</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def test_endpoint_success(self):
+    self.assertSuccess(self.postConstraintJson({&#34;max&#34;: 15}))</code></pre>
+</details>
+</dd>
+<dt id="app.tests.test_upload_constraint_data.TestUploadConstraintData.test_model_engine"><code class="name flex">
 <span>def <span class="ident">test_model_engine</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -269,31 +373,39 @@ not have a method with the specified name.</p></div>
 </summary>
 <pre><code class="python">def test_model_engine(self):
     analyzer = TestDataAnalyzerPlugin()
+    analyzer2 = TestDataAnalyzerPlugin2()
     global_model_engine.add_analyzer(analyzer)
+    global_model_engine.add_analyzer(analyzer2)
     global_model_engine.start()
-    data_payload = {&#39;increment&#39;: 5}
+
+    data_payload = {&#39;increment&#39;: 8}
+    constraint_payload = {&#39;max&#39;: 5}
+    constraint_payload2 = {&#39;maxsize&#39;: 4}
 
     self.assertEqual(analyzer.num, 0)
     self.assertIsNone(analyzer.max)
 
-    self.assertSuccess(self.postJson(data_payload))
+    self.assertSuccess(self.postDataJson(data_payload))
+
+    self.assertEqual(analyzer.num, 8)
+    self.assertIsNone(analyzer.max)
+
+    self.assertSuccess(self.postConstraintJson(constraint_payload))
 
     self.assertEqual(analyzer.num, 5)
-    self.assertIsNone(analyzer.max)</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_non_json"><code class="name flex">
-<span>def <span class="ident">test_non_json</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_non_json(self):
-    self.assertFailure(self.postData(&#39;test&#39;))
-    self.assertFailure(self.postData(dict(id=0, count=0)))</code></pre>
+    self.assertEqual(analyzer.max, 5)
+
+    self.assertDictEqual(analyzer.collect(), {&#39;num&#39;: 5})
+
+    self.assertEqual(analyzer2.num, 0)
+    self.assertSetEqual(analyzer2.nodes, set())
+    self.assertIsNone(analyzer2.maxsize)
+
+    self.assertSuccess(self.postConstraintJson(constraint_payload2))
+
+    self.assertEqual(analyzer2.num, 0)
+    self.assertSetEqual(analyzer2.nodes, set())
+    self.assertEqual(analyzer2.maxsize, 4)</code></pre>
 </details>
 </dd>
 </dl>
@@ -315,16 +427,18 @@ not have a method with the specified name.</p></div>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData" href="#app.tests.test_upload_sensor_data.TestUploadSensorData">TestUploadSensorData</a></code></h4>
-<ul class="two-column">
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.assertFailure" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.assertFailure">assertFailure</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.assertSuccess" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.assertSuccess">assertSuccess</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.postData" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.postData">postData</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.postJson" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.postJson">postJson</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.setUp" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.setUp">setUp</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.tearDown" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.tearDown">tearDown</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_model_engine" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_model_engine">test_model_engine</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_non_json" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_non_json">test_non_json</a></code></li>
+<h4><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData">TestUploadConstraintData</a></code></h4>
+<ul class="">
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.assertFailure" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.assertFailure">assertFailure</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.assertSuccess" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.assertSuccess">assertSuccess</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.postConstraintJson" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.postConstraintJson">postConstraintJson</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.postData" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.postData">postData</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.postDataJson" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.postDataJson">postDataJson</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.setUp" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.setUp">setUp</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.tearDown" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.tearDown">tearDown</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.test_endpoint_failure" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.test_endpoint_failure">test_endpoint_failure</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.test_endpoint_success" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.test_endpoint_success">test_endpoint_success</a></code></li>
+<li><code><a title="app.tests.test_upload_constraint_data.TestUploadConstraintData.test_model_engine" href="#app.tests.test_upload_constraint_data.TestUploadConstraintData.test_model_engine">test_model_engine</a></code></li>
 </ul>
 </li>
 </ul>

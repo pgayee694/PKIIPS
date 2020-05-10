@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>app.plugins.graph_plugin API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>app.plugins.graph_plugin</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from app import data_analyzer
+from collections import namedtuple
+
+from app.graph import FlowNetwork
+from app.pki_model import PKI
+
+
+def find_path(start_node, flow, people):
+    &#34;&#34;&#34;
+    find_path is a utility function that returns all that nodes that are able to carry flow from a specific source
+    node
+    :param start_node: The source node to calculate paths for
+    :param flow: List of all nodes in the network with positive flow
+    :param people: The amount of people that must be carried from the source node
+    :return: A list of all possible nodes that contribute to viable paths for start_node
+    &#34;&#34;&#34;
+    path_list = [start_node]
+    for node in path_list:
+        current_node = node
+        for edge_check in flow:
+            if edge_check.start == current_node and edge_check.end != &#39;ta&#39;:
+                if edge_check.flow &gt;= people / 2:
+                    if edge_check.end not in path_list:
+                        path_list.append(edge_check.end)
+    return path_list
+
+
+class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
+    RoomData = namedtuple(&#39;RoomData&#39;, (&#39;Room&#39;, &#39;Count&#39;))
+    NodeConstraint = namedtuple(&#39;NodeConstraint&#39;, (&#39;node_id&#39;,))
+
+    def __init__(self):
+        super().__init__(GraphPlugin.RoomData._fields, GraphPlugin.NodeConstraint._fields)
+
+    def get_data_class(self):
+        &#34;&#34;&#34;
+        returns Room Data class
+        :return: room data class
+        &#34;&#34;&#34;
+        return GraphPlugin.RoomData
+
+    def get_constraint_class(self):
+        &#34;&#34;&#34;
+        returns node constraint class
+        :return: node constrain class
+        &#34;&#34;&#34;
+        return GraphPlugin.NodeConstraint
+
+    def init(self):
+        &#34;&#34;&#34;
+        Initialization
+        Attributes:
+            pki: a PKI object for optimization
+            routes: a dictionary of routes
+        :return:
+        &#34;&#34;&#34;
+
+        self.pki = PKI()
+        self.routes = {}
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        shutdown
+        :return:
+        &#34;&#34;&#34;
+        self.pki = None
+
+    def collect(self):
+        &#34;&#34;&#34;
+        to collect routes
+        :return: A dictionary of routes for each rooms
+        &#34;&#34;&#34;
+        return {&#39;paths&#39;: self.routes}
+
+    def analyze(self, data):
+        &#34;&#34;&#34;
+        Updates the people count in rooms and reruns the graph optimization
+        :param data: room numbers with associated people counts
+        :return:
+        &#34;&#34;&#34;
+        self.pki.update_room(data.Room, data.Count)
+        self.optimize()
+
+    def constraint(self, constraints):
+        &#34;&#34;&#34;
+        toggles the enabled/disabled statuses of nodes
+        :param constraints: a list of node names passed in as strings
+        :return:
+        &#34;&#34;&#34;
+        self.pki.toggle(constraints.node_id)
+        self.optimize()
+
+    def optimize(self):
+        &#34;&#34;&#34;
+        The main program which builds a network flow graph and then runs a network flow algorithm to insure all
+        flow desired makes it through the network
+        :return: n/a
+        &#34;&#34;&#34;
+        # for iterating through while loop
+        level_count = 1
+        # create empty graph
+        opt_graph = FlowNetwork()
+
+        # add artificial source and sink and first level of vertices/edges
+        opt_graph.add_vertex(&#39;sa&#39;, True, False)
+        opt_graph.add_vertex(&#39;ta&#39;, False, True)
+        for node in self.pki.vertex_levels[&#39;l1&#39;]:
+            if self.pki.vertex_levels[&#39;l1&#39;][node]:
+                opt_graph.add_vertex(node)
+
+        for key, value in self.pki.edge_levels[&#39;l1&#39;].items():
+            for v in value:
+                opt_graph.add_edge(key, v[0], v[1])
+
+        while True:
+            # where we calculate our max flow
+            flow_amount = opt_graph.calculate_max_flow()
+            # if flow desired is found in current level of graph, we&#39;ve found the graph to use
+            if flow_amount == self.pki.desired_flow:
+                break
+            # Else Add the second or third level of nodes and edges
+            if level_count == 1:
+                for node in self.pki.vertex_levels[&#39;l2&#39;]:
+                    if self.pki.vertex_levels[&#39;l2&#39;][node]:
+                        opt_graph.add_vertex(node)
+                for key, value in self.pki.edge_levels[&#39;l2&#39;].items():
+                    for v in value:
+                        opt_graph.add_edge(key, v[0], v[1])
+
+            if level_count == 2:
+                for node in self.pki.vertex_levels[&#39;l3&#39;]:
+                    if self.pki.vertex_levels[&#39;l3&#39;][node]:
+                        opt_graph.add_vertex(node)
+                for key, value in self.pki.edge_levels[&#39;l3&#39;].items():
+                    for v in value:
+                        opt_graph.add_edge(key, v[0], v[1])
+
+            # if the desired flow cant be found, return an error
+            if level_count == 3:
+                break
+
+            level_count = level_count + 1
+
+        # Builds a network of only the edges with positive flow for usability in finding paths
+        positive_flow_network = []
+        for edge in opt_graph.get_edges():
+            if edge.flow &gt;= 0:
+                positive_flow_network = positive_flow_network + [edge]
+        path_a = find_path(&#39;252&#39;, positive_flow_network, self.pki.room_counts[&#39;252&#39;])
+        path_b = find_path(&#39;256&#39;, positive_flow_network, self.pki.room_counts[&#39;256&#39;])
+        path_c = find_path(&#39;260&#39;, positive_flow_network, self.pki.room_counts[&#39;260&#39;])
+        self.routes = {&#39;252&#39;: path_a, &#39;256&#39;: path_b, &#39;260&#39;: path_c}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="app.plugins.graph_plugin.find_path"><code class="name flex">
+<span>def <span class="ident">find_path</span></span>(<span>start_node, flow, people)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>find_path is a utility function that returns all that nodes that are able to carry flow from a specific source
+node
+:param start_node: The source node to calculate paths for
+:param flow: List of all nodes in the network with positive flow
+:param people: The amount of people that must be carried from the source node
+:return: A list of all possible nodes that contribute to viable paths for start_node</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_path(start_node, flow, people):
+    &#34;&#34;&#34;
+    find_path is a utility function that returns all that nodes that are able to carry flow from a specific source
+    node
+    :param start_node: The source node to calculate paths for
+    :param flow: List of all nodes in the network with positive flow
+    :param people: The amount of people that must be carried from the source node
+    :return: A list of all possible nodes that contribute to viable paths for start_node
+    &#34;&#34;&#34;
+    path_list = [start_node]
+    for node in path_list:
+        current_node = node
+        for edge_check in flow:
+            if edge_check.start == current_node and edge_check.end != &#39;ta&#39;:
+                if edge_check.flow &gt;= people / 2:
+                    if edge_check.end not in path_list:
+                        path_list.append(edge_check.end)
+    return path_list</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="app.plugins.graph_plugin.GraphPlugin"><code class="flex name class">
+<span>class <span class="ident">GraphPlugin</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>All Data Analyzer plugins should inherit from this class.</p>
+<p>Initializes what keywords this analyzer is listening for.</p>
+<h2 id="parameters">Parameters</h2>
+<p>data_keywords (Iterable): An object that is iterable
+constraint_keywords (Iterable): An object that is iterable</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class GraphPlugin(data_analyzer.DataAnalyzerPlugin):
+    RoomData = namedtuple(&#39;RoomData&#39;, (&#39;Room&#39;, &#39;Count&#39;))
+    NodeConstraint = namedtuple(&#39;NodeConstraint&#39;, (&#39;node_id&#39;,))
+
+    def __init__(self):
+        super().__init__(GraphPlugin.RoomData._fields, GraphPlugin.NodeConstraint._fields)
+
+    def get_data_class(self):
+        &#34;&#34;&#34;
+        returns Room Data class
+        :return: room data class
+        &#34;&#34;&#34;
+        return GraphPlugin.RoomData
+
+    def get_constraint_class(self):
+        &#34;&#34;&#34;
+        returns node constraint class
+        :return: node constrain class
+        &#34;&#34;&#34;
+        return GraphPlugin.NodeConstraint
+
+    def init(self):
+        &#34;&#34;&#34;
+        Initialization
+        Attributes:
+            pki: a PKI object for optimization
+            routes: a dictionary of routes
+        :return:
+        &#34;&#34;&#34;
+
+        self.pki = PKI()
+        self.routes = {}
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        shutdown
+        :return:
+        &#34;&#34;&#34;
+        self.pki = None
+
+    def collect(self):
+        &#34;&#34;&#34;
+        to collect routes
+        :return: A dictionary of routes for each rooms
+        &#34;&#34;&#34;
+        return {&#39;paths&#39;: self.routes}
+
+    def analyze(self, data):
+        &#34;&#34;&#34;
+        Updates the people count in rooms and reruns the graph optimization
+        :param data: room numbers with associated people counts
+        :return:
+        &#34;&#34;&#34;
+        self.pki.update_room(data.Room, data.Count)
+        self.optimize()
+
+    def constraint(self, constraints):
+        &#34;&#34;&#34;
+        toggles the enabled/disabled statuses of nodes
+        :param constraints: a list of node names passed in as strings
+        :return:
+        &#34;&#34;&#34;
+        self.pki.toggle(constraints.node_id)
+        self.optimize()
+
+    def optimize(self):
+        &#34;&#34;&#34;
+        The main program which builds a network flow graph and then runs a network flow algorithm to insure all
+        flow desired makes it through the network
+        :return: n/a
+        &#34;&#34;&#34;
+        # for iterating through while loop
+        level_count = 1
+        # create empty graph
+        opt_graph = FlowNetwork()
+
+        # add artificial source and sink and first level of vertices/edges
+        opt_graph.add_vertex(&#39;sa&#39;, True, False)
+        opt_graph.add_vertex(&#39;ta&#39;, False, True)
+        for node in self.pki.vertex_levels[&#39;l1&#39;]:
+            if self.pki.vertex_levels[&#39;l1&#39;][node]:
+                opt_graph.add_vertex(node)
+
+        for key, value in self.pki.edge_levels[&#39;l1&#39;].items():
+            for v in value:
+                opt_graph.add_edge(key, v[0], v[1])
+
+        while True:
+            # where we calculate our max flow
+            flow_amount = opt_graph.calculate_max_flow()
+            # if flow desired is found in current level of graph, we&#39;ve found the graph to use
+            if flow_amount == self.pki.desired_flow:
+                break
+            # Else Add the second or third level of nodes and edges
+            if level_count == 1:
+                for node in self.pki.vertex_levels[&#39;l2&#39;]:
+                    if self.pki.vertex_levels[&#39;l2&#39;][node]:
+                        opt_graph.add_vertex(node)
+                for key, value in self.pki.edge_levels[&#39;l2&#39;].items():
+                    for v in value:
+                        opt_graph.add_edge(key, v[0], v[1])
+
+            if level_count == 2:
+                for node in self.pki.vertex_levels[&#39;l3&#39;]:
+                    if self.pki.vertex_levels[&#39;l3&#39;][node]:
+                        opt_graph.add_vertex(node)
+                for key, value in self.pki.edge_levels[&#39;l3&#39;].items():
+                    for v in value:
+                        opt_graph.add_edge(key, v[0], v[1])
+
+            # if the desired flow cant be found, return an error
+            if level_count == 3:
+                break
+
+            level_count = level_count + 1
+
+        # Builds a network of only the edges with positive flow for usability in finding paths
+        positive_flow_network = []
+        for edge in opt_graph.get_edges():
+            if edge.flow &gt;= 0:
+                positive_flow_network = positive_flow_network + [edge]
+        path_a = find_path(&#39;252&#39;, positive_flow_network, self.pki.room_counts[&#39;252&#39;])
+        path_b = find_path(&#39;256&#39;, positive_flow_network, self.pki.room_counts[&#39;256&#39;])
+        path_c = find_path(&#39;260&#39;, positive_flow_network, self.pki.room_counts[&#39;260&#39;])
+        self.routes = {&#39;252&#39;: path_a, &#39;256&#39;: path_b, &#39;260&#39;: path_c}</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="app.data_analyzer.DataAnalyzerPlugin" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin">DataAnalyzerPlugin</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="app.plugins.graph_plugin.GraphPlugin.NodeConstraint"><code class="name">var <span class="ident">NodeConstraint</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.RoomData"><code class="name">var <span class="ident">RoomData</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="app.plugins.graph_plugin.GraphPlugin.analyze"><code class="name flex">
+<span>def <span class="ident">analyze</span></span>(<span>self, data)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Updates the people count in rooms and reruns the graph optimization
+:param data: room numbers with associated people counts
+:return:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def analyze(self, data):
+    &#34;&#34;&#34;
+    Updates the people count in rooms and reruns the graph optimization
+    :param data: room numbers with associated people counts
+    :return:
+    &#34;&#34;&#34;
+    self.pki.update_room(data.Room, data.Count)
+    self.optimize()</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.collect"><code class="name flex">
+<span>def <span class="ident">collect</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>to collect routes
+:return: A dictionary of routes for each rooms</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collect(self):
+    &#34;&#34;&#34;
+    to collect routes
+    :return: A dictionary of routes for each rooms
+    &#34;&#34;&#34;
+    return {&#39;paths&#39;: self.routes}</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.constraint"><code class="name flex">
+<span>def <span class="ident">constraint</span></span>(<span>self, constraints)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>toggles the enabled/disabled statuses of nodes
+:param constraints: a list of node names passed in as strings
+:return:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def constraint(self, constraints):
+    &#34;&#34;&#34;
+    toggles the enabled/disabled statuses of nodes
+    :param constraints: a list of node names passed in as strings
+    :return:
+    &#34;&#34;&#34;
+    self.pki.toggle(constraints.node_id)
+    self.optimize()</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.get_constraint_class"><code class="name flex">
+<span>def <span class="ident">get_constraint_class</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>returns node constraint class
+:return: node constrain class</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_constraint_class(self):
+    &#34;&#34;&#34;
+    returns node constraint class
+    :return: node constrain class
+    &#34;&#34;&#34;
+    return GraphPlugin.NodeConstraint</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.get_data_class"><code class="name flex">
+<span>def <span class="ident">get_data_class</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>returns Room Data class
+:return: room data class</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_data_class(self):
+    &#34;&#34;&#34;
+    returns Room Data class
+    :return: room data class
+    &#34;&#34;&#34;
+    return GraphPlugin.RoomData</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.init"><code class="name flex">
+<span>def <span class="ident">init</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initialization</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>pki</code></strong></dt>
+<dd>a PKI object for optimization</dd>
+<dt><strong><code>routes</code></strong></dt>
+<dd>a dictionary of routes</dd>
+</dl>
+<p>:return:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init(self):
+    &#34;&#34;&#34;
+    Initialization
+    Attributes:
+        pki: a PKI object for optimization
+        routes: a dictionary of routes
+    :return:
+    &#34;&#34;&#34;
+
+    self.pki = PKI()
+    self.routes = {}</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.optimize"><code class="name flex">
+<span>def <span class="ident">optimize</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The main program which builds a network flow graph and then runs a network flow algorithm to insure all
+flow desired makes it through the network
+:return: n/a</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def optimize(self):
+    &#34;&#34;&#34;
+    The main program which builds a network flow graph and then runs a network flow algorithm to insure all
+    flow desired makes it through the network
+    :return: n/a
+    &#34;&#34;&#34;
+    # for iterating through while loop
+    level_count = 1
+    # create empty graph
+    opt_graph = FlowNetwork()
+
+    # add artificial source and sink and first level of vertices/edges
+    opt_graph.add_vertex(&#39;sa&#39;, True, False)
+    opt_graph.add_vertex(&#39;ta&#39;, False, True)
+    for node in self.pki.vertex_levels[&#39;l1&#39;]:
+        if self.pki.vertex_levels[&#39;l1&#39;][node]:
+            opt_graph.add_vertex(node)
+
+    for key, value in self.pki.edge_levels[&#39;l1&#39;].items():
+        for v in value:
+            opt_graph.add_edge(key, v[0], v[1])
+
+    while True:
+        # where we calculate our max flow
+        flow_amount = opt_graph.calculate_max_flow()
+        # if flow desired is found in current level of graph, we&#39;ve found the graph to use
+        if flow_amount == self.pki.desired_flow:
+            break
+        # Else Add the second or third level of nodes and edges
+        if level_count == 1:
+            for node in self.pki.vertex_levels[&#39;l2&#39;]:
+                if self.pki.vertex_levels[&#39;l2&#39;][node]:
+                    opt_graph.add_vertex(node)
+            for key, value in self.pki.edge_levels[&#39;l2&#39;].items():
+                for v in value:
+                    opt_graph.add_edge(key, v[0], v[1])
+
+        if level_count == 2:
+            for node in self.pki.vertex_levels[&#39;l3&#39;]:
+                if self.pki.vertex_levels[&#39;l3&#39;][node]:
+                    opt_graph.add_vertex(node)
+            for key, value in self.pki.edge_levels[&#39;l3&#39;].items():
+                for v in value:
+                    opt_graph.add_edge(key, v[0], v[1])
+
+        # if the desired flow cant be found, return an error
+        if level_count == 3:
+            break
+
+        level_count = level_count + 1
+
+    # Builds a network of only the edges with positive flow for usability in finding paths
+    positive_flow_network = []
+    for edge in opt_graph.get_edges():
+        if edge.flow &gt;= 0:
+            positive_flow_network = positive_flow_network + [edge]
+    path_a = find_path(&#39;252&#39;, positive_flow_network, self.pki.room_counts[&#39;252&#39;])
+    path_b = find_path(&#39;256&#39;, positive_flow_network, self.pki.room_counts[&#39;256&#39;])
+    path_c = find_path(&#39;260&#39;, positive_flow_network, self.pki.room_counts[&#39;260&#39;])
+    self.routes = {&#39;252&#39;: path_a, &#39;256&#39;: path_b, &#39;260&#39;: path_c}</code></pre>
+</details>
+</dd>
+<dt id="app.plugins.graph_plugin.GraphPlugin.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>shutdown
+:return:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def shutdown(self):
+    &#34;&#34;&#34;
+    shutdown
+    :return:
+    &#34;&#34;&#34;
+    self.pki = None</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="app.data_analyzer.DataAnalyzerPlugin" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin">DataAnalyzerPlugin</a></b></code>:
+<ul class="hlist">
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.get_constraint_keywords" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.get_constraint_keywords">get_constraint_keywords</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.get_data_keywords" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.get_data_keywords">get_data_keywords</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.has_constraint_keyword" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.has_constraint_keyword">has_constraint_keyword</a></code></li>
+<li><code><a title="app.data_analyzer.DataAnalyzerPlugin.has_data_keyword" href="../data_analyzer.html#app.data_analyzer.DataAnalyzerPlugin.has_data_keyword">has_data_keyword</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="app.plugins" href="index.html">app.plugins</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="app.plugins.graph_plugin.find_path" href="#app.plugins.graph_plugin.find_path">find_path</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="app.plugins.graph_plugin.GraphPlugin" href="#app.plugins.graph_plugin.GraphPlugin">GraphPlugin</a></code></h4>
+<ul class="">
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.NodeConstraint" href="#app.plugins.graph_plugin.GraphPlugin.NodeConstraint">NodeConstraint</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.RoomData" href="#app.plugins.graph_plugin.GraphPlugin.RoomData">RoomData</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.analyze" href="#app.plugins.graph_plugin.GraphPlugin.analyze">analyze</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.collect" href="#app.plugins.graph_plugin.GraphPlugin.collect">collect</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.constraint" href="#app.plugins.graph_plugin.GraphPlugin.constraint">constraint</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.get_constraint_class" href="#app.plugins.graph_plugin.GraphPlugin.get_constraint_class">get_constraint_class</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.get_data_class" href="#app.plugins.graph_plugin.GraphPlugin.get_data_class">get_data_class</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.init" href="#app.plugins.graph_plugin.GraphPlugin.init">init</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.optimize" href="#app.plugins.graph_plugin.GraphPlugin.optimize">optimize</a></code></li>
+<li><code><a title="app.plugins.graph_plugin.GraphPlugin.shutdown" href="#app.plugins.graph_plugin.GraphPlugin.shutdown">shutdown</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
