@@ -27,7 +27,9 @@
 <pre><code class="python">import unittest
 
 from app import app
-
+from app import global_model_engine
+from app.model_engine import ModelEngine
+from app.plugins.example_plugins import TestDataAnalyzerPlugin
 
 class TestUploadSensorData(unittest.TestCase):
     &#34;&#34;&#34;Tests the functionality of the &#39;/update-sensor-data&#39; route.&#34;&#34;&#34;
@@ -36,6 +38,7 @@ class TestUploadSensorData(unittest.TestCase):
         app.config[&#39;TESTING&#39;] = True
         app.config[&#39;WTF_CSRF_ENABLED&#39;] = False
         app.config[&#39;DEBUG&#39;] = False
+        global_model_engine = ModelEngine()
         self.app = app.test_client()
 
     def tearDown(self):
@@ -62,49 +65,23 @@ class TestUploadSensorData(unittest.TestCase):
         self.assertEqual(response.get_data(as_text=True),
                          &#39;Invalid Request Syntax&#39;)
 
-    def test_zero_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: 0, &#34;count&#34;: 0}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: 0, &#34;count&#34;: 1}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: 0}))
-
-    def test_negative_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: -1, &#34;count&#34;: -1}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: -1, &#34;count&#34;: 1}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: -1}))
-
-    def test_int_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: 1}))
-
-    def test_int_id_and_str_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: &#34;1&#34;}))
-
-    def test_str_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: &#34;1&#34;}))
-
-    def test_str_id_and_int_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: 1}))
-
-    def test_additional_fields(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: 1, &#34;rand&#34;: 0.1}))
-
-    def test_missing_field(self):
-        self.assertFailure(self.postJson({&#34;id&#34;: 1}))
-        self.assertFailure(self.postJson({&#34;count&#34;: 1}))
-
-    def test_invalid_field(self):
-        self.assertFailure(self.postJson({&#34;id&#34;: &#34;asdf1234&#34;}))
-        self.assertFailure(self.postJson({&#34;count&#34;: &#34;asdf1234&#34;}))
-
-    def test_no_fields(self):
-        self.assertFailure(self.postJson({}))
-        self.assertFailure(self.postJson(None))
-        self.assertFailure(self.postData(dict()))
-        self.assertFailure(self.postData(None))
-
     def test_non_json(self):
         self.assertFailure(self.postData(&#39;test&#39;))
         self.assertFailure(self.postData(dict(id=0, count=0)))
 
+    def test_model_engine(self):
+        analyzer = TestDataAnalyzerPlugin()
+        global_model_engine.add_analyzer(analyzer)
+        global_model_engine.start()
+        data_payload = {&#39;increment&#39;: 5}
+
+        self.assertEqual(analyzer.num, 0)
+        self.assertIsNone(analyzer.max)
+
+        self.assertSuccess(self.postJson(data_payload))
+
+        self.assertEqual(analyzer.num, 5)
+        self.assertIsNone(analyzer.max)
 
 if __name__ == &#39;__main__&#39;:
     unittest.main()</code></pre>
@@ -139,6 +116,7 @@ not have a method with the specified name.</p></div>
         app.config[&#39;TESTING&#39;] = True
         app.config[&#39;WTF_CSRF_ENABLED&#39;] = False
         app.config[&#39;DEBUG&#39;] = False
+        global_model_engine = ModelEngine()
         self.app = app.test_client()
 
     def tearDown(self):
@@ -165,48 +143,23 @@ not have a method with the specified name.</p></div>
         self.assertEqual(response.get_data(as_text=True),
                          &#39;Invalid Request Syntax&#39;)
 
-    def test_zero_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: 0, &#34;count&#34;: 0}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: 0, &#34;count&#34;: 1}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: 0}))
-
-    def test_negative_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: -1, &#34;count&#34;: -1}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: -1, &#34;count&#34;: 1}))
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: -1}))
-
-    def test_int_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: 1}))
-
-    def test_int_id_and_str_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: &#34;1&#34;}))
-
-    def test_str_id_and_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: &#34;1&#34;}))
-
-    def test_str_id_and_int_count(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: 1}))
-
-    def test_additional_fields(self):
-        self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: 1, &#34;rand&#34;: 0.1}))
-
-    def test_missing_field(self):
-        self.assertFailure(self.postJson({&#34;id&#34;: 1}))
-        self.assertFailure(self.postJson({&#34;count&#34;: 1}))
-
-    def test_invalid_field(self):
-        self.assertFailure(self.postJson({&#34;id&#34;: &#34;asdf1234&#34;}))
-        self.assertFailure(self.postJson({&#34;count&#34;: &#34;asdf1234&#34;}))
-
-    def test_no_fields(self):
-        self.assertFailure(self.postJson({}))
-        self.assertFailure(self.postJson(None))
-        self.assertFailure(self.postData(dict()))
-        self.assertFailure(self.postData(None))
-
     def test_non_json(self):
         self.assertFailure(self.postData(&#39;test&#39;))
-        self.assertFailure(self.postData(dict(id=0, count=0)))</code></pre>
+        self.assertFailure(self.postData(dict(id=0, count=0)))
+
+    def test_model_engine(self):
+        analyzer = TestDataAnalyzerPlugin()
+        global_model_engine.add_analyzer(analyzer)
+        global_model_engine.start()
+        data_payload = {&#39;increment&#39;: 5}
+
+        self.assertEqual(analyzer.num, 0)
+        self.assertIsNone(analyzer.max)
+
+        self.assertSuccess(self.postJson(data_payload))
+
+        self.assertEqual(analyzer.num, 5)
+        self.assertIsNone(analyzer.max)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -288,6 +241,7 @@ not have a method with the specified name.</p></div>
     app.config[&#39;TESTING&#39;] = True
     app.config[&#39;WTF_CSRF_ENABLED&#39;] = False
     app.config[&#39;DEBUG&#39;] = False
+    global_model_engine = ModelEngine()
     self.app = app.test_client()</code></pre>
 </details>
 </dd>
@@ -304,8 +258,8 @@ not have a method with the specified name.</p></div>
     pass</code></pre>
 </details>
 </dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_additional_fields"><code class="name flex">
-<span>def <span class="ident">test_additional_fields</span></span>(<span>self)</span>
+<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_model_engine"><code class="name flex">
+<span>def <span class="ident">test_model_engine</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -313,93 +267,19 @@ not have a method with the specified name.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def test_additional_fields(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: 1, &#34;rand&#34;: 0.1}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_int_id_and_count"><code class="name flex">
-<span>def <span class="ident">test_int_id_and_count</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_int_id_and_count(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: 1}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_int_id_and_str_count"><code class="name flex">
-<span>def <span class="ident">test_int_id_and_str_count</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_int_id_and_str_count(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: &#34;1&#34;}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_invalid_field"><code class="name flex">
-<span>def <span class="ident">test_invalid_field</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_invalid_field(self):
-    self.assertFailure(self.postJson({&#34;id&#34;: &#34;asdf1234&#34;}))
-    self.assertFailure(self.postJson({&#34;count&#34;: &#34;asdf1234&#34;}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_missing_field"><code class="name flex">
-<span>def <span class="ident">test_missing_field</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_missing_field(self):
-    self.assertFailure(self.postJson({&#34;id&#34;: 1}))
-    self.assertFailure(self.postJson({&#34;count&#34;: 1}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_negative_id_and_count"><code class="name flex">
-<span>def <span class="ident">test_negative_id_and_count</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_negative_id_and_count(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: -1, &#34;count&#34;: -1}))
-    self.assertSuccess(self.postJson({&#34;id&#34;: -1, &#34;count&#34;: 1}))
-    self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: -1}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_no_fields"><code class="name flex">
-<span>def <span class="ident">test_no_fields</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_no_fields(self):
-    self.assertFailure(self.postJson({}))
-    self.assertFailure(self.postJson(None))
-    self.assertFailure(self.postData(dict()))
-    self.assertFailure(self.postData(None))</code></pre>
+<pre><code class="python">def test_model_engine(self):
+    analyzer = TestDataAnalyzerPlugin()
+    global_model_engine.add_analyzer(analyzer)
+    global_model_engine.start()
+    data_payload = {&#39;increment&#39;: 5}
+
+    self.assertEqual(analyzer.num, 0)
+    self.assertIsNone(analyzer.max)
+
+    self.assertSuccess(self.postJson(data_payload))
+
+    self.assertEqual(analyzer.num, 5)
+    self.assertIsNone(analyzer.max)</code></pre>
 </details>
 </dd>
 <dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_non_json"><code class="name flex">
@@ -414,47 +294,6 @@ not have a method with the specified name.</p></div>
 <pre><code class="python">def test_non_json(self):
     self.assertFailure(self.postData(&#39;test&#39;))
     self.assertFailure(self.postData(dict(id=0, count=0)))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_str_id_and_count"><code class="name flex">
-<span>def <span class="ident">test_str_id_and_count</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_str_id_and_count(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: &#34;1&#34;}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_str_id_and_int_count"><code class="name flex">
-<span>def <span class="ident">test_str_id_and_int_count</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_str_id_and_int_count(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: &#34;1&#34;, &#34;count&#34;: 1}))</code></pre>
-</details>
-</dd>
-<dt id="app.tests.test_upload_sensor_data.TestUploadSensorData.test_zero_id_and_count"><code class="name flex">
-<span>def <span class="ident">test_zero_id_and_count</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def test_zero_id_and_count(self):
-    self.assertSuccess(self.postJson({&#34;id&#34;: 0, &#34;count&#34;: 0}))
-    self.assertSuccess(self.postJson({&#34;id&#34;: 0, &#34;count&#34;: 1}))
-    self.assertSuccess(self.postJson({&#34;id&#34;: 1, &#34;count&#34;: 0}))</code></pre>
 </details>
 </dd>
 </dl>
@@ -477,24 +316,15 @@ not have a method with the specified name.</p></div>
 <ul>
 <li>
 <h4><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData" href="#app.tests.test_upload_sensor_data.TestUploadSensorData">TestUploadSensorData</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.assertFailure" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.assertFailure">assertFailure</a></code></li>
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.assertSuccess" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.assertSuccess">assertSuccess</a></code></li>
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.postData" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.postData">postData</a></code></li>
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.postJson" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.postJson">postJson</a></code></li>
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.setUp" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.setUp">setUp</a></code></li>
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.tearDown" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.tearDown">tearDown</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_additional_fields" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_additional_fields">test_additional_fields</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_int_id_and_count" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_int_id_and_count">test_int_id_and_count</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_int_id_and_str_count" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_int_id_and_str_count">test_int_id_and_str_count</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_invalid_field" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_invalid_field">test_invalid_field</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_missing_field" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_missing_field">test_missing_field</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_negative_id_and_count" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_negative_id_and_count">test_negative_id_and_count</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_no_fields" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_no_fields">test_no_fields</a></code></li>
+<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_model_engine" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_model_engine">test_model_engine</a></code></li>
 <li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_non_json" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_non_json">test_non_json</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_str_id_and_count" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_str_id_and_count">test_str_id_and_count</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_str_id_and_int_count" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_str_id_and_int_count">test_str_id_and_int_count</a></code></li>
-<li><code><a title="app.tests.test_upload_sensor_data.TestUploadSensorData.test_zero_id_and_count" href="#app.tests.test_upload_sensor_data.TestUploadSensorData.test_zero_id_and_count">test_zero_id_and_count</a></code></li>
 </ul>
 </li>
 </ul>

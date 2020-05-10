@@ -25,8 +25,29 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from flask import Flask
+import logging
+from app.model_engine import ModelEngine
+
+global_model_engine = ModelEngine()
+logging.basicConfig(format=&#39;[%(levelname)s] %(asctime)s (%(module)s): %(message)s&#39;)
+
+from app.plugins.distance_plugin import DistanceAnalyzerPlugin
+from app.plugins.graph_plugin import GraphPlugin
 
 app = Flask(__name__)
+
+DATA_ANALYZER_PLUGINS = \
+[
+    # Put data analyzer plugin instances here
+    DistanceAnalyzerPlugin(),
+    GraphPlugin()
+]
+
+
+for data_analyzer_plugin in DATA_ANALYZER_PLUGINS:
+    global_model_engine.add_analyzer(data_analyzer_plugin)
+
+global_model_engine.start()
 
 from app import routes</code></pre>
 </details>
@@ -40,7 +61,15 @@ from app import routes</code></pre>
 </dd>
 <dt><code class="name"><a title="app.graph" href="graph.html">app.graph</a></code></dt>
 <dd>
-<div class="desc"><p>Contains classes and utilities for graph operations.</p></div>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="app.model_engine" href="model_engine.html">app.model_engine</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="app.pki_model" href="pki_model.html">app.pki_model</a></code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 <dt><code class="name"><a title="app.plugins" href="plugins/index.html">app.plugins</a></code></dt>
 <dd>
@@ -73,6 +102,8 @@ from app import routes</code></pre>
 <ul>
 <li><code><a title="app.data_analyzer" href="data_analyzer.html">app.data_analyzer</a></code></li>
 <li><code><a title="app.graph" href="graph.html">app.graph</a></code></li>
+<li><code><a title="app.model_engine" href="model_engine.html">app.model_engine</a></code></li>
+<li><code><a title="app.pki_model" href="pki_model.html">app.pki_model</a></code></li>
 <li><code><a title="app.plugins" href="plugins/index.html">app.plugins</a></code></li>
 <li><code><a title="app.routes" href="routes.html">app.routes</a></code></li>
 <li><code><a title="app.tests" href="tests/index.html">app.tests</a></code></li>
