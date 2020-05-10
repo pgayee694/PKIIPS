@@ -1,0 +1,1463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.1" />
+<title>plugins.people_count API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>plugins.people_count</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import seer_plugin
+import seer_config
+import cv2
+import imutils
+import imutils.video
+import numpy
+import os.path
+import matplotlib.pyplot as plt
+import numpy as np
+import utils
+import sys
+import random
+
+class PeopleCount(seer_plugin.DataCollectorPlugin):
+    &#34;&#34;&#34;
+        Data collector plugin that gathers video feed
+        and uses models to determine the count of people
+        in the video stream.
+        &#34;&#34;&#34;
+
+    BACKGROUND_CLASS    = &#34;background&#34;
+    AEROPLANE_CLASS             = &#34;aeroplane&#34;
+    BICYCLE_CLASS               = &#34;bicycle&#34;
+    BIRD_CLASS                  = &#34;bird&#34;
+    BOAT_CLASS                  = &#34;boat&#34;
+    BOTTLE_CLASS                = &#34;bottle&#34;
+    BUS_CLASS                   = &#34;bus&#34;
+    CAR_CLASS                   = &#34;car&#34;
+    CAT_CLASS                   = &#34;cat&#34;
+    CHAIR_CLASS                 = &#34;chair&#34;
+    COW_CLASS                   = &#34;cow&#34;
+    DININGTABLE_CLASS   = &#34;diningtable&#34;
+    DOG_CLASS                   = &#34;dog&#34;
+    HORSE_CLASS                 = &#34;horse&#34;
+    MOTORBIKE_CLASS     = &#34;motorbike&#34;
+    PERSON_CLASS                = &#34;person&#34;
+    POTTEDPLANT_CLASS   = &#34;pottedplant&#34;
+    SHEEP_CLASS                 = &#34;sheep&#34;
+    SOFA_CLASS                  = &#34;sofa&#34;
+    TRAIN_CLASS                 = &#34;train&#34;
+    TVMONITOR_CLASS     = &#34;tvmonitor&#34;
+
+    CLASSES = \
+            [
+                    BACKGROUND_CLASS    ,
+                    AEROPLANE_CLASS             ,
+                    BICYCLE_CLASS               ,
+                    BIRD_CLASS                  ,
+                    BOAT_CLASS                  ,
+                    BOTTLE_CLASS                ,
+                    BUS_CLASS                   ,
+                    CAR_CLASS                   ,
+                    CAT_CLASS                   ,
+                    CHAIR_CLASS                 ,
+                    COW_CLASS                   ,
+                    DININGTABLE_CLASS   ,
+                    DOG_CLASS                   ,
+                    HORSE_CLASS                 ,
+                    MOTORBIKE_CLASS     ,
+                    PERSON_CLASS                ,
+                    POTTEDPLANT_CLASS   ,
+                    SHEEP_CLASS                 ,
+                    SOFA_CLASS                  ,
+                    TRAIN_CLASS                 ,
+                    TVMONITOR_CLASS     ,
+                    ]
+
+    INI                 = &#39;people-count&#39;
+    CONFIDENCE_INI      = &#39;confidence&#39;
+    MODEL_INI           = &#39;model-path&#39;
+    PROTOTXT_INI        = &#39;prototxt-path&#39;
+    RPI_MODEL_INI       = &#39;rpi-model-path&#39;
+    LABELMAP_INI        = &#39;labelmap-path&#39;
+    CALIBRATION_DATA = &#39;calibration-data&#39;
+    BLOCKSIZE = &#39;blocksize&#39;
+    BASELINE = &#39;baseline&#39;
+    RANGE = &#39;range_&#39;
+    ID = &#39;id_&#39;
+    ROOM = &#39;room&#39;
+    DEFAULT_CONFIDENCE  = 0.2
+    COUNT_KEY                   = &#39;count&#39;
+    DISTANCES_KEY = &#39;distances&#39;
+
+    def init(self):
+        &#34;&#34;&#34;
+        Gets configuration for confidence and model paths.
+        Sets up the network and video stream.
+        &#34;&#34;&#34;
+
+        self.id_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
+        self.room = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+
+        self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
+        self.model              = seer_config.configuration[PeopleCount.INI].get(PeopleCount.MODEL_INI)
+        self.prototxt   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.PROTOTXT_INI)
+        self.rpi_model  = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RPI_MODEL_INI)
+        self.labelmap   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.LABELMAP_INI)
+
+        if not os.path.isfile(self.model):
+            raise IOError(self.model)
+        if not os.path.isfile(self.prototxt):
+            raise IOError(self.prototxt)
+
+        self.net                = cv2.dnn.readNetFromCaffe(self.prototxt, self.model)
+
+        self.height = 720 # px
+        self.width = 1280 # px
+
+        self.videoL             = cv2.VideoCapture(0)
+        self.videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.videoL.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+
+        self.videoR             = cv2.VideoCapture(1)
+        self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+
+        calibration_path = seer_config.configuration[PeopleCount.INI].get(PeopleCount.CALIBRATION_DATA)
+
+        if not os.path.isfile(calibration_path):
+            raise IOError(calibration_path)
+
+        calibration = np.load(calibration_path, allow_pickle=False)
+        self.calib_size = tuple(calibration[&#39;imageSize&#39;])
+        self.leftMapX = calibration[&#39;leftMapX&#39;]
+        self.leftMapY = calibration[&#39;leftMapY&#39;]
+        self.leftROI = tuple(calibration[&#39;leftROI&#39;])
+        self.rightMapX = calibration[&#39;rightMapX&#39;]
+        self.rightMapY = calibration[&#39;rightMapY&#39;]
+        self.rightROI = tuple(calibration[&#39;rightROI&#39;])
+        leftCamMtx = calibration[&#39;leftCamMtx&#39;]
+        rightCamMtx = calibration[&#39;rightCamMtx&#39;]
+
+        self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx) #px
+        self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE) #cm
+        self.range_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
+
+        self.stereoMatcher = cv2.StereoBM_create()
+        self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].getint(PeopleCount.BLOCKSIZE))
+
+        self.initial_disparity = self.get_initial_disparity()
+
+        #plt.imshow(initial_disparity, &#39;gray&#39;)
+        #plt.show()
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Stops the video stream.
+        &#34;&#34;&#34;
+        self.video.stop()
+
+    def collect(self):
+        &#34;&#34;&#34;
+        Collects a frame from the video stream, runs it through
+        the network, and count the number of model detections
+        in the frame.
+
+        Returns:
+            (dictionary): A dictionary with one key: PeopleCount.COUNT_KEY,
+                                          with its value being the count of people in the current
+                                          frame of the video feed.
+        &#34;&#34;&#34;
+        ret, frameL = self.videoL.read()
+
+        ret, frameR = self.videoR.read()
+
+        height, width   = frameL.shape[:2]
+        blob                    = cv2.dnn.blobFromImage(cv2.resize(frameL, (300, 300)),
+                        0.007843, (300, 300), 127.5)
+
+        self.net.setInput(blob)
+        detections              = self.net.forward()
+        detection_count = 0
+        distances = []
+
+        frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+        frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+        grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+        grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+
+        for i in numpy.arange(0, detections.shape[2]):
+            confidence = detections[0, 0, i, 2]
+
+            if confidence &gt; self.confidence:
+                idx = int(detections[0, 0, i, 1])
+                if PeopleCount.CLASSES[idx] != PeopleCount.PERSON_CLASS:
+                    continue
+
+                detection_count += 1
+
+                box = detections[0,0,i, 3:7] * np.array([width, height, width, height])
+                startX, startY, endX, endY = box.astype(&#39;int&#39;)
+
+                disparity = self.stereoMatcher.compute(grayL, grayR)
+
+                closest_disp = self.get_closest(disparity, startX, startY, endX, endY)
+
+                if closest_disp &lt;= 0:
+                    # try to see if we can get some sort of distance from the original scene
+                    closest_disp = self.get_closest(self.initial_disparity, startX, startY, endX, endY)
+
+                depth = self.baseline * self.focal_length / (closest_disp / 16.0)
+                distances.append(depth)
+
+        return {PeopleCount.COUNT_KEY: detection_count,
+                PeopleCount.DISTANCES_KEY: distances,
+                PeopleCount.RANGE: self.range_,
+                PeopleCount.ID: self.id_,
+                PeopleCount.ROOM: self.room}
+
+    def find_marker(query, image):
+        &#34;&#34;&#34;
+        Searches for the marker object in the image
+
+        Parameters:
+                query: picture of the object to search for, also called the query image
+                image: image to search within, also called the train image
+
+        return: list containing top left and top right coordinate of rectangle around object
+        rtype: list
+        &#34;&#34;&#34;
+
+        orb = cv2.ORB_create()
+
+        kp_q, des_q = orb.detectAndCompute(query, None)
+        kp_i, des_i = orb.detectAndCompute(image, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+        matches = bf.match(des_q, des_i)
+        matches = sorted(matches, key=lambda x: x.distance)
+        top_half = matches[:(int(len(matches)/2))]
+
+        points = {}
+
+        for match in top_half:
+            idx = match.trainIdx
+            points[idx] = kp_i[idx].pt
+
+        x = 0
+        y = 0
+        cnt = 0
+
+        # accumulation for center
+        for pair in points.values():
+            x += pair[0]
+            y += pair[1]
+            cnt += 1
+
+        center = (x/cnt, y/cnt)
+        top_half = sorted(top_half,
+                        key=lambda x: utils.euclidean_distance(center[0], center[1], points[x.trainIdx][0], points[x.trainIdx][1]))
+        good_matches = top_half[:(int(len(top_half)/2))]
+
+        # find bounding rectangle coords
+        left = bottom = sys.maxsize
+        right = top = -sys.maxsize - 1
+        for match in good_matches:
+            idx = match.trainIdx
+            pt = kp_i[idx].pt
+            top = int(max(top, pt[1]))
+            left = int(min(left, pt[0]))
+            bottom = int(min(bottom, pt[1]))
+            right = int(max(right, pt[0]))
+
+        return [(top, left), (bottom, right)]
+
+    def calculate_focal_length(self, leftCamMtx, rightCamMtx):
+        &#34;&#34;&#34;
+        Calculates the focal length to use. Takes the average of the left and right
+        focal lengths of each camera and then returns the average of those values
+        across both cameras.
+
+        Parameters:
+            leftCamMtx: left camera matrix from calibration
+            rightCamMtx: right camera matrix from calibration
+        
+        Returns:
+            focal_length: focal length to use, in pixels
+        &#34;&#34;&#34;
+
+        fxL = leftCamMtx[0][0]
+        fyL = leftCamMtx[1][1]
+        fxR = rightCamMtx[0][0]
+        fyR = rightCamMtx[1][1]
+        
+        fL = (fxL + fyL) / 2.0
+        fR = (fxR + fyR) / 2.0
+
+        return (fL + fR) / 2.0
+    
+    def get_closest(self, disparities, startX, endX, startY, endY):
+        &#34;&#34;&#34;
+        Finds the closest positive disparity in the range specified by start/end X/Y.
+
+        Parameters:
+            distances: distance matrix from disparity map
+            startX: starting x coordinate
+            endX: ending x coordinate
+            startY: start y coordinate
+            endY: ending y coordinate
+
+        Returns:
+            disparity: closest disparity
+        &#34;&#34;&#34;
+
+        # modify bounds to make sure theyre in the image in case of remapping issues
+        startX = min(max(startX, 0), self.width - 1)
+        startY = min(max(startY, 0), self.height - 1)
+        endX = max(min(endX, self.width - 1), 0)
+        endY = max(min(endY, self.height - 1), 0)
+
+        disparity = disparities[startY][startX]
+
+        for y in range(startY, endY):
+            for x in range(startX, endX):
+                if disparities[y][x] &gt; disparity:
+                    disparity = disparities[y][x]
+        
+        return disparity
+
+    def get_initial_disparity(self):
+        &#34;&#34;&#34;
+        Finds the initial disparity map of the scene before it starts looking for people.
+        This helps to at least approximate gaps that might be in the image when people
+        start walking through the scene.
+
+        TODO: Remove this and find a better solution.
+
+        Returns:
+            disparity: disparity map of the scene
+        &#34;&#34;&#34;
+
+        ret, frameL = self.videoL.read()
+        ret, frameR = self.videoR.read()
+
+        frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+        frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+        grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+        grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+        return self.stereoMatcher.compute(grayL, grayR)
+
+class PeopleCountTest(seer_plugin.DataCollectorPlugin):
+    &#34;&#34;&#34;
+    Data collector plugin that will send fake test data to delphi
+    to mimic a real implementation.
+    &#34;&#34;&#34;
+
+    TEST_COUNT = &#39;test-count&#39;
+
+    def init(self):
+        self.id_        = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID)
+        self.room       = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+        self.range_     = seer_config.configuration[PeopleCount.INI].getint(PeopleCount.RANGE) #cm
+        self.test_count = seer_config.configuration[PeopleCount.INI].getint(PeopleCountTest.TEST_COUNT)
+        self.distances  = [random.randint(0, self.range_) for _ in range(self.test_count)]
+
+    def collect(self):
+        return {
+            &#39;count&#39;: self.test_count,
+            &#39;distances&#39;: self.distances,
+            &#39;range_&#39;: self.range_,
+            &#39;id_&#39;: self.id_,
+            &#39;room&#39;: self.room
+        }</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="plugins.people_count.PeopleCount"><code class="flex name class">
+<span>class <span class="ident">PeopleCount</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Data collector plugin that gathers video feed
+and uses models to determine the count of people
+in the video stream.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PeopleCount(seer_plugin.DataCollectorPlugin):
+    &#34;&#34;&#34;
+        Data collector plugin that gathers video feed
+        and uses models to determine the count of people
+        in the video stream.
+        &#34;&#34;&#34;
+
+    BACKGROUND_CLASS    = &#34;background&#34;
+    AEROPLANE_CLASS             = &#34;aeroplane&#34;
+    BICYCLE_CLASS               = &#34;bicycle&#34;
+    BIRD_CLASS                  = &#34;bird&#34;
+    BOAT_CLASS                  = &#34;boat&#34;
+    BOTTLE_CLASS                = &#34;bottle&#34;
+    BUS_CLASS                   = &#34;bus&#34;
+    CAR_CLASS                   = &#34;car&#34;
+    CAT_CLASS                   = &#34;cat&#34;
+    CHAIR_CLASS                 = &#34;chair&#34;
+    COW_CLASS                   = &#34;cow&#34;
+    DININGTABLE_CLASS   = &#34;diningtable&#34;
+    DOG_CLASS                   = &#34;dog&#34;
+    HORSE_CLASS                 = &#34;horse&#34;
+    MOTORBIKE_CLASS     = &#34;motorbike&#34;
+    PERSON_CLASS                = &#34;person&#34;
+    POTTEDPLANT_CLASS   = &#34;pottedplant&#34;
+    SHEEP_CLASS                 = &#34;sheep&#34;
+    SOFA_CLASS                  = &#34;sofa&#34;
+    TRAIN_CLASS                 = &#34;train&#34;
+    TVMONITOR_CLASS     = &#34;tvmonitor&#34;
+
+    CLASSES = \
+            [
+                    BACKGROUND_CLASS    ,
+                    AEROPLANE_CLASS             ,
+                    BICYCLE_CLASS               ,
+                    BIRD_CLASS                  ,
+                    BOAT_CLASS                  ,
+                    BOTTLE_CLASS                ,
+                    BUS_CLASS                   ,
+                    CAR_CLASS                   ,
+                    CAT_CLASS                   ,
+                    CHAIR_CLASS                 ,
+                    COW_CLASS                   ,
+                    DININGTABLE_CLASS   ,
+                    DOG_CLASS                   ,
+                    HORSE_CLASS                 ,
+                    MOTORBIKE_CLASS     ,
+                    PERSON_CLASS                ,
+                    POTTEDPLANT_CLASS   ,
+                    SHEEP_CLASS                 ,
+                    SOFA_CLASS                  ,
+                    TRAIN_CLASS                 ,
+                    TVMONITOR_CLASS     ,
+                    ]
+
+    INI                 = &#39;people-count&#39;
+    CONFIDENCE_INI      = &#39;confidence&#39;
+    MODEL_INI           = &#39;model-path&#39;
+    PROTOTXT_INI        = &#39;prototxt-path&#39;
+    RPI_MODEL_INI       = &#39;rpi-model-path&#39;
+    LABELMAP_INI        = &#39;labelmap-path&#39;
+    CALIBRATION_DATA = &#39;calibration-data&#39;
+    BLOCKSIZE = &#39;blocksize&#39;
+    BASELINE = &#39;baseline&#39;
+    RANGE = &#39;range_&#39;
+    ID = &#39;id_&#39;
+    ROOM = &#39;room&#39;
+    DEFAULT_CONFIDENCE  = 0.2
+    COUNT_KEY                   = &#39;count&#39;
+    DISTANCES_KEY = &#39;distances&#39;
+
+    def init(self):
+        &#34;&#34;&#34;
+        Gets configuration for confidence and model paths.
+        Sets up the network and video stream.
+        &#34;&#34;&#34;
+
+        self.id_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
+        self.room = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+
+        self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
+        self.model              = seer_config.configuration[PeopleCount.INI].get(PeopleCount.MODEL_INI)
+        self.prototxt   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.PROTOTXT_INI)
+        self.rpi_model  = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RPI_MODEL_INI)
+        self.labelmap   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.LABELMAP_INI)
+
+        if not os.path.isfile(self.model):
+            raise IOError(self.model)
+        if not os.path.isfile(self.prototxt):
+            raise IOError(self.prototxt)
+
+        self.net                = cv2.dnn.readNetFromCaffe(self.prototxt, self.model)
+
+        self.height = 720 # px
+        self.width = 1280 # px
+
+        self.videoL             = cv2.VideoCapture(0)
+        self.videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.videoL.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+
+        self.videoR             = cv2.VideoCapture(1)
+        self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+
+        calibration_path = seer_config.configuration[PeopleCount.INI].get(PeopleCount.CALIBRATION_DATA)
+
+        if not os.path.isfile(calibration_path):
+            raise IOError(calibration_path)
+
+        calibration = np.load(calibration_path, allow_pickle=False)
+        self.calib_size = tuple(calibration[&#39;imageSize&#39;])
+        self.leftMapX = calibration[&#39;leftMapX&#39;]
+        self.leftMapY = calibration[&#39;leftMapY&#39;]
+        self.leftROI = tuple(calibration[&#39;leftROI&#39;])
+        self.rightMapX = calibration[&#39;rightMapX&#39;]
+        self.rightMapY = calibration[&#39;rightMapY&#39;]
+        self.rightROI = tuple(calibration[&#39;rightROI&#39;])
+        leftCamMtx = calibration[&#39;leftCamMtx&#39;]
+        rightCamMtx = calibration[&#39;rightCamMtx&#39;]
+
+        self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx) #px
+        self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE) #cm
+        self.range_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
+
+        self.stereoMatcher = cv2.StereoBM_create()
+        self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].getint(PeopleCount.BLOCKSIZE))
+
+        self.initial_disparity = self.get_initial_disparity()
+
+        #plt.imshow(initial_disparity, &#39;gray&#39;)
+        #plt.show()
+
+    def shutdown(self):
+        &#34;&#34;&#34;
+        Stops the video stream.
+        &#34;&#34;&#34;
+        self.video.stop()
+
+    def collect(self):
+        &#34;&#34;&#34;
+        Collects a frame from the video stream, runs it through
+        the network, and count the number of model detections
+        in the frame.
+
+        Returns:
+            (dictionary): A dictionary with one key: PeopleCount.COUNT_KEY,
+                                          with its value being the count of people in the current
+                                          frame of the video feed.
+        &#34;&#34;&#34;
+        ret, frameL = self.videoL.read()
+
+        ret, frameR = self.videoR.read()
+
+        height, width   = frameL.shape[:2]
+        blob                    = cv2.dnn.blobFromImage(cv2.resize(frameL, (300, 300)),
+                        0.007843, (300, 300), 127.5)
+
+        self.net.setInput(blob)
+        detections              = self.net.forward()
+        detection_count = 0
+        distances = []
+
+        frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+        frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+        grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+        grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+
+        for i in numpy.arange(0, detections.shape[2]):
+            confidence = detections[0, 0, i, 2]
+
+            if confidence &gt; self.confidence:
+                idx = int(detections[0, 0, i, 1])
+                if PeopleCount.CLASSES[idx] != PeopleCount.PERSON_CLASS:
+                    continue
+
+                detection_count += 1
+
+                box = detections[0,0,i, 3:7] * np.array([width, height, width, height])
+                startX, startY, endX, endY = box.astype(&#39;int&#39;)
+
+                disparity = self.stereoMatcher.compute(grayL, grayR)
+
+                closest_disp = self.get_closest(disparity, startX, startY, endX, endY)
+
+                if closest_disp &lt;= 0:
+                    # try to see if we can get some sort of distance from the original scene
+                    closest_disp = self.get_closest(self.initial_disparity, startX, startY, endX, endY)
+
+                depth = self.baseline * self.focal_length / (closest_disp / 16.0)
+                distances.append(depth)
+
+        return {PeopleCount.COUNT_KEY: detection_count,
+                PeopleCount.DISTANCES_KEY: distances,
+                PeopleCount.RANGE: self.range_,
+                PeopleCount.ID: self.id_,
+                PeopleCount.ROOM: self.room}
+
+    def find_marker(query, image):
+        &#34;&#34;&#34;
+        Searches for the marker object in the image
+
+        Parameters:
+                query: picture of the object to search for, also called the query image
+                image: image to search within, also called the train image
+
+        return: list containing top left and top right coordinate of rectangle around object
+        rtype: list
+        &#34;&#34;&#34;
+
+        orb = cv2.ORB_create()
+
+        kp_q, des_q = orb.detectAndCompute(query, None)
+        kp_i, des_i = orb.detectAndCompute(image, None)
+
+        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+        matches = bf.match(des_q, des_i)
+        matches = sorted(matches, key=lambda x: x.distance)
+        top_half = matches[:(int(len(matches)/2))]
+
+        points = {}
+
+        for match in top_half:
+            idx = match.trainIdx
+            points[idx] = kp_i[idx].pt
+
+        x = 0
+        y = 0
+        cnt = 0
+
+        # accumulation for center
+        for pair in points.values():
+            x += pair[0]
+            y += pair[1]
+            cnt += 1
+
+        center = (x/cnt, y/cnt)
+        top_half = sorted(top_half,
+                        key=lambda x: utils.euclidean_distance(center[0], center[1], points[x.trainIdx][0], points[x.trainIdx][1]))
+        good_matches = top_half[:(int(len(top_half)/2))]
+
+        # find bounding rectangle coords
+        left = bottom = sys.maxsize
+        right = top = -sys.maxsize - 1
+        for match in good_matches:
+            idx = match.trainIdx
+            pt = kp_i[idx].pt
+            top = int(max(top, pt[1]))
+            left = int(min(left, pt[0]))
+            bottom = int(min(bottom, pt[1]))
+            right = int(max(right, pt[0]))
+
+        return [(top, left), (bottom, right)]
+
+    def calculate_focal_length(self, leftCamMtx, rightCamMtx):
+        &#34;&#34;&#34;
+        Calculates the focal length to use. Takes the average of the left and right
+        focal lengths of each camera and then returns the average of those values
+        across both cameras.
+
+        Parameters:
+            leftCamMtx: left camera matrix from calibration
+            rightCamMtx: right camera matrix from calibration
+        
+        Returns:
+            focal_length: focal length to use, in pixels
+        &#34;&#34;&#34;
+
+        fxL = leftCamMtx[0][0]
+        fyL = leftCamMtx[1][1]
+        fxR = rightCamMtx[0][0]
+        fyR = rightCamMtx[1][1]
+        
+        fL = (fxL + fyL) / 2.0
+        fR = (fxR + fyR) / 2.0
+
+        return (fL + fR) / 2.0
+    
+    def get_closest(self, disparities, startX, endX, startY, endY):
+        &#34;&#34;&#34;
+        Finds the closest positive disparity in the range specified by start/end X/Y.
+
+        Parameters:
+            distances: distance matrix from disparity map
+            startX: starting x coordinate
+            endX: ending x coordinate
+            startY: start y coordinate
+            endY: ending y coordinate
+
+        Returns:
+            disparity: closest disparity
+        &#34;&#34;&#34;
+
+        # modify bounds to make sure theyre in the image in case of remapping issues
+        startX = min(max(startX, 0), self.width - 1)
+        startY = min(max(startY, 0), self.height - 1)
+        endX = max(min(endX, self.width - 1), 0)
+        endY = max(min(endY, self.height - 1), 0)
+
+        disparity = disparities[startY][startX]
+
+        for y in range(startY, endY):
+            for x in range(startX, endX):
+                if disparities[y][x] &gt; disparity:
+                    disparity = disparities[y][x]
+        
+        return disparity
+
+    def get_initial_disparity(self):
+        &#34;&#34;&#34;
+        Finds the initial disparity map of the scene before it starts looking for people.
+        This helps to at least approximate gaps that might be in the image when people
+        start walking through the scene.
+
+        TODO: Remove this and find a better solution.
+
+        Returns:
+            disparity: disparity map of the scene
+        &#34;&#34;&#34;
+
+        ret, frameL = self.videoL.read()
+        ret, frameR = self.videoR.read()
+
+        frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+        frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+        grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+        grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+        return self.stereoMatcher.compute(grayL, grayR)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>seer_plugin.DataCollectorPlugin</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="plugins.people_count.PeopleCount.AEROPLANE_CLASS"><code class="name">var <span class="ident">AEROPLANE_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BACKGROUND_CLASS"><code class="name">var <span class="ident">BACKGROUND_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BASELINE"><code class="name">var <span class="ident">BASELINE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BICYCLE_CLASS"><code class="name">var <span class="ident">BICYCLE_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BIRD_CLASS"><code class="name">var <span class="ident">BIRD_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BLOCKSIZE"><code class="name">var <span class="ident">BLOCKSIZE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BOAT_CLASS"><code class="name">var <span class="ident">BOAT_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BOTTLE_CLASS"><code class="name">var <span class="ident">BOTTLE_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.BUS_CLASS"><code class="name">var <span class="ident">BUS_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.CALIBRATION_DATA"><code class="name">var <span class="ident">CALIBRATION_DATA</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.CAR_CLASS"><code class="name">var <span class="ident">CAR_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.CAT_CLASS"><code class="name">var <span class="ident">CAT_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.CHAIR_CLASS"><code class="name">var <span class="ident">CHAIR_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.CLASSES"><code class="name">var <span class="ident">CLASSES</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.CONFIDENCE_INI"><code class="name">var <span class="ident">CONFIDENCE_INI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.COUNT_KEY"><code class="name">var <span class="ident">COUNT_KEY</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.COW_CLASS"><code class="name">var <span class="ident">COW_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.DEFAULT_CONFIDENCE"><code class="name">var <span class="ident">DEFAULT_CONFIDENCE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.DININGTABLE_CLASS"><code class="name">var <span class="ident">DININGTABLE_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.DISTANCES_KEY"><code class="name">var <span class="ident">DISTANCES_KEY</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.DOG_CLASS"><code class="name">var <span class="ident">DOG_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.HORSE_CLASS"><code class="name">var <span class="ident">HORSE_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.ID"><code class="name">var <span class="ident">ID</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.INI"><code class="name">var <span class="ident">INI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.LABELMAP_INI"><code class="name">var <span class="ident">LABELMAP_INI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.MODEL_INI"><code class="name">var <span class="ident">MODEL_INI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.MOTORBIKE_CLASS"><code class="name">var <span class="ident">MOTORBIKE_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.PERSON_CLASS"><code class="name">var <span class="ident">PERSON_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.POTTEDPLANT_CLASS"><code class="name">var <span class="ident">POTTEDPLANT_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.PROTOTXT_INI"><code class="name">var <span class="ident">PROTOTXT_INI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.RANGE"><code class="name">var <span class="ident">RANGE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.ROOM"><code class="name">var <span class="ident">ROOM</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.RPI_MODEL_INI"><code class="name">var <span class="ident">RPI_MODEL_INI</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.SHEEP_CLASS"><code class="name">var <span class="ident">SHEEP_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.SOFA_CLASS"><code class="name">var <span class="ident">SOFA_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.TRAIN_CLASS"><code class="name">var <span class="ident">TRAIN_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="plugins.people_count.PeopleCount.TVMONITOR_CLASS"><code class="name">var <span class="ident">TVMONITOR_CLASS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="plugins.people_count.PeopleCount.calculate_focal_length"><code class="name flex">
+<span>def <span class="ident">calculate_focal_length</span></span>(<span>self, leftCamMtx, rightCamMtx)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculates the focal length to use. Takes the average of the left and right
+focal lengths of each camera and then returns the average of those values
+across both cameras.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>leftCamMtx</code></strong> :&ensp;<code>left camera matrix from calibration</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>rightCamMtx</code></strong> :&ensp;<code>right camera matrix from calibration</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>focal_length</code></dt>
+<dd>focal length to use, in pixels</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def calculate_focal_length(self, leftCamMtx, rightCamMtx):
+    &#34;&#34;&#34;
+    Calculates the focal length to use. Takes the average of the left and right
+    focal lengths of each camera and then returns the average of those values
+    across both cameras.
+
+    Parameters:
+        leftCamMtx: left camera matrix from calibration
+        rightCamMtx: right camera matrix from calibration
+    
+    Returns:
+        focal_length: focal length to use, in pixels
+    &#34;&#34;&#34;
+
+    fxL = leftCamMtx[0][0]
+    fyL = leftCamMtx[1][1]
+    fxR = rightCamMtx[0][0]
+    fyR = rightCamMtx[1][1]
+    
+    fL = (fxL + fyL) / 2.0
+    fR = (fxR + fyR) / 2.0
+
+    return (fL + fR) / 2.0</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCount.collect"><code class="name flex">
+<span>def <span class="ident">collect</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Collects a frame from the video stream, runs it through
+the network, and count the number of model detections
+in the frame.</p>
+<h2 id="returns">Returns</h2>
+<p>(dictionary): A dictionary with one key: PeopleCount.COUNT_KEY,
+with its value being the count of people in the current
+frame of the video feed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collect(self):
+    &#34;&#34;&#34;
+    Collects a frame from the video stream, runs it through
+    the network, and count the number of model detections
+    in the frame.
+
+    Returns:
+        (dictionary): A dictionary with one key: PeopleCount.COUNT_KEY,
+                                      with its value being the count of people in the current
+                                      frame of the video feed.
+    &#34;&#34;&#34;
+    ret, frameL = self.videoL.read()
+
+    ret, frameR = self.videoR.read()
+
+    height, width   = frameL.shape[:2]
+    blob                    = cv2.dnn.blobFromImage(cv2.resize(frameL, (300, 300)),
+                    0.007843, (300, 300), 127.5)
+
+    self.net.setInput(blob)
+    detections              = self.net.forward()
+    detection_count = 0
+    distances = []
+
+    frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+    frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+    grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+    grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+
+    for i in numpy.arange(0, detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+
+        if confidence &gt; self.confidence:
+            idx = int(detections[0, 0, i, 1])
+            if PeopleCount.CLASSES[idx] != PeopleCount.PERSON_CLASS:
+                continue
+
+            detection_count += 1
+
+            box = detections[0,0,i, 3:7] * np.array([width, height, width, height])
+            startX, startY, endX, endY = box.astype(&#39;int&#39;)
+
+            disparity = self.stereoMatcher.compute(grayL, grayR)
+
+            closest_disp = self.get_closest(disparity, startX, startY, endX, endY)
+
+            if closest_disp &lt;= 0:
+                # try to see if we can get some sort of distance from the original scene
+                closest_disp = self.get_closest(self.initial_disparity, startX, startY, endX, endY)
+
+            depth = self.baseline * self.focal_length / (closest_disp / 16.0)
+            distances.append(depth)
+
+    return {PeopleCount.COUNT_KEY: detection_count,
+            PeopleCount.DISTANCES_KEY: distances,
+            PeopleCount.RANGE: self.range_,
+            PeopleCount.ID: self.id_,
+            PeopleCount.ROOM: self.room}</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCount.find_marker"><code class="name flex">
+<span>def <span class="ident">find_marker</span></span>(<span>query, image)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Searches for the marker object in the image</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>query</code></strong> :&ensp;<code>picture</code> of <code>the object to search for, also called the query image</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>image</code></strong> :&ensp;<code>image to search within, also called the train image</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>return</code></strong> :&ensp;<code>list containing top left and top right coordinate</code> of <code>rectangle around object</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>rtype</code></strong> :&ensp;<code>list</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_marker(query, image):
+    &#34;&#34;&#34;
+    Searches for the marker object in the image
+
+    Parameters:
+            query: picture of the object to search for, also called the query image
+            image: image to search within, also called the train image
+
+    return: list containing top left and top right coordinate of rectangle around object
+    rtype: list
+    &#34;&#34;&#34;
+
+    orb = cv2.ORB_create()
+
+    kp_q, des_q = orb.detectAndCompute(query, None)
+    kp_i, des_i = orb.detectAndCompute(image, None)
+
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+    matches = bf.match(des_q, des_i)
+    matches = sorted(matches, key=lambda x: x.distance)
+    top_half = matches[:(int(len(matches)/2))]
+
+    points = {}
+
+    for match in top_half:
+        idx = match.trainIdx
+        points[idx] = kp_i[idx].pt
+
+    x = 0
+    y = 0
+    cnt = 0
+
+    # accumulation for center
+    for pair in points.values():
+        x += pair[0]
+        y += pair[1]
+        cnt += 1
+
+    center = (x/cnt, y/cnt)
+    top_half = sorted(top_half,
+                    key=lambda x: utils.euclidean_distance(center[0], center[1], points[x.trainIdx][0], points[x.trainIdx][1]))
+    good_matches = top_half[:(int(len(top_half)/2))]
+
+    # find bounding rectangle coords
+    left = bottom = sys.maxsize
+    right = top = -sys.maxsize - 1
+    for match in good_matches:
+        idx = match.trainIdx
+        pt = kp_i[idx].pt
+        top = int(max(top, pt[1]))
+        left = int(min(left, pt[0]))
+        bottom = int(min(bottom, pt[1]))
+        right = int(max(right, pt[0]))
+
+    return [(top, left), (bottom, right)]</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCount.get_closest"><code class="name flex">
+<span>def <span class="ident">get_closest</span></span>(<span>self, disparities, startX, endX, startY, endY)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds the closest positive disparity in the range specified by start/end X/Y.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>distances</code></strong> :&ensp;<code>distance matrix from disparity map</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>startX</code></strong> :&ensp;<code>starting x coordinate</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>endX</code></strong> :&ensp;<code>ending x coordinate</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>startY</code></strong> :&ensp;<code>start y coordinate</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>endY</code></strong> :&ensp;<code>ending y coordinate</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>disparity</code></dt>
+<dd>closest disparity</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_closest(self, disparities, startX, endX, startY, endY):
+    &#34;&#34;&#34;
+    Finds the closest positive disparity in the range specified by start/end X/Y.
+
+    Parameters:
+        distances: distance matrix from disparity map
+        startX: starting x coordinate
+        endX: ending x coordinate
+        startY: start y coordinate
+        endY: ending y coordinate
+
+    Returns:
+        disparity: closest disparity
+    &#34;&#34;&#34;
+
+    # modify bounds to make sure theyre in the image in case of remapping issues
+    startX = min(max(startX, 0), self.width - 1)
+    startY = min(max(startY, 0), self.height - 1)
+    endX = max(min(endX, self.width - 1), 0)
+    endY = max(min(endY, self.height - 1), 0)
+
+    disparity = disparities[startY][startX]
+
+    for y in range(startY, endY):
+        for x in range(startX, endX):
+            if disparities[y][x] &gt; disparity:
+                disparity = disparities[y][x]
+    
+    return disparity</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCount.get_initial_disparity"><code class="name flex">
+<span>def <span class="ident">get_initial_disparity</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds the initial disparity map of the scene before it starts looking for people.
+This helps to at least approximate gaps that might be in the image when people
+start walking through the scene.</p>
+<p>TODO: Remove this and find a better solution.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>disparity</code></dt>
+<dd>disparity map of the scene</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_initial_disparity(self):
+    &#34;&#34;&#34;
+    Finds the initial disparity map of the scene before it starts looking for people.
+    This helps to at least approximate gaps that might be in the image when people
+    start walking through the scene.
+
+    TODO: Remove this and find a better solution.
+
+    Returns:
+        disparity: disparity map of the scene
+    &#34;&#34;&#34;
+
+    ret, frameL = self.videoL.read()
+    ret, frameR = self.videoR.read()
+
+    frameL = cv2.remap(frameL, self.leftMapX, self.leftMapY, cv2.INTER_LINEAR)
+    frameR = cv2.remap(frameR, self.rightMapX, self.rightMapY, cv2.INTER_LINEAR)
+    grayL = cv2.cvtColor(frameL, cv2.COLOR_BGR2GRAY)
+    grayR = cv2.cvtColor(frameR, cv2.COLOR_BGR2GRAY)
+
+    return self.stereoMatcher.compute(grayL, grayR)</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCount.init"><code class="name flex">
+<span>def <span class="ident">init</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets configuration for confidence and model paths.
+Sets up the network and video stream.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init(self):
+    &#34;&#34;&#34;
+    Gets configuration for confidence and model paths.
+    Sets up the network and video stream.
+    &#34;&#34;&#34;
+
+    self.id_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID) #cm
+    self.room = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+
+    self.confidence = seer_config.configuration[PeopleCount.INI].getfloat(PeopleCount.CONFIDENCE_INI, fallback=PeopleCount.DEFAULT_CONFIDENCE)
+    self.model              = seer_config.configuration[PeopleCount.INI].get(PeopleCount.MODEL_INI)
+    self.prototxt   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.PROTOTXT_INI)
+    self.rpi_model  = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RPI_MODEL_INI)
+    self.labelmap   = seer_config.configuration[PeopleCount.INI].get(PeopleCount.LABELMAP_INI)
+
+    if not os.path.isfile(self.model):
+        raise IOError(self.model)
+    if not os.path.isfile(self.prototxt):
+        raise IOError(self.prototxt)
+
+    self.net                = cv2.dnn.readNetFromCaffe(self.prototxt, self.model)
+
+    self.height = 720 # px
+    self.width = 1280 # px
+
+    self.videoL             = cv2.VideoCapture(0)
+    self.videoL.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+    self.videoL.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+
+    self.videoR             = cv2.VideoCapture(1)
+    self.videoR.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+    self.videoR.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+
+    calibration_path = seer_config.configuration[PeopleCount.INI].get(PeopleCount.CALIBRATION_DATA)
+
+    if not os.path.isfile(calibration_path):
+        raise IOError(calibration_path)
+
+    calibration = np.load(calibration_path, allow_pickle=False)
+    self.calib_size = tuple(calibration[&#39;imageSize&#39;])
+    self.leftMapX = calibration[&#39;leftMapX&#39;]
+    self.leftMapY = calibration[&#39;leftMapY&#39;]
+    self.leftROI = tuple(calibration[&#39;leftROI&#39;])
+    self.rightMapX = calibration[&#39;rightMapX&#39;]
+    self.rightMapY = calibration[&#39;rightMapY&#39;]
+    self.rightROI = tuple(calibration[&#39;rightROI&#39;])
+    leftCamMtx = calibration[&#39;leftCamMtx&#39;]
+    rightCamMtx = calibration[&#39;rightCamMtx&#39;]
+
+    self.focal_length = self.calculate_focal_length(leftCamMtx, rightCamMtx) #px
+    self.baseline = seer_config.configuration[PeopleCount.INI].get(PeopleCount.BASELINE) #cm
+    self.range_ = seer_config.configuration[PeopleCount.INI].get(PeopleCount.RANGE) #cm
+
+    self.stereoMatcher = cv2.StereoBM_create()
+    self.stereoMatcher.setBlockSize(seer_config.configuration[PeopleCount.INI].getint(PeopleCount.BLOCKSIZE))
+
+    self.initial_disparity = self.get_initial_disparity()</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCount.shutdown"><code class="name flex">
+<span>def <span class="ident">shutdown</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Stops the video stream.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def shutdown(self):
+    &#34;&#34;&#34;
+    Stops the video stream.
+    &#34;&#34;&#34;
+    self.video.stop()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="plugins.people_count.PeopleCountTest"><code class="flex name class">
+<span>class <span class="ident">PeopleCountTest</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Data collector plugin that will send fake test data to delphi
+to mimic a real implementation.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PeopleCountTest(seer_plugin.DataCollectorPlugin):
+    &#34;&#34;&#34;
+    Data collector plugin that will send fake test data to delphi
+    to mimic a real implementation.
+    &#34;&#34;&#34;
+
+    TEST_COUNT = &#39;test-count&#39;
+
+    def init(self):
+        self.id_        = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID)
+        self.room       = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+        self.range_     = seer_config.configuration[PeopleCount.INI].getint(PeopleCount.RANGE) #cm
+        self.test_count = seer_config.configuration[PeopleCount.INI].getint(PeopleCountTest.TEST_COUNT)
+        self.distances  = [random.randint(0, self.range_) for _ in range(self.test_count)]
+
+    def collect(self):
+        return {
+            &#39;count&#39;: self.test_count,
+            &#39;distances&#39;: self.distances,
+            &#39;range_&#39;: self.range_,
+            &#39;id_&#39;: self.id_,
+            &#39;room&#39;: self.room
+        }</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>seer_plugin.DataCollectorPlugin</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="plugins.people_count.PeopleCountTest.TEST_COUNT"><code class="name">var <span class="ident">TEST_COUNT</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="plugins.people_count.PeopleCountTest.collect"><code class="name flex">
+<span>def <span class="ident">collect</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Called every time step to collect data. Must
+return a map consisting of named data. This data
+will eventually be delivered to the Delphi system.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collect(self):
+    return {
+        &#39;count&#39;: self.test_count,
+        &#39;distances&#39;: self.distances,
+        &#39;range_&#39;: self.range_,
+        &#39;id_&#39;: self.id_,
+        &#39;room&#39;: self.room
+    }</code></pre>
+</details>
+</dd>
+<dt id="plugins.people_count.PeopleCountTest.init"><code class="name flex">
+<span>def <span class="ident">init</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Called once the plugin has been created and
+before data has been requested to collect.
+This can be used to intialize variables before
+the data collection step.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init(self):
+    self.id_        = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ID)
+    self.room       = seer_config.configuration[PeopleCount.INI].get(PeopleCount.ROOM)
+    self.range_     = seer_config.configuration[PeopleCount.INI].getint(PeopleCount.RANGE) #cm
+    self.test_count = seer_config.configuration[PeopleCount.INI].getint(PeopleCountTest.TEST_COUNT)
+    self.distances  = [random.randint(0, self.range_) for _ in range(self.test_count)]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="plugins" href="index.html">plugins</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="plugins.people_count.PeopleCount" href="#plugins.people_count.PeopleCount">PeopleCount</a></code></h4>
+<ul class="">
+<li><code><a title="plugins.people_count.PeopleCount.AEROPLANE_CLASS" href="#plugins.people_count.PeopleCount.AEROPLANE_CLASS">AEROPLANE_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BACKGROUND_CLASS" href="#plugins.people_count.PeopleCount.BACKGROUND_CLASS">BACKGROUND_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BASELINE" href="#plugins.people_count.PeopleCount.BASELINE">BASELINE</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BICYCLE_CLASS" href="#plugins.people_count.PeopleCount.BICYCLE_CLASS">BICYCLE_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BIRD_CLASS" href="#plugins.people_count.PeopleCount.BIRD_CLASS">BIRD_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BLOCKSIZE" href="#plugins.people_count.PeopleCount.BLOCKSIZE">BLOCKSIZE</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BOAT_CLASS" href="#plugins.people_count.PeopleCount.BOAT_CLASS">BOAT_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BOTTLE_CLASS" href="#plugins.people_count.PeopleCount.BOTTLE_CLASS">BOTTLE_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.BUS_CLASS" href="#plugins.people_count.PeopleCount.BUS_CLASS">BUS_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.CALIBRATION_DATA" href="#plugins.people_count.PeopleCount.CALIBRATION_DATA">CALIBRATION_DATA</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.CAR_CLASS" href="#plugins.people_count.PeopleCount.CAR_CLASS">CAR_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.CAT_CLASS" href="#plugins.people_count.PeopleCount.CAT_CLASS">CAT_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.CHAIR_CLASS" href="#plugins.people_count.PeopleCount.CHAIR_CLASS">CHAIR_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.CLASSES" href="#plugins.people_count.PeopleCount.CLASSES">CLASSES</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.CONFIDENCE_INI" href="#plugins.people_count.PeopleCount.CONFIDENCE_INI">CONFIDENCE_INI</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.COUNT_KEY" href="#plugins.people_count.PeopleCount.COUNT_KEY">COUNT_KEY</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.COW_CLASS" href="#plugins.people_count.PeopleCount.COW_CLASS">COW_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.DEFAULT_CONFIDENCE" href="#plugins.people_count.PeopleCount.DEFAULT_CONFIDENCE">DEFAULT_CONFIDENCE</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.DININGTABLE_CLASS" href="#plugins.people_count.PeopleCount.DININGTABLE_CLASS">DININGTABLE_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.DISTANCES_KEY" href="#plugins.people_count.PeopleCount.DISTANCES_KEY">DISTANCES_KEY</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.DOG_CLASS" href="#plugins.people_count.PeopleCount.DOG_CLASS">DOG_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.HORSE_CLASS" href="#plugins.people_count.PeopleCount.HORSE_CLASS">HORSE_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.ID" href="#plugins.people_count.PeopleCount.ID">ID</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.INI" href="#plugins.people_count.PeopleCount.INI">INI</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.LABELMAP_INI" href="#plugins.people_count.PeopleCount.LABELMAP_INI">LABELMAP_INI</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.MODEL_INI" href="#plugins.people_count.PeopleCount.MODEL_INI">MODEL_INI</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.MOTORBIKE_CLASS" href="#plugins.people_count.PeopleCount.MOTORBIKE_CLASS">MOTORBIKE_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.PERSON_CLASS" href="#plugins.people_count.PeopleCount.PERSON_CLASS">PERSON_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.POTTEDPLANT_CLASS" href="#plugins.people_count.PeopleCount.POTTEDPLANT_CLASS">POTTEDPLANT_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.PROTOTXT_INI" href="#plugins.people_count.PeopleCount.PROTOTXT_INI">PROTOTXT_INI</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.RANGE" href="#plugins.people_count.PeopleCount.RANGE">RANGE</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.ROOM" href="#plugins.people_count.PeopleCount.ROOM">ROOM</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.RPI_MODEL_INI" href="#plugins.people_count.PeopleCount.RPI_MODEL_INI">RPI_MODEL_INI</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.SHEEP_CLASS" href="#plugins.people_count.PeopleCount.SHEEP_CLASS">SHEEP_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.SOFA_CLASS" href="#plugins.people_count.PeopleCount.SOFA_CLASS">SOFA_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.TRAIN_CLASS" href="#plugins.people_count.PeopleCount.TRAIN_CLASS">TRAIN_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.TVMONITOR_CLASS" href="#plugins.people_count.PeopleCount.TVMONITOR_CLASS">TVMONITOR_CLASS</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.calculate_focal_length" href="#plugins.people_count.PeopleCount.calculate_focal_length">calculate_focal_length</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.collect" href="#plugins.people_count.PeopleCount.collect">collect</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.find_marker" href="#plugins.people_count.PeopleCount.find_marker">find_marker</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.get_closest" href="#plugins.people_count.PeopleCount.get_closest">get_closest</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.get_initial_disparity" href="#plugins.people_count.PeopleCount.get_initial_disparity">get_initial_disparity</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.init" href="#plugins.people_count.PeopleCount.init">init</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCount.shutdown" href="#plugins.people_count.PeopleCount.shutdown">shutdown</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="plugins.people_count.PeopleCountTest" href="#plugins.people_count.PeopleCountTest">PeopleCountTest</a></code></h4>
+<ul class="">
+<li><code><a title="plugins.people_count.PeopleCountTest.TEST_COUNT" href="#plugins.people_count.PeopleCountTest.TEST_COUNT">TEST_COUNT</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCountTest.collect" href="#plugins.people_count.PeopleCountTest.collect">collect</a></code></li>
+<li><code><a title="plugins.people_count.PeopleCountTest.init" href="#plugins.people_count.PeopleCountTest.init">init</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
